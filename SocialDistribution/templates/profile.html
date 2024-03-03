@@ -16,27 +16,6 @@
 
 </head>
 
-<style>
-    a,
-    a:link,
-    a:visited,
-    a:hover,
-    a:active {
-        text-decoration: none;
-        color: inherit;
-
-    }
-
-    .profile-photo {
-        width: 80px;
-        height: 80px;
-    }
-
-    .post-info {
-        margin-left: 10px;
-    }
-</style>
-
 <body>
 
 
@@ -50,22 +29,21 @@
     </form>
 </div>
 <div class="profile-container">
+    <div class="overlay" id="overlay" style="display: none;"></div>
     <div class="profile-header">
-        {% if user.avatar %}
-            <img
-                    class="profile-photo"
-                    src="{{ user.avatar.url }}"
-                    onclick="document.getElementById('avatarInput').click()"
-                    alt="Profile Picture"
-            />
-        {% else %}
-            <img
-                    class="profile-photo"
-                    src="../../static/images/default_avatar.png"
-                    onclick="document.getElementById('avatarInput').click()"
-                    alt="Profile Picture"
-            />
-        {% endif %}
+    
+        <button class="profile-edit-btn" id="profile-edit-btn" title="Edit Profile" > 
+            <ion-icon name="create-outline"></ion-icon></a>
+        </button>
+            
+    
+        <img
+                class="profile-avatar"
+                src="{{ user.avatar.url }}"
+                onclick="document.getElementById('avatarInput').click()"
+                alt="Profile Picture"
+        />
+        
         <form
                 method="post"
                 enctype="multipart/form-data"
@@ -81,32 +59,30 @@
                     onchange="this.form.submit()"
             />
         </form>
-        <div id="profile-info" class="profile-info" style="text-align: center">
-            <div class="username" id="username" onclick="editUserName()">{{ user.username }}</div>
+        <div id="profile-info" class="profile-info" style="text-align: center"> 
+            <div class="username" id="username" >{{ user.username }}</div>
             <input type="text" id="edit-username" onblur="handleUserNameBlur()" style="display: none">
             <div class="email" id="email">Email: {{ user.email }}</div>
-            {% if request.user == user %}
-                <form action="update-bio/" method="post">
-                    {% csrf_token %}
-                    <textarea
-                            class="bio-container"
-                            name="bio"
-                            type="text"
-                            rows="4"
-                            cols="50"
-                    >{{ user.bio }}</textarea>
-                    <button type="submit">Save</button>
-                </form>
-            {% else %}
-                <textarea readonly>{{ user.bio }}</textarea>
-            {% endif %}
+            <p class="bio-container" id="user-bio">{{ user.bio }}</p>
+    
+            <form action="update-bio/" method="post" style="display: none;">
+                {% csrf_token %}
+                <textarea
+                        class="bio-container"
+                        id="edit-user-bio"
+                        name="bio"
+                        type="text"
+                >{{ user.bio }}</textarea>
+                <button class="saveButton" type="submit">Save</button>
+            </form>
+            
         </div>
         <div class="follow-container">
             <a href="{% url 'PAGE_FollowersList' username=user.username %}">
-                <button id="follower-btn" class="top-button followers-button">Followers</button>
+                <button id="follower-btn" class="followers-button">Followers</button>
             </a>
             <a href="{% url 'PAGE_FollowingList' username=user.username %}">
-                <button id="following-btn" class="top-button following-button">Following</button>
+                <button id="following-btn" class="following-button">Following</button>
             </a>
         </div>
         {% if not user.username == request.user.username and not user.username in following_usernames %}
@@ -117,7 +93,7 @@
     <div class="post-container">
         {% if request.user == user and request.user %}
             <div>
-                <button><a href="{% url 'API_AuthorDraft' username=user.username %}">
+                <button><a href="{% url 'API_AuthorDraft' username=user.username %}" title="Post Draft">
                     <ion-icon name="file-tray-full-outline">Post Draft</ion-icon>
                 </a></button>
             </div>
@@ -173,6 +149,33 @@
 <script src="{% static 'js/posting.js' %}"></script>
 <script src="{% static 'js/post_detail.js' %}"></script>
 <script src="{% static 'js/profile.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var editButton = document.querySelector('.profile-edit-btn');
+        var overlay = document.getElementById('overlay');
+
+        editButton.addEventListener('click', function() {
+            overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none'; 
+            editInput();
+        });
+    });
+
+    function editInput() {
+        var bioText = document.getElementById('user-bio');
+        var bioEdit = document.getElementById('edit-user-bio');
+        var form = bioEdit.closest('form');
+
+        if (bioText.style.display === 'none') {
+            bioText.style.display = 'block';
+            form.style.display = 'none';
+        } else {
+            bioText.style.display = 'none';
+            form.style.display = 'block';
+            editUserName();
+            bioEdit.value = bioText.textContent;
+        }
+    }
+</script>
 
 </body>
 </html>
