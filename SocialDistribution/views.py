@@ -397,19 +397,22 @@ def update_username(request, username):
 
         return JsonResponse({'error': ''}, safe=False)
 
+class ProfileView(TemplateView):
+    """ * [GET] Get The FollowerList Page """
+    template_name = "profile.html"
 
-def profileView(request, username):
-    user = get_object_or_404(User, username=username)
+class ProfileAPIView(APIView):
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+        posts = Post.objects.filter(author=user, is_draft=False).order_by('-date_posted')
 
-    posts = []
-    for post in Post.objects.filter(author=user, is_draft=False).order_by('-date_posted'):
-        post.like_count = post.like.count()
-        posts.append(post)
-    context = {
-        'user': user,
-        'posts': posts
-    }
-    return render(request, 'profile.html', context)
+        user_serializer = UserSerializer(user)
+        posts_serializer = PostSerializer(posts, many=True)
+
+        return Response({
+            'user': user_serializer.data,
+            'posts': posts_serializer.data
+        })
 
 
 def otherProfileView(request, selfUsername, targetUsername):

@@ -46,6 +46,9 @@
         {% endif %}
         <span class="user-name" id="userName" onclick="redirectProfile()">{{ post.author.username }}</span>
         <span class="post-date">{{ post.date_posted|date:"Y-m-d" }}</span>
+        {% if post.visibility == 'FRIENDS' %}
+        <ion-icon name="people"></ion-icon>
+        {% endif %}
     </div>
     <h1 class="post-title" id="postTitle">{{ post.title }}</h1>
     <div class="scrollable-content">

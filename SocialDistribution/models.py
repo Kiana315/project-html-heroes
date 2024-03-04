@@ -11,8 +11,8 @@ class User(AbstractUser):
     # A text field used to store the user's personal profile.
     #   blank=True indicates that this field is optional
     #   and users can not fill in the introduction when registering
-    bio = models.TextField(blank=True)
-    username = models.CharField(max_length=150, unique=True)
+    bio = models.TextField(max_length=200, blank=True)
+    username = models.CharField(max_length=50, unique=True)
     email = models.EmailField()
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
 

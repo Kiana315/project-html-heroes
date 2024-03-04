@@ -93,10 +93,18 @@
 }
 
 .user-avatar,
-.title,
-.content {
+.title {
     border-radius: 50%;
 }
+
+.post-content {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 
 .username {
     margin: 0 10px;
@@ -108,6 +116,7 @@
     color: #888;
     font-size: small;
 }
+
 .interact-container {
     position: relative;
     display: flex;

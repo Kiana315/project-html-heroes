@@ -24,13 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
                         <div class="username">${post.username || 'Unknown User'}</div>
                         <div class="post-time">${formattedDate}</div>
+                        ${post.visibility === 'FRIENDS' ? '<ion-icon name="people"></ion-icon>' : ''}
                     </div>
                 `;
 
                 const contentHTML = `
                     <div class="content">
                         <div class="title">${post.title}</div>
-                        <p>${post.content}</p>
+                        <p class="post-content">${post.content}</p>
                     </div>
                 `;
 

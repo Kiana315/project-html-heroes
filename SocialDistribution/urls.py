@@ -33,6 +33,7 @@ urlpatterns = [
     path('profile/<str:username>/friends/', FriendView.as_view(), name='PAGE_FriendList'),
     path("profile/<str:username>/draft/", author_draft_view, name="API_AuthorDraft"),
 
+    path('api/user/<str:username>/posts/', ProfileAPIView.as_view(), name='API_profile'),
     path("api/user/<str:username>/followers/", FollowersAPIView.as_view(), name="API_GETFollowers"),                                        # GET User FollowerList             --> Test Success
     path("api/user/<str:username>/following/", FollowingAPIView.as_view(), name="API_GETFollowing"),                                        # GET User FollowerList             --> Test Success
     path("api/user/<str:username>/friends/", FriendsAPIView.as_view(), name="API_GETFriends"),                                              # GET User FriendList               --> Test Success
@@ -44,7 +45,8 @@ urlpatterns = [
     # Identity API System:
     path("api/user/<str:username>/", UserAPIView.as_view(), name="API_USER"),                                                               # GET Self User/Profile Info        --> Test Success
     path("api/user/<str:user1_id>/<str:user2_id>/", UserAPIView.as_view(), name="API_USER_TWO"),                                            # GET Other's User/Profile Info     --> Test Success
-    path("profile/<str:username>/", profileView, name="PAGE_Profile"),
+    path("profile/<str:username>/", ProfileView.as_view(), name="PAGE_Profile"),
+    
     path("friendPosts/<str:username>/profile/<str:selfUsername>/<str:targetUsername>/",
         lambda request, username, selfUsername, targetUsername: 
         redirect('PAGE_OtherProfile', selfUsername=selfUsername, targetUsername=targetUsername)),
@@ -62,8 +64,6 @@ urlpatterns = [
     path("api/posts/<int:post_id>/likes/", LikeAPIView.as_view(), name='API_PLikes'),                                                       # GET/POST LikeList/NewLike         --> Test Success
     path('api/posts/<int:post_id>/check-like/', check_like_status, name='check_like_status'),
     path('api/posts/<int:post_id>/share/', SharePostView.as_view(), name='share_post'),
-
-
     path('api/posts/<int:post_id>/delete/', DeletePostView.as_view(), name='API_delete_post'),                                              # DELETE post                       --> Test Success
     path('api/posts/<int:post_id>/update/', UpdatePostView.as_view(), name='update_post'),                                                  # GET/PUT edit and update post      --> Test Success
 

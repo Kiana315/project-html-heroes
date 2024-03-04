@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const contentHTML = `
                     <div class="content">
                         <div class="title">${post.title}</div>
-                        <p>${post.content}</p>
+                        <p class="post-content">${post.content}</p>
                     </div>
                 `;
 

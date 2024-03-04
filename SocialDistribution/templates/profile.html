@@ -27,6 +27,13 @@
         {% csrf_token %}
         <button type="submit" class="logout-button">Log Out</button>
     </form>
+    {% if request.user == user and request.user %}
+        <div>
+            <button><a href="{% url 'API_AuthorDraft' username=user.username %}" title="Post Draft">
+                <ion-icon name="file-tray-full-outline">Post Draft</ion-icon>
+            </a></button>
+        </div>
+    {% endif %}
 </div>
 <div class="profile-container">
     <div class="overlay" id="overlay" style="display: none;"></div>
@@ -91,53 +98,10 @@
     </div>
 
     <div class="post-container">
-        {% if request.user == user and request.user %}
-            <div>
-                <button><a href="{% url 'API_AuthorDraft' username=user.username %}" title="Post Draft">
-                    <ion-icon name="file-tray-full-outline">Post Draft</ion-icon>
-                </a></button>
-            </div>
-        {% endif %}
-        <div class="recent-posts">
+        
+        <div class="recent-posts" id="recent-posts" data-username="{{ user.username }}">
             <!-- This section should be populated with actual post data -->
-            {% for post in posts %}
-                <div class="post">
-                    {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="" width="120" height="120"/>
-                    {% endif %}
-                    <div class="post-info">
-                        <a href="{% url 'PAGE_postDetail' post_id=post.id %}" id="none"
-                        ><h3 class="post-title">{{ post.title }}</h3>
-                        </a>
-                        <p>{{ post.content |slice:":30" }}</p>
-
-                        <div class="post-actions">
-                            <button id="post-share" class="action">
-                                <ion-icon class="material-symbols-outlined" name="share-outline"></ion-icon>
-                                Share
-                            </button>
-                            <button id="post-comment" class="action">
-                                <ion-icon class="material-symbols-outlined" name="chatbox-ellipses-outline"></ion-icon>
-                                Comment
-                            </button>
-                            <button id="post-like" class="action">
-                                <ion-icon class="material-symbols-outlined" name="heart-outline"></ion-icon>
-                                {% if post.like_count %}
-                                    <span>{{ post.like_count }}</span>
-                                {% else %}
-                                    Like
-                                {% endif %}
-                            </button>
-                        </div>
-
-                        <!-- <div class="interactions">
-                          <button class="top-button interaction-button">Like</button>
-                          <button class="top-button interaction-button">Comment</button>
-                          <button class="top-button interaction-button">Share</button>
-                        </div> -->
-                    </div>
-                </div>
-            {% endfor %}
+            
         </div>
     </div>
 </div>

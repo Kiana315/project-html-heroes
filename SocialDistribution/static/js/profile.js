@@ -157,6 +157,78 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+
+document.addEventListener('DOMContentLoaded', () => {
+    const recentPostsContainer = document.getElementById('recent-posts');
+    const username = recentPostsContainer.getAttribute('data-username');
+    
+    console.log('Username:', username);
+    fetch(`/api/user/${username}/posts`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (Array.isArray(data.posts)) {
+                data.posts.forEach(post => {
+                    let postElement = document.createElement('div');
+                    postElement.className = 'post';
+
+                    const postLink = document.createElement('a');
+                    postLink.href = `/posts/${post.id}`;
+                    postLink.className = 'post-link';
+
+                    const datePosted = new Date(post.date_posted);
+                    const formattedDate = `${datePosted.getFullYear()}-${datePosted.getMonth() + 1}-${datePosted.getDate()}`;
+                    
+                    const contentHTML = `
+                        <div class="content">
+                        ${post.image ? `<img src="${post.image}" alt="" width="120" height="120"/>` : ''}
+                            <div class="post-title">${post.title}</div>
+                            <div class="post-time">${formattedDate}</div>
+                            <p class="post-content">${post.content}</p>
+                        </div>
+                    `;
+
+                    const interactionHTML = `
+                        <div class="interact-container">
+                            <button id="share-${post.id}" type="button" data-post-id="${post.id}">
+                                <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
+                                Share <span class="share-count">${post.share_count}</span>
+                            </button>
+                            <button id="comment-${post.id}" type="button" data-post-id="${post.id}">
+                                <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
+                                </ion-icon>
+                                    ${post.comment_count > 0 ? '' : 'Comment'} 
+                                    <span class="comment-count">${post.comment_count > 0 ? post.comment_count: ''}
+                                </span>
+                            </button>
+                            <button id="like-${post.id}" type="button" data-post-id="${post.id}"> 
+                                <ion-icon size="small" name="heart-outline" style="margin-right: 8px;">
+                                </ion-icon>
+                                        ${post.likes_count > 0 ? '' : 'Like'}
+                                    <span class="like-count">${post.likes_count > 0 ? post.likes_count : ''}</span>
+                            </button>
+                        </div>
+                    `;
+
+                    postLink.innerHTML = contentHTML;
+                    postElement.appendChild(postLink);
+                    postElement.innerHTML += interactionHTML;
+                    recentPostsContainer.appendChild(postElement);
+
+                    
+                });
+            } else {
+                console.error('Error: Expected an array of posts');
+                recentPostsContainer.innerHTML = '<p>Error loading posts.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching posts:', error);
+            recentPostsContainer.innerHTML = '<p>Error loading posts.</p>';
+        });
+});
+
+
 function _getURLTargetUsername() {
     const pathSections = window.location.pathname.split('/').filter(Boolean);
     return pathSections[pathSections.length - 1];
