@@ -174,9 +174,12 @@ a:active {
 .post-title {
     margin: 0;
     font-weight: bold;
+    display: flex;
+    align-items: center;
 }
 
 .post-time{
+    
     margin: 10px 0;
     color: #888;
     font-size: small;

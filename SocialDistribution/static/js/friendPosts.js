@@ -42,12 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             Share <span class="share-count">${post.share_count}</span>
                         </button>
                         <button id="comment-${post.id}" type="button" data-post-id="${post.id}">
-                            <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
-                            Comment <span class="comment-count">${post.comment_count}</span>
+                            <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
+                            </ion-icon>
+                                ${post.comment_count > 0 ? '' : 'Comment'} 
+                                <span class="comment-count">${post.comment_count > 0 ? post.comment_count: ''}
+                            </span>
                         </button>
                         <button id="like-${post.id}" type="button" data-post-id="${post.id}"> 
-                            <ion-icon size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>
-                            Like <span class="like-count">${post.like_count}</span>
+                            <ion-icon size="small" name="heart-outline" style="margin-right: 8px;">
+                            </ion-icon>
+                                    ${post.likes_count > 0 ? '' : 'Like'}
+                                <span class="like-count">${post.likes_count > 0 ? post.likes_count : ''}</span>
                         </button>
                     </div>
                 `;
@@ -57,56 +62,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 postElement.innerHTML += interactionHTML;
                 postContainer.appendChild(postElement);
 
-                // const likeButton = postElement.querySelector('.like-btn');
-                // const commentButton = postElement.querySelector('.comment-btn');
-                // const commentBox = document.createElement('div');
-                // commentBox.className = 'comment-box';
-                // commentBox.style.display = 'none';
-                // commentBox.innerHTML = `
-                //     <textarea class="comment-text" placeholder="Add a comment..."></textarea>
-                //     <button type="button" class="submit-comment">Post Comment</button>
-                // `;
-                // postElement.appendChild(commentBox);
+                const likeButton = postElement.querySelector(`#like-${post.id}`);
+                likeButton.addEventListener('click', function() {
+                    console.log("like clicked",`api/posts/${post.id}/likes/`);
+                    // 点赞操作的 AJAX 请求
+                    // 更新点赞计数
+                    fetch(`/api/posts/${post.id}/likes/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'), 
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // 更新页面上的点赞计数
+                            const likeCountSpan = postElement.querySelector(`#like-${post.id} .like-count`);
+                            likeCountSpan.textContent = data.likes_count; // 假设后端返回更新后的点赞计数
+                        } else {
+                            // 处理错误情况
+                            console.error('Error:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
 
-                // commentButton.addEventListener('click', (e) => {
-                //     e.stopPropagation();
-                //     commentBox.style.display = commentBox.style.display === 'none' ? 'block' : 'none';
-                // });
-                // likeButton.addEventListener('click', (e) => {
-                //     e.stopPropagation();
-                //     console.log('Like button clicked for post:', post.id);
-                //     fetch(`/api/posts/${post.id}/likes/`, {
-                //         method: 'POST',
-                //     })
-                //     .then(response => {
-                //         if (response.ok) {
-                //             console.log('>> Like Sent Successfully;');
-                //         } else {
-                //             console.log('>> Like Sent Unsuccessfully;');
-                //         }
-                //     })
-                //     .catch(error => console.error('Error:', error));
-                // });
 
-                // const submitCommentButton = commentBox.querySelector('.submit-comment');
-                // submitCommentButton.addEventListener('click', () => {
-                //     const commentText = commentBox.querySelector('.comment-text').value;
-                //     console.log('Comment submitted for post:', post.id, 'Comment:', commentText);
-                //     fetch(`/api/posts/${post.id}/comments/`, {
-                //         method: 'POST',
-                //         headers: {'Content-Type': 'application/json'},
-                //         body: JSON.stringify({ text: commentText }),
-                //     })
-                //     .then(response => {
-                //         if (response.ok) {
-                //             console.log('>> Comment Sent Successfully;');
-                //         } else {
-                //             // Handle errors
-                //             console.log('>> Comment Sent Unsuccessfully;');
-                //         }
-                //     })
-                //     .catch(error => console.error('Error:', error));
-                // });
+                // Event listeners for like button
+                const commentButton = postElement.querySelector(`#comment-${post.id}`);
+                commentButton.addEventListener('click', function() {
+                    console.log("comment clicked");
+                    // 评论操作的 AJAX 请求
+                    // 更新评论计数
+                });
             });
         })
         .catch(error => console.error('Error:', error));

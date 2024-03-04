@@ -182,7 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const contentHTML = `
                         <div class="content">
                         ${post.image ? `<img src="${post.image}" alt="" width="120" height="120"/>` : ''}
-                            <div class="post-title">${post.title}</div>
+                            <div class="post-title">${post.title}
+                            ${post.visibility === 'FRIENDS' ? '<ion-icon name="people" style="padding: 0 10px"></ion-icon>' : ''}
+                            ${post.visibility === 'PRIVATE' ? '<ion-icon name="eye-off" style="padding: 0 10px"></ion-icon>' : ''}
+                            </div>
                             <div class="post-time">${formattedDate}</div>
                             <p class="post-content">${post.content}</p>
                         </div>
@@ -197,15 +200,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button id="comment-${post.id}" type="button" data-post-id="${post.id}">
                                 <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
                                 </ion-icon>
-                                    ${post.comment_count > 0 ? '' : 'Comment'} 
-                                    <span class="comment-count">${post.comment_count > 0 ? post.comment_count: ''}
+                                ${post.comment_count > 0 ? '' : 'Comment'} 
+                                <span class="comment-count">${post.comment_count > 0 ? post.comment_count: ''}
                                 </span>
                             </button>
                             <button id="like-${post.id}" type="button" data-post-id="${post.id}"> 
                                 <ion-icon size="small" name="heart-outline" style="margin-right: 8px;">
                                 </ion-icon>
-                                        ${post.likes_count > 0 ? '' : 'Like'}
-                                    <span class="like-count">${post.likes_count > 0 ? post.likes_count : ''}</span>
+                                ${post.likes_count > 0 ? '' : 'Like'}
+                                <span class="like-count">${post.likes_count > 0 ? post.likes_count : ''}</span>
                             </button>
                         </div>
                     `;
