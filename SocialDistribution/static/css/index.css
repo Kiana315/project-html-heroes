@@ -31,22 +31,6 @@ a {
     color: black;
 }
 
- 
-.post-button {
-    background-color: var(--btn-bg-color);
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    margin-right: 30px;
-    margin-top: 10px;
-}
-
-.post-button:active,
-.post-button:hover {
-    background-color: var(--btn-hover-color);
-}
 
 /* Floating Action Button */
 #floating-button {
@@ -69,4 +53,11 @@ a {
 }
 #floating-button:hover {
     transform: scale(1.1);
+}
+
+.corner-icon {
+     
+    position: relative; 
+    margin-left: auto;
+    width: auto;
 }

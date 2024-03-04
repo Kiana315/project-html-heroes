@@ -431,3 +431,7 @@ body  {
     width: 100%;
     height: auto;
 }
+
+.formatted-content {
+    white-space: pre-wrap; 
+}

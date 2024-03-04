@@ -46,16 +46,20 @@
         {% endif %}
         <span class="user-name" id="userName" onclick="redirectProfile()">{{ post.author.username }}</span>
         <span class="post-date">{{ post.date_posted|date:"Y-m-d" }}</span>
-        {% if post.visibility == 'FRIENDS' %}
-        <ion-icon name="people"></ion-icon>
-        {% elif post.visibility == 'PRIVATE' %}
-        <ion-icon name="eye-off"></ion-icon>
+        {% if post.content_type == 'COMMONMARK'%}
+        <ion-icon name="logo-markdown" style="padding: 0 10px;"></ion-icon>
         {% endif %}
+        {% if post.visibility == 'FRIENDS' %}
+        <ion-icon name="people" style="padding: 0 10px;"></ion-icon>
+        {% elif post.visibility == 'PRIVATE' %}
+        <ion-icon name="eye-off" style="padding: 0 10px;"></ion-icon>
+        {% endif %}
+
     </div>
     <h1 class="post-title" id="postTitle">{{ post.title }}</h1>
     <div class="scrollable-content">
         <span id="postId" style="display: none">{{ post.id }}</span>
-        <p class="post-content" id="postContent">{{ post.content|safe }}</p>
+        <p class="post-content formatted-content" id="postContent">{{ post.content|safe }}</p>
         {% if post.image %}
             <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
         {% endif %}

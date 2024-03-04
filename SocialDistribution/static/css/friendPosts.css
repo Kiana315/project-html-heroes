@@ -32,23 +32,7 @@ body {
     border-radius: 50%;
 }
 
-/*
-.user-info {
-    margin-bottom: 15px;
-}
 
-.avatar,
-.username,
-.title,
-.content {
-    border-radius: 50%;
-}
-
-.interactions {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-} */
 
 .post-button {
     background-color: var(--btn-bg-color);
@@ -128,4 +112,10 @@ a {
 }
 #floating-button:hover {
     transform: scale(1.1);
+}
+
+.corner-icon {
+    position: relative; 
+    margin-left: auto;
+    width: auto;
 }

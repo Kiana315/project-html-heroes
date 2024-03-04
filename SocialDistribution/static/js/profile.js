@@ -183,14 +183,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="content">
                         ${post.image ? `<img src="${post.image}" alt="" width="120" height="120"/>` : ''}
                             <div class="post-title">${post.title}
-                            ${post.visibility === 'FRIENDS' ? '<ion-icon name="people" style="padding: 0 10px"></ion-icon>' : ''}
-                            ${post.visibility === 'PRIVATE' ? '<ion-icon name="eye-off" style="padding: 0 10px"></ion-icon>' : ''}
+                            <div class="corner-icon">
+                                ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown" padding: 0 10px; position: relative; margin-left: auto;></ion-icon>' : ''}
+                                ${post.visibility === 'FRIENDS' ? '<ion-icon name="people" style="padding: 0 10px; position: relative; margin-left: auto;"></ion-icon>' : ''}
+                                ${post.visibility === 'PRIVATE' ? '<ion-icon name="eye-off" style="padding: 0 10px; position: relative; margin-left: auto;"></ion-icon>' : ''}
+                            </div>
                             </div>
                             <div class="post-time">${formattedDate}</div>
                             <p class="post-content">${post.content}</p>
+                            
                         </div>
                     `;
-
+                    style=""
                     const interactionHTML = `
                         <div class="interact-container">
                             <button id="share-${post.id}" type="button" data-post-id="${post.id}">

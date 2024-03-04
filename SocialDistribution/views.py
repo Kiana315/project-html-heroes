@@ -1,4 +1,5 @@
 # Traditional Pattern:
+
 from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import render, redirect, get_list_or_404, get_object_or_404
@@ -108,11 +109,12 @@ class PostDetailView(DetailView):
             context['likes_count'] = Like.objects.filter(post=self.get_object()).count()
             return super().render_to_response(context, **response_kwargs)
 
+    # def get_html_content(self):
+    #     if self.content_type == 'COMMONMARK':
+    #         return commonmark.commonmark(self.content)
+    #     return self.content
 
-"""
-def postView(request, username):
-    return render(request, 'post.html')
-"""
+
 
 
 class IndexView(TemplateView):

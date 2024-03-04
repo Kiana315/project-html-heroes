@@ -24,7 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
                         <div class="username">${post.username || 'Unknown User'}</div>
                         <div class="post-time">${formattedDate}</div>
-                        ${post.visibility === 'FRIENDS' ? '<ion-icon name="people"></ion-icon>' : ''}
+                        <div class="corner-icon">
+                            ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown" style="padding: 10px;"></ion-icon>' : ''}
+                            ${post.visibility === 'FRIENDS' ? '<ion-icon name="people" style="padding: 10px;"></ion-icon>' : ''}
+                        </div>
                     </div>
                 `;
 

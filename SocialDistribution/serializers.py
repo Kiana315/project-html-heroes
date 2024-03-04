@@ -17,7 +17,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 'author', 'username', 'title', 'content', 'image', 'visibility',
+            'id', 'author', 'username', 'title', 'content', 'content_type', 'image', 'visibility',
             'date_posted', 'last_modified', 'likes_count', 'avatar', 'is_draft',
             'is_shared', 'shared_post_id', 'shared_post_title', 'comment_count'
         ]
@@ -31,6 +31,12 @@ class PostSerializer(serializers.ModelSerializer):
     
     def get_is_shared(self, obj):
         return obj.shared_post is not None
+
+    # def to_representation(self, instance):
+    #     ret = super().to_representation(instance)
+    #     if instance.content_type == 'COMMONMARK':
+    #         ret['content'] = commonmark_to_html(ret['content'])
+    #     return ret
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

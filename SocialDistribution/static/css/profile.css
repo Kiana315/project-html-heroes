@@ -277,3 +277,9 @@ a:active {
     width: 1px;
     background-color: #000;
 }
+
+.corner-icon {
+    position: relative; 
+    margin-left: auto;
+    width: auto;
+}

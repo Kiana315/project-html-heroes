@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
                         <div class="username">${post.username || 'Unknown User'}</div>
                         <div class="post-time">${formattedDate}</div>
+                        <div class="corner-icon">
+                            ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown" style="padding: 0 10px; position: relative; margin-left: auto;"></ion-icon>' : ''}
+                        </div>
                     </div>
                 `;
 

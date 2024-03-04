@@ -32,9 +32,14 @@ class Post(models.Model):
         ('FRIENDS', 'Friends-Only'),
         ('PRIVATE', 'Private'),
     ]
+    CONTENT_TYPE_CHOICES = [
+        ('COMMONMARK', 'CommonMark'),
+        ('PLAIN', 'Plain Text'),
+    ]
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255)
     content = models.TextField()
+    content_type = models.CharField(max_length=10, choices=CONTENT_TYPE_CHOICES, default='PLAIN')
     image = models.ImageField(upload_to='posts/images/', null=True, blank=True)
     visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='PUBLIC')
     date_posted = models.DateTimeField(auto_now_add=True)

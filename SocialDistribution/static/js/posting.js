@@ -1,6 +1,7 @@
 
 document.addEventListener('DOMContentLoaded', (event) => {
     // Get elements
+    
     const modal = document.getElementById("newPostModal");
     const btn = document.getElementById("floating-button");
     const form = document.getElementById("newPostForm");
@@ -22,8 +23,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
     form.onsubmit = function(event) {
         event.preventDefault(); // Prevent form default submission behavior
 
+        let useCommonMark = document.getElementById('content_type').checked;
+        let contentType = useCommonMark ? 'COMMONMARK' : 'PLAIN';
+        console.log("content_type", contentType);
+
         // Create FormData Obj
         var formData = new FormData(form);
+        formData.append("content_type", contentType);
+        
         if (event.submitter.innerText === "Save Draft"){
             formData.append("is_draft", "true")
         }
