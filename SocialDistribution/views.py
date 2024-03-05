@@ -137,38 +137,30 @@ class FPsAPIView(generics.ListAPIView):
         current_user = get_object_or_404(User, username=username)   # get current user
 
         # Query the users followed by the current user
-        followed_users = User.objects.filter(reverse_following__user=current_user)
-        following_users = User.objects.filter(reverse_followers__user=current_user)
-        # print("followed_users: ", followed_users, "\nfollowing_users: ", following_users)
-        
-        # followed_users_set = set(followed_users)
-        # following_users_set = set(following_users)
-
-        # friends_set = followed_users_set & following_users_set
-        # print(friends_set)
-        # # Query the current user’s friends (two-way relationship)
-        # friends = User.objects.filter(id__in=[user.id for user in friends_set])
-        # print(friends)
-
-        # Get friend list of current user
-        friends = User.objects.filter(
-            Q(friends_set1__user1=current_user) | 
-            Q(friends_set2__user2=current_user)
-        ).distinct()
-        
+        user_following = User.objects.filter(reverse_following__user=current_user)
         # Get public posts from following users
-        followed_user_posts = Post.objects.filter(author__in=followed_users, visibility='PUBLIC')
+        user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC')
+
+        # Get friend list of current user 问题所在！！！！！！！！
+        friends = User.objects.filter(
+            Q(friends_set1__user1=current_user) 
+        ).distinct()
+
+        print(friends)  #查询不到有效user
 
         # Get friends’ public and friends-only posts
         friend_posts = Post.objects.filter(
             Q(author__in=friends, visibility='PUBLIC') |
-            Q(author__in=friends, visibility='FRIENDS') |
+            Q(author__in=friends, visibility='FRIENDS')
+        )
+
+        user_posts = Post.objects.filter(
             Q(author=current_user, visibility='PUBLIC') |
             Q(author=current_user, visibility='FRIENDS')
         )
 
         # Merge query sets and remove duplicates
-        posts = followed_user_posts | friend_posts
+        posts = user_following_posts | friend_posts | user_following_posts
         posts = posts.distinct().order_by('-date_posted')
         
         serializer = PostSerializer(posts, many=True)
