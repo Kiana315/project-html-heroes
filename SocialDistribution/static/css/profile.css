@@ -44,23 +44,36 @@ body {
     background-image: linear-gradient(45deg, #e00808 0%, #f8990a 100%);
 }
 
+
 .profile-container {
     display: flex;
     flex-direction: row;
-    padding: 0 30px;
+    padding: 0 8%;
     position: relative;
     justify-content: center;
 }
 
-.profile-header {
+.profile-left {
     position: relative;
-    width: 20%;
     height: auto;
+    width: 35%;
     display: flex;           
     flex-direction: column; 
     align-items: center;
-    margin: 20px 40px auto 40px;
-    padding: 50px 0;
+    margin: 0 0 auto 40px;
+    justify-content: center;
+    
+}
+
+.profile-header {
+    position: relative;
+    width: 70%;
+    max-width: 100%;
+    display: flex;           
+    flex-direction: column; 
+    align-items: center;
+    margin: 0 10px 20px 20px;
+    padding: 50px 20px;
     justify-content: center;
     border-radius: 10px;
     border: 1px solid #ddd;
@@ -68,6 +81,7 @@ body {
     background-color:rgba(255, 255, 255, 0.8);
     z-index: 2;
 }
+
 
 .profile-edit-btn {
     position: absolute;
@@ -122,7 +136,7 @@ body {
 }
 
 .post-container {
-    width: 50%;
+    width: 65%;
     display: flex;
     padding-right: 10%;
     flex-direction: column;
@@ -149,7 +163,7 @@ a:active {
 }
 
 .recent-posts {
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .post {
@@ -289,4 +303,48 @@ a:active {
     position: relative; 
     margin-left: auto;
     width: auto;
+}
+
+.friend-list {
+    position: relative;
+    width: 70%;
+    max-width: 100%;
+    display: flex;           
+    flex-direction: column; 
+    margin: 0 10px 20px 20px;
+    padding: 0 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color:rgba(255, 255, 255, 0.8);
+}
+
+.friend-info {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(129, 129, 129, 0.8);
+}
+
+.friend-avatar{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    margin: 20px 20px 20px 0;
+    flex-shrink: 0;
+}
+
+.friend-name {
+    width: fit-content;
+    flex-grow: 1;
+    white-space: nowrap;
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+}
+.friend-name:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }

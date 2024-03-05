@@ -59,7 +59,7 @@
     <h1 class="post-title" id="postTitle">{{ post.title }}</h1>
     <div class="scrollable-content">
         <span id="postId" style="display: none">{{ post.id }}</span>
-        <p class="post-content formatted-content" id="postContent">{{ post.content|safe }}</p>
+        <div class="post-content formatted-content" id="postContent">{{ post.content|safe }}</div>
         {% if post.image %}
             <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
         {% endif %}
@@ -149,7 +149,7 @@
 
 <script type="text/javascript">
     const currentPostTitle = "{{ post.title }}";
-    const currentPostContent = "{{ post.content }}";
+    // const currentPostContent = "{{ post.content }}";
 </script>
 
 <script src="{% static 'js/common.js' %}"></script>

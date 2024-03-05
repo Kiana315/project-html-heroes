@@ -103,17 +103,12 @@ class PostDetailView(DetailView):
                 'image_url': post.image.url if post.image else '',
                 'likes_count': Like.objects.filter(post=post).count(),
                 'comments': list(post.get_comments().values('user__username', 'text')),
+                # 'html_content': post.get_html_content(),
             }
             return JsonResponse(data)
         else:
             context['likes_count'] = Like.objects.filter(post=self.get_object()).count()
             return super().render_to_response(context, **response_kwargs)
-
-    # def get_html_content(self):
-    #     if self.content_type == 'COMMONMARK':
-    #         return commonmark.commonmark(self.content)
-    #     return self.content
-
 
 
 

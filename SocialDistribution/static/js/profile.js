@@ -275,16 +275,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-
+// Load recent posts for the user
 document.addEventListener('DOMContentLoaded', () => {
     const recentPostsContainer = document.getElementById('recent-posts');
     const username = recentPostsContainer.getAttribute('data-username');
 
-    console.log('Username:', username);
     fetch(`/api/user/${username}/posts`)
         .then(response => response.json())
         .then(data => {
-            console.log(data);
+            // console.log(data);
             if (Array.isArray(data.posts)) {
                 data.posts.forEach(post => {
                     let postElement = document.createElement('div');
@@ -351,6 +350,45 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Error fetching posts:', error);
             recentPostsContainer.innerHTML = '<p>Error loading posts.</p>';
+        });
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const friendListContainer = document.getElementById('friendList');
+    const username = friendListContainer.getAttribute('data-username'); 
+
+    fetch(`/api/user/${username}/friends/`)
+        .then(response => response.json())
+        .then(friendships => {
+            friendships.forEach(friendship => {
+
+                let friend;
+                if (friendship.user1.username === username){
+                    friend = friendship.user2;
+                } else {
+                    return;
+                }
+                console.log(friend);
+                
+                let friendElement = document.createElement('div');
+                friendElement.className = 'friend-info';
+
+                friendElement.innerHTML = `
+                <div class="friend-avatar">
+                    <img src="${friend.avatar}" alt="Friend Avatar">
+                </div>
+                <div class="friend-name">
+                    <a href="/profile/${username}/${friend.username}">${friend.username}</a> 
+                </div>
+                `;
+
+                friendListContainer.appendChild(friendElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching friends:', error);
+            friendListContainer.innerHTML = '<p>Error loading friends.</p>';
         });
 });
 

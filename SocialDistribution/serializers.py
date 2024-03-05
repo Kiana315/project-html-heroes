@@ -9,7 +9,7 @@ class PostSerializer(serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
     is_draft = serializers.BooleanField(default=False)
-
+    # html_content = serializers.SerializerMethodField()
     is_shared = serializers.SerializerMethodField() 
     shared_post_id = serializers.IntegerField(source='shared_post.id', read_only=True)
     shared_post_title = serializers.CharField(source='shared_post.title', read_only=True)
@@ -32,11 +32,8 @@ class PostSerializer(serializers.ModelSerializer):
     def get_is_shared(self, obj):
         return obj.shared_post is not None
 
-    # def to_representation(self, instance):
-    #     ret = super().to_representation(instance)
-    #     if instance.content_type == 'COMMONMARK':
-    #         ret['content'] = commonmark_to_html(ret['content'])
-    #     return ret
+    # def get_html_content(self, obj):
+    #     return obj.get_html_content()
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

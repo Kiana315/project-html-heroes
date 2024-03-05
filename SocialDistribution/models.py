@@ -1,3 +1,4 @@
+import commonmark
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -48,6 +49,10 @@ class Post(models.Model):
     shared_post = models.ForeignKey('self', on_delete=models.CASCADE, related_name='shared_posts', null=True, blank=True)
     ordering = ['-date_posted']
 
+    # def get_html_content(self):
+    #     if self.content_type == 'COMMONMARK':
+    #         return commonmark.commonmark(self.content)
+    #     return self.content
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment', default=99999)
