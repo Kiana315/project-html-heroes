@@ -216,7 +216,8 @@ a:active {
 }
 
 
-.follow-button {
+#follow-btn,
+#unfollow-btn {
     margin: 20px;
     padding: 10px 20px;
     font-size: 16px;
@@ -227,9 +228,16 @@ a:active {
     box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
     cursor: pointer;
     transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
-    outline: none;
     bottom: 10px;
     background-image: linear-gradient(45deg, #9FACE6 0%, #74EBD5 100%);
+    display: inline;
+}
+
+#relation {
+    margin-top: 25px;
+    color: rgba(0, 0, 0, 0.78);
+    font-size: small;
+    font-weight: bold;
 }
 
 .interaction-button {

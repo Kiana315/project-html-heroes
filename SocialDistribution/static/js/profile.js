@@ -61,16 +61,53 @@ function handleUserNameBlur() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+    /*   data = {
+            'user1_follows_user2': user1_follows_user2,
+            'user2_follows_user1': user2_follows_user1,
+            'user1_followed_by_user2': user1_followed_by_user2,
+            'user2_followed_by_user1': user2_followed_by_user1,
+            'already_friend': user1_makeFriend_user2 and user2_makeFriend_user1,
+            'mutual_follow': user1_follows_user2 and user2_follows_user1 and user1_followed_by_user2 and user2_followed_by_user1,
+        }*/
+
     const selfUsername = _getURLSelfUsername();
     const targetUsername = _getURLTargetUsername();
-
-
     const followButton = document.getElementById('follow-btn');
+    const unfollowButton = document.getElementById('unfollow-btn');
+    const relationInstruction = document.getElementById('relation');
+
+    fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
+        .then(relationResponse => {
+            if (!relationResponse.ok) {
+                throw new Error('Network response was not ok.');
+            }
+            return relationResponse.json();
+        })
+        .then(relations => {
+            if (relations["already_friend"]) {
+                relationInstruction.textContent = `- ${targetUsername} Is Your Friend -`;
+                followButton.style.display = "none";
+                unfollowButton.style.display = "inline";
+            }
+            else if (relations["user1_follows_user2"] && relations["user2_followed_by_user1"]) {
+                relationInstruction.textContent = `- You Are Following ${targetUsername} -`;
+                followButton.style.display = "none";
+                unfollowButton.style.display = "inline";
+            }
+            else if (relations["user2_follows_user1"] && relations["user1_followed_by_user2"]) {
+                relationInstruction.textContent = `- ${targetUsername} Is Your Follower -`;
+                followButton.style.display = "inline";
+                unfollowButton.style.display = "none";
+            }
+            else {
+                relationInstruction.textContent = `- Hi, I'm ${targetUsername}, Nice To Meet U -`;
+                followButton.style.display = "inline";
+                unfollowButton.style.display = "none";
+            }
+        })
+
     if (followButton) {
         followButton.addEventListener('click', function() {
-            const selfUsername = _getURLSelfUsername();
-            const targetUsername = _getURLTargetUsername();
-
             // Todo - Check if they are already friends, if not then continue the follow process:
             let areFriends = true;
             fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
@@ -154,8 +191,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
-});
 
+    if (unfollowButton) {
+        followButton.addEventListener('click', function() {
+
+        });
+    }
+
+
+
+});
 
 
 document.addEventListener('DOMContentLoaded', () => {
