@@ -535,6 +535,40 @@ class CreateFollowingAPIView(APIView):
             return Response({"detail": "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class DeleteFollowerAPIView(APIView):
+    """ [DELETE] Delete Follower Relation Case """
+    def delete(self, request, selfUsername, targetUsername):
+        # Get both users based on their usernames
+        self_user = get_object_or_404(User, username=selfUsername)
+        target_user = get_object_or_404(User, username=targetUsername)
+
+        if self_user != target_user:
+            try:
+                Follower.objects.filter(user=target_user, follower=self_user).delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                return Response({"detail": "An error occurred while deleting the follower relation."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({"detail": "Cannot remove yourself as a follower."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteFollowingAPIView(APIView):
+    """ [DELETE] Delete Following Relation Case """
+    def delete(self, request, selfUsername, targetUsername):
+        # Get both users based on their usernames
+        self_user = get_object_or_404(User, username=selfUsername)
+        target_user = get_object_or_404(User, username=targetUsername)
+
+        if self_user != target_user:
+            try:
+                Following.objects.filter(user=target_user, following=self_user).delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Exception as e:
+                return Response({"detail": "An error occurred while deleting the following relation."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({"detail": "Cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST'])
 def createFriendshipAPIView(request, selfUsername, targetUsername):
     """ [POST] Post New Friend Relation Case """
@@ -550,6 +584,21 @@ def createFriendshipAPIView(request, selfUsername, targetUsername):
     except Exception as e:
         return JsonResponse({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['DELETE'])
+def deleteFriendshipAPIView(request, selfUsername, targetUsername):
+    """ [DELETE] Delete Friend Relation Case """
+    user1 = get_object_or_404(User, username=selfUsername)
+    user2 = get_object_or_404(User, username=targetUsername)
+    if user1 == user2:
+        return JsonResponse({'error': 'A user cannot unfriend themselves.'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        Friend.delete_friendship_for_user1(user1, user2)
+        return JsonResponse({'message': 'Friendship deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    except ValidationError as e:
+        return JsonResponse({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return JsonResponse({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class AnalyzeRelationAPIView(APIView):

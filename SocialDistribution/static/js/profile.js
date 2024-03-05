@@ -1,6 +1,6 @@
 function editUserName() {
     let el = document.getElementById("username");
-    
+
     el.style.display = 'none';
 
     let input = document.getElementById("edit-username");
@@ -12,7 +12,7 @@ function editUserName() {
 
 
 function handleUserNameBlur() {
-    
+
     let el = document.getElementById("edit-username");
     let formData = new FormData();
     formData.append("username", el.value)
@@ -43,7 +43,8 @@ function handleUserNameBlur() {
                 spanElement.setAttribute("id", "update-username-error")
                 parentElement.insertBefore(spanElement, el.nextSibling)
                 el.focus();
-            } else {
+            }
+            else {
                 el.style.display = 'none'
                 let username = document.getElementById("username");
                 username.innerText = el.value
@@ -75,6 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const followButton = document.getElementById('follow-btn');
     const unfollowButton = document.getElementById('unfollow-btn');
     const relationInstruction = document.getElementById('relation');
+
+    followButton.style.display = "none";
+    unfollowButton.style.display = "none";
 
     fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
         .then(relationResponse => {
@@ -134,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(response => {
                                 if (response.ok) {
                                     followButton.style.display = 'none';
+                                    unfollowButton.style.display = 'inline';
 
                                     // Todo - For `USER_TARGET`, set `USER_SELF` as a follower of `USER_TARGET`:
                                     fetch(`/api/user/${targetUsername}/following/${selfUsername}/`, {
@@ -179,7 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                             }
                                         })
                                         .catch(error => console.error('Error:', error));
-                                } else {
+                                }
+                                else {
                                     alert("Already Followed.");
                                 }
                             })
@@ -192,13 +198,80 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Todo - Unfollow Logics:
+    //  1. Only self follow other    >>      delete 1->2 follow-ship;
+    //  2. we are friend            >>       delete 1<->2 friend-ship，add 2->1 follow-ship;
     if (unfollowButton) {
-        followButton.addEventListener('click', function() {
+        unfollowButton.addEventListener('click', function() {
+            alert("fuck");
+            fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
+                .then(relationResponse => {
+                    if (!relationResponse.ok) {
+                        throw new Error('Network response was not ok.');
+                    }
+                    return relationResponse.json();
+                })
+                .then(relations => {
+                    if (relations["user1_follows_user2"] && relations["user2_followed_by_user1"]) {
+                        fetch(`/api/user/${selfUsername}/unfollowerOf/${targetUsername}/`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok.');
+                                }
+                                return response.json();
+                            })
+                            .then(relations => {
+                                fetch(`/api/user/${targetUsername}/unfollowing/${selfUsername}/`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRFToken': getCookie('csrftoken'),
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Network response was not ok.');
+                                        }
+                                        else {
+                                            alert("Unfollow Successfully.");
+                                            unfollowButton.style.display = 'none';
+                                            followButton.style.display = 'inline';
+                                        }
+                                        return response.json();
+                                    })
+                            })
+                    }
+                    else if (relations["already_friend"]) {
+                        fetch(`/api/user/${selfUsername}/unfriend/${targetUsername}/`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok.');
+                                }
+                                else {
+                                    alert(`Unfollow Successfully, ${targetUsername} Is Still Following You.`);
+                                    unfollowButton.style.display = 'none';
+                                    followButton.style.display = 'inline';
+                                }
+                                return response.json();
+                            })
+
+                    }
+                })
 
         });
     }
-
-
 
 });
 
@@ -206,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', () => {
     const recentPostsContainer = document.getElementById('recent-posts');
     const username = recentPostsContainer.getAttribute('data-username');
-    
+
     console.log('Username:', username);
     fetch(`/api/user/${username}/posts`)
         .then(response => response.json())
@@ -223,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const datePosted = new Date(post.date_posted);
                     const formattedDate = `${datePosted.getFullYear()}-${datePosted.getMonth() + 1}-${datePosted.getDate()}`;
-                    
+
                     const contentHTML = `
                         <div class="content">
                         ${post.image ? `<img src="${post.image}" alt="" width="120" height="120"/>` : ''}
@@ -239,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                         </div>
                     `;
-                    style=""
+                    style = ""
                     const interactionHTML = `
                         <div class="interact-container">
                             <button id="share-${post.id}" type="button" data-post-id="${post.id}">
@@ -250,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
                                 </ion-icon>
                                 ${post.comment_count > 0 ? '' : 'Comment'} 
-                                <span class="comment-count">${post.comment_count > 0 ? post.comment_count: ''}
+                                <span class="comment-count">${post.comment_count > 0 ? post.comment_count : ''}
                                 </span>
                             </button>
                             <button id="like-${post.id}" type="button" data-post-id="${post.id}"> 
@@ -267,9 +340,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     postElement.innerHTML += interactionHTML;
                     recentPostsContainer.appendChild(postElement);
 
-                    
+
                 });
-            } else {
+            }
+            else {
                 console.error('Error: Expected an array of posts');
                 recentPostsContainer.innerHTML = '<p>Error loading posts.</p>';
             }
