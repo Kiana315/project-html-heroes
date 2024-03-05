@@ -287,7 +287,6 @@ class CommentAPIView(generics.ListCreateAPIView):
         return context
 
 
-
 class LikeAPIView(generics.ListCreateAPIView):
     """ [GET/POST] Get The LikeList For A Spec-post; Create A Like For A Spec-post """
     serializer_class = LikeSerializer
@@ -308,6 +307,7 @@ class LikeAPIView(generics.ListCreateAPIView):
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
+
 def check_like_status(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     user = request.user
@@ -315,6 +315,7 @@ def check_like_status(request, post_id):
     has_liked = Like.objects.filter(post=post, liker=user).exists()
 
     return JsonResponse({'has_liked': has_liked})
+
 
 class SharePostView(APIView):
     permission_classes = [IsAuthenticated]
@@ -370,14 +371,17 @@ class MsgsAPIView(generics.ListAPIView):
 ----------------------------------  Profile & Identity Settings ----------------------------------
 """
 
+class ProfileView(TemplateView):
+    """ * [GET] Get The FollowerList Page """
+    template_name = "profile.html"
+
 
 def upload_avatar(request, username):
     if request.method == 'POST':
         form = AvatarUploadForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-
-    return redirect(profileView, username=username)
+    return redirect("PAGE_Profile", username=username)
 
 
 def update_bio(request, username):
@@ -386,7 +390,7 @@ def update_bio(request, username):
         if form.is_valid():
             form.save()
 
-    return redirect(profileView, username=username)
+    return redirect("PAGE_Profile", username=username)
 
 
 def update_username(request, username):
@@ -399,9 +403,6 @@ def update_username(request, username):
 
         return JsonResponse({'error': ''}, safe=False)
 
-class ProfileView(TemplateView):
-    """ * [GET] Get The FollowerList Page """
-    template_name = "profile.html"
 
 class ProfileAPIView(APIView):
     def get(self, request, username):

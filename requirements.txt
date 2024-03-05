@@ -2,10 +2,10 @@
 
 psycopg2-binary
 django-on-heroku
-asgiref==3.7.2; python_version >= '3.7'
-django==5.0.2; python_version >= '3.10'
-sqlparse==0.4.4; python_version >= '3.5'
-djangorestframework
+asgiref==3.7.2
+Django~=5.0.2
+sqlparse==0.4.4
+djangorestframework~=3.14.0
 Pillow
 gunicorn
 CommonMark
