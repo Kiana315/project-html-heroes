@@ -4,6 +4,24 @@ from django.urls import reverse
 from SocialDistribution.models import Like, Post, User, Comment, Friend
 from rest_framework.authtoken.models import Token
 
+class PostOperationAPITests(APITestCase):
+    def setUp(self):
+        # create a test user
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+        # Create a test post
+        self.post = Post.objects.create(author=self.user, title='Test Post', content='Test Content')
+        exists = Post.objects.filter(id=self.post.id).exists()
+        print("Post exists:", exists, self.post.id)
+
+    def test_get_post(self):
+        # Test retrieving a specific post
+        url = reverse('API_PDetail', kwargs={'post_id': self.post.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], self.post.title)
+
 class LikeAPITests(APITestCase):
     def setUp(self):
         # Create a test user
@@ -129,3 +147,94 @@ class CommentAPITests(APITestCase):
         data = {'comment_text': 'An unauthorized comment'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class ShareAPITests(APITestCase):
+    def setUp(self):
+        self.user1 = User.objects.create(username='user1', email='test1@example.com', password='testpassword')
+        self.user2 = User.objects.create_user(username='user2', email='test2@example.com', password='testpassword')
+
+        # Login user1
+        self.client.login(username='user1', password='testpassword')
+
+        # Create test posts
+        self.public_post = Post.objects.create(author=self.user1, title='Public Post', content='Public Content', visibility='PUBLIC')
+        self.private_post = Post.objects.create(author=self.user1, title='Friends Only Post', content='Friends content', visibility='FRIENDS')
+
+        # Login user2
+        self.client.login(username='user2', password='testpassword')
+
+    def test_share_post_successfully(self):
+        # share the post
+        url = reverse('share_post', kwargs={'post_id': self.public_post.id})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
+    def test_share_non_public_post(self):
+        # share friends only post
+        url = reverse('share_post', kwargs={'post_id': self.private_post.id})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) 
+
+class DeleteAPITests(APITestCase):
+    def setUp(self):
+        # create a test user
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+        # Create a test post
+        self.post = Post.objects.create(author=self.user, title='Test Post', content='Test Content')
+
+    def test_delete_post_success(self):
+        # make sure the post is exist
+        self.assertTrue(Post.objects.filter(pk=self.post.id).exists())
+        exists = Post.objects.filter(id=self.post.id).exists()
+        print("Post exists:", exists, self.post.id)
+
+        # delete the post
+        response = self.client.delete(reverse('API_delete_post', kwargs={'post_id': self.post.id}))
+
+        # check if the post is deleted
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Post.objects.filter(pk=self.post.id).exists())
+
+    def test_delete_nonexistent_post(self):
+        # try to delete a post which is not exist
+        non_existent_post_url = reverse('API_delete_post', kwargs={'post_id': self.post.id + 1})
+        response = self.client.delete(non_existent_post_url)
+
+        # assert the status code
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+class UpdateAPITests(APITestCase):
+    def setUp(self):
+        # create a test user
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+        # Create a test post
+        self.post = Post.objects.create(author=self.user, title='Test Post', content='Test Content')
+
+    def test_update_post_success(self):
+        # update the info
+        data = {'title': 'Updated Title', 'content': 'Updated content'}
+        response = self.client.put(reverse('update_post',kwargs={'post_id': self.post.id}), data)
+        # check the status code
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # check if the info updated successfully
+        post_updated = Post.objects.get(id=self.post.id)
+        self.assertEqual(post_updated.title, data['title'])
+        self.assertEqual(post_updated.content, data['content'])
+
+    def test_update_post_not_found(self):
+        # try to update a non-exists post
+        url = reverse('update_post', kwargs={'post_id': self.post.id + 66})
+        data = {'title': 'New Title', 'content': 'New content'}
+        response = self.client.put(url, data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_post_invalid_data(self):
+        # try to send invalid data
+        data = {'title': '', 'content': ''}
+        response = self.client.put(reverse('update_post', kwargs={'post_id': self.post.id}), data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
