@@ -139,29 +139,27 @@ class FPsAPIView(generics.ListAPIView):
 
         # Query the users followed by the current user
         user_following = User.objects.filter(reverse_following__user=current_user)
-        # Get public posts from following users
+        # Get query set of public posts from following users
         user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC')
 
-        # Get friend list of current user 问题所在！！！！！！！！
-        friends = User.objects.filter(
-            Q(friends_set1__user1=current_user) 
-        ).distinct()
+        # Get query set of current user's friend list  
+        friends = User.objects.filter(friends_set1__user1=current_user).values_list('friends_set1__user2', flat=True)
 
-        print(friends)  #查询不到有效user
 
-        # Get friends’ public and friends-only posts
+        # Get query set of friends’ public and friends-only posts
         friend_posts = Post.objects.filter(
             Q(author__in=friends, visibility='PUBLIC') |
             Q(author__in=friends, visibility='FRIENDS')
         )
 
+        # Get query set of current user's PUBLIC and FRIENDS posts
         user_posts = Post.objects.filter(
             Q(author=current_user, visibility='PUBLIC') |
             Q(author=current_user, visibility='FRIENDS')
         )
 
         # Merge query sets and remove duplicates
-        posts = user_following_posts | friend_posts | user_following_posts
+        posts = user_following_posts | friend_posts | user_posts
         posts = posts.distinct().order_by('-date_posted')
         
         serializer = PostSerializer(posts, many=True)
