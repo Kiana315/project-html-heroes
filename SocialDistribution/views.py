@@ -16,7 +16,7 @@ from django.urls import reverse
 
 # REST Pattern:
 from rest_framework import generics, status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -277,14 +277,20 @@ class LikeAPIView(generics.ListCreateAPIView):
     """ [GET/POST] Get The LikeList For A Spec-post; Create A Like For A Spec-post """
     serializer_class = LikeSerializer
 
+    # def get_queryset(self):
+    #     return get_list_or_404(Like, post_id=self.kwargs['post_id'])
+    
     def get_queryset(self):
-        return get_list_or_404(Like, post_id=self.kwargs['post_id'])
+        post_id = self.kwargs['post_id']
+        return Like.objects.filter(post_id=post_id)
+
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs['post_id'])
         user = self.request.user
         if Like.objects.filter(post=post, liker=user).exists():
-            raise ValidationError('You have already liked this post.')
+            # raise ValidationError('You have already liked this post.')
+            raise DRFValidationError('You have already liked this post.')
         serializer.save(post=post, liker=user)
         post.refresh_from_db()
         likes_count = post.like.count()
