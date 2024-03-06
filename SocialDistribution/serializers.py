@@ -89,9 +89,9 @@ class MessageSerializer(serializers.ModelSerializer):
     owner_username = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Message
-        fields = ['id', 'owner', 'owner_username', 'date', 'message_type']
+        fields = ['id', 'owner_username', 'date', 'message_type']
         read_only_fields = ['id', 'date', 'owner_username']
     def create(self, validated_data):
-        # Optionally, customize the creation of message instances here
+        # Owner will be set in the view, so it's not included in validated_data
         message = Message.objects.create(**validated_data)
         return message

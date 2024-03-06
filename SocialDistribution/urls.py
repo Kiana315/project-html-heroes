@@ -71,7 +71,7 @@ urlpatterns = [
     path('api/posts/<int:post_id>/update/', UpdatePostView.as_view(), name='update_post'),                                                  # GET/PUT edit and update post      --> Test Success
 
     # Inbox API System:
-    path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                                    # GET TypeMessagesForUser            -->
+    path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                           # GET TypeMessagesForUser            -->
     path('api/msgs/create/', CreateMessageAPIView.as_view(), name='API_POSTUserMsg'),                                                       # POST TypeMessageForUser            -->
     path('api/msgs/delete/<str:type>/', DeleteMessageAPIView.as_view(), name='API_DELETEUserMsg'),                                          # DELETE TypeMessageForUser          -->
 ]

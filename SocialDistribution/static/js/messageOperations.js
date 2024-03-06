@@ -23,12 +23,12 @@ export async function getMessages(messageType) {
 
 export async function createMessage(messageType, content) {
     const url = '/api/msgs/create/';
-    //const csrfToken = getCsrfToken();
+    const csrfToken = getCsrfToken();
     const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            //'X-CSRFToken': csrfToken,
+            'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
             message_type: messageType,
@@ -41,21 +41,22 @@ export async function createMessage(messageType, content) {
         console.log('Message created successfully:', data);
     }
     else {
-        console.error('Failed to create message:', response.status, response.statusText);
+        const error = await response.json();
+        console.error('Failed to create message:', response.status, response.statusText, error);
     }
 }
 
 
 export async function deleteMessage(messageType) {
     const url = `/api/msgs/delete/${messageType}/`;
-    //const csrfToken = getCsrfToken();
+    const csrfToken = getCsrfToken();
 
     try {
         const response = await fetch(url, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                //'X-CSRFToken': csrfToken,
+                'X-CSRFToken': csrfToken,
             },
             credentials: 'include',
         });
@@ -73,12 +74,16 @@ export async function deleteMessage(messageType) {
 
 
 function getCsrfToken() {
-  const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
-  if (!csrfInput) {
-    console.error('CSRF input not found in the form!');
+  const csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+
+  if (!csrfToken) {
+    console.error('CSRF token not found!');
     return '';
   }
-  return csrfInput.value;
+  return csrfToken;
 }
 
 

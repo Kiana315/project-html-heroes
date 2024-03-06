@@ -8,53 +8,41 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/inbox.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/navbar.css' %}">
-
+    
     <title>Inbox</title>
 </head>
 
 <body>
-   
-    {% include 'navbar.html' %}
 
-    <div class="inbox-container">
-        <h1>- Your Inbox -</h1>
-        <div class="inbox-filters">
-            <form id="filter-form">
-                <label for="filter">Filter messages:</label>
-                <select name="filter" id="filter">
-                    <option value="all">All</option>
-                    <option value="FR">Follow Requests</option>
-                    <option value="LK">Likes</option>
-                    <option value="CM">Comments</option>
-                    <option value="NP">NewPost Reminder</option>
-                    <option value="SU">New Signups</option>
-                </select>
-                <button type="submit">Filter</button>
-            </form>
-        </div>
-        
-        <!--
-        <div class="inbox-messages">
-            <ul class="inbox-messages-container">
-                <li class="message unread">
-                    <div class="message-header">
-                        <span class="status-dot"></span>
-                        <span class="sender">Eden</span>
-                        <span class="subject">Hey, did you get my last message?</span>
-                    </div>
-                    <div class="message-body">
-                        <p class="message-text">Hey, just checking to see if you received my last message. Let me know if you have any questions about the project.</p>
-                        <button id="inbox-delete-btn">Delete</button>
-                        <button id="inbox-star-btn">Star</button>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>-->
+{% include 'navbar.html' %}
 
-    <script type="module" src="{% static 'js/inbox.js' %}"></script>
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+<div class="inbox-container">
+    <h1>- Your Inbox -</h1>
+    <div class="inbox-filters">
+        <form id="filter-form">
+            <label for="filter">Filter messages:</label>
+            <select name="filter" id="filter">
+                <option value="all">All</option>
+                <option value="FR">Follow Requests</option>
+                <option value="LK">Likes</option>
+                <option value="CM">Comments</option>
+                <option value="NP">NewPost Reminder</option>
+                <option value="SU">New Signups</option>
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+    
+    <div class="inbox-messages">
+        <ul id="msgContainer" class="inbox-messages-container">
+            <!--JS Works-->
+        </ul>
+    </div>
+</div>
+
+<script type="module" src="{% static 'js/inbox.js' %}"></script>
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
 </body>
 

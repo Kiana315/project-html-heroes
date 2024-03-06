@@ -6,34 +6,26 @@ import {
     deleteMessage,
 } from './messageOperations.js';
 
-
-function clickableListItem() {
-    document.addEventListener('DOMContentLoaded', function() {
-        let messages = document.querySelectorAll('.inbox-messages .message');
-        messages.forEach(function(message) {
-            message.querySelector('.message-header').addEventListener('click', function() {
-                message.classList.toggle('unfolded');
-            });
+function clickableListItem(messages) {
+    messages.forEach(function(message) {
+        message.querySelector('.message-header').addEventListener('click', function() {
+            message.classList.toggle('unfolded');
         });
     });
 }
 
-
 function clickableFilterMessages() {
-    document.addEventListener('DOMContentLoaded', function() {
-        let filterForm = document.getElementById('filter-form');
-        filterForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            let filterValue = document.getElementById('filter').value;
-            filterAndDisplayMessages(filterValue);
-        });
+    let filterForm = document.getElementById('filter-form');
+    filterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        let filterValue = document.getElementById('filter').value;
+        filterAndDisplayMessages(filterValue);
     });
 }
 
 function filterAndDisplayMessages(filter) {
     let messageContainer = document.querySelector('.inbox-container');
     let messages = messageContainer.querySelectorAll('.message');
-
     messages.forEach(function(message) {
         let subjectType = message.getAttribute('type');
         if (filter === 'all' || filter === subjectType) {
@@ -43,7 +35,6 @@ function filterAndDisplayMessages(filter) {
         }
     });
 }
-
 
 function createBlock(msg, type, isNewMsg = true) {
     let li_message = document.createElement("li");
@@ -87,20 +78,32 @@ function createBlock(msg, type, isNewMsg = true) {
 }
 
 
+async function loadAndDisplayMessages() {
+    let messageTypes = ['FR', 'LK', 'CM', 'NP', 'SU']; // Array of message types
+    let ul_inboxMsgContainer = document.getElementById('msgContainer');
+    ul_inboxMsgContainer.innerHTML = ''; // Clear any existing messages
 
-/* TESTS */
-createMessage("FR", "aaa");
-createMessage("LK", "bbb");
-createMessage("NP", "ccc");
-
-
-clickableListItem();
-clickableFilterMessages();
-
-let ul_inboxMsgContainer = document.getElementById("inbox-messages-container");
-for (let type in ['FR', 'LK', 'CM', 'NP', 'SU']) {
-    for (let message in getMessages(type)) {
-        let li_message = createBlock(message, type);
-        ul_inboxMsgContainer.appendChild(li_message);
+    for (let type of messageTypes) {
+        try {
+            let messages = await getMessages(type);
+            if (messages && Array.isArray(messages)) {
+                for (let msg of messages) {
+                    let li_message = createBlock(msg, type);
+                    ul_inboxMsgContainer.appendChild(li_message);
+                }
+            } else {
+                console.error(`Messages of type ${type} are not an array.`);
+            }
+        } catch (error) {
+            console.error(`An error occurred while fetching messages of type ${type}:`, error);
+        }
     }
 }
+
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadAndDisplayMessages();
+    clickableFilterMessages();
+    let messages = document.querySelectorAll('.inbox-messages .message');
+    clickableListItem(messages);
+});

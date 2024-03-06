@@ -6,8 +6,8 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
     position: relative;
-    display: flex;           
-    flex-direction: column; 
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding-top: 60px;
 }
@@ -18,7 +18,8 @@ body {
     background: rgba(255, 255, 255, 0.8);
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 h1, h2 {
@@ -32,13 +33,16 @@ h1, h2 {
     text-align: center;
 }
 
+
 #filter-form {
     display: inline-block;
 }
 
+
 #filter-form label {
     margin-right: 10px;
 }
+
 
 #filter-form select {
     border: 2px solid #007bff;
@@ -46,6 +50,7 @@ h1, h2 {
     padding: 5px;
     background-color: #fff;
 }
+
 
 #filter-form button {
     padding: 5px 15px;
@@ -56,22 +61,9 @@ h1, h2 {
     cursor: pointer;
 }
 
+
 #filter-form button:hover {
     background-color: #218838;
-}
-
-
-.inbox-messages {
-    background-color: #fff;
-    border-radius: 5px;
-    margin-top: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.inbox-messages ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
 }
 
 .message {
@@ -83,92 +75,97 @@ h1, h2 {
     transition: background-color 0.3s;
 }
 
-.message:last-child {
-    border-bottom: none;
-}
-
-.message:hover {
-    background-color: #f8f8f8;
-}
-
-.status-dot {
-    height: 10px;
-    width: 10px;
-    background-color: #ddd;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 10px;
-    padding-right: 10px;
-    position: relative;
-    top: -1px;
-}
-
-.message.unread .status-dot {
-    background-color: #ff3b30;
-}
-
-.message.star .status-dot {
-    background-color: yellow;
-}
-
-.sender {
+.message .subject {
     font-weight: bold;
-    margin-right: 10px;
-    color: #007bff;
+    font-size: 1.2rem;
+    padding-left: 20px;
 }
 
-.message-header {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-}
 
-.subject {
-    font-weight: bold;
-    color: #333;
-}
-
-.message-body {
+.message .message-body,
+.message .message-actions button {
     display: none;
-    padding: 30px;
-    border-top: 1px solid #ddd;
 }
 
+.message.unfolded .message-body,
+.message.unfolded .message-actions button {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+
+/* Button styling */
 .message-actions button {
     margin-right: 10px;
     padding: 5px 10px;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
-}
-
-.message.unread .sender, .message.unread .subject {
+    transition: background-color 0.3s, transform 0.3s;
     font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.message-actions button:hover,
+.message-actions button:focus {
+    background-color: #f0f0f0;
+    border-color: #bbb;
+    transform: translateY(-2px);
+}
+
+.inbox-delete-btn {
+    margin-left: 30px;
+    padding: 10px 20px;
     text-align: center;
-}
-
-#inbox-delete-btn {
-    margin-top: 20px;
-    text-align: right;
-    border-radius: 10px;
-    background-color: red;
-    color: white;
-}
-
-#inbox-star-btn {
-    margin-top: 20px;
-    text-align: right;
-    border-radius: 10px;
-    background-color: aqua;
     color: black;
+    border: none;
+    border-radius: 30px;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    outline: none;
+    bottom: 10px;
+    background-image: linear-gradient(45deg, #76e3a9 0%, #ebe668 100%);
 }
 
-.message.unfolded .message-body {
-    display: block;
-    margin-left: 50px;
+
+.inbox-star-btn {
+    margin-left: 30px;
+    padding: 10px 20px;
+    text-align: center;
+    color: black;
+    border: none;
+    border-radius: 30px;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    bottom: 10px;
+    background-image: linear-gradient(45deg, #9FACE6 0%, #74EBD5 100%);
+    display: inline;
 }
 
-.user-avatar {
-    height: 30px;
-    width: 30px;
-    border-radius: 50%;
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
+
+.message.unfolded {
+    margin-top: 20px;
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.message.unfolded .status-dot {
+    margin-right: 15px;
+}
+
+.message .message-body {
+    transition: display 0.5s ease;
+}
+
