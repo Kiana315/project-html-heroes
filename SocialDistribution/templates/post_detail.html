@@ -7,7 +7,7 @@
     <title>Post Page</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/post_detail.css' %}">
-    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="{% static 'css/newPostModal.css' %}">
 </head>
 <body data-current-user="{{ request.user.username }}">
 <div id="notification" class="notification"></div>
@@ -133,11 +133,13 @@
                     <input type="file" id="imageUpload" name="image" style="display: none;">
                 </div>
                 <div class="right">
-                    <label for="visibility"></label>
+                    <input type="checkbox" id="content_type" name="content_type">
+                    <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
 
                     <select name="visibility" id="visibility">
                         <option value="PUBLIC" selected>Public</option>
                         <option value="FRIENDS">Friends-Only</option>
+                        <option value="PRIVATE">Private</option>
                     </select>
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Post Changes</button>
