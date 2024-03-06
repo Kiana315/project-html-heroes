@@ -104,46 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 更新评论计数
                 });
 
-                // commentButton.addEventListener('click', (e) => {
-                //     e.stopPropagation();
-                //     commentBox.style.display = commentBox.style.display === 'none' ? 'block' : 'none';
-                // });
-                // likeButton.addEventListener('click', (e) => {
-                //     e.stopPropagation();
-                //     console.log('Like button clicked for post:', post.id);
-                //     fetch(`/api/posts/${post.id}/likes/`, {
-                //         method: 'POST',
-                //         headers: {'Content-Type': 'application/json'},
-                //         body: JSON.stringify({}),
-                //     })
-                //     .then(response => {
-                //         if (response.ok) {
-                //             console.log('>> Like Sent Successfully;');
-                //         } else {
-                //             console.log('>> Like Sent Unsuccessfully;');
-                //         }
-                //     })
-                //     .catch(error => console.error('Error:', error));
-                // });
-
-                // const submitCommentButton = commentBox.querySelector('.submit-comment');
-                // submitCommentButton.addEventListener('click', () => {
-                //     const commentText = commentBox.querySelector('.comment-text').value;
-                //     console.log('Comment submitted for post:', post.id, 'Comment:', commentText);
-                //     fetch(`/api/posts/${post.id}/comments/`, {
-                //         method: 'POST',
-                //         headers: {'Content-Type': 'application/json'},
-                //         body: JSON.stringify({ text: commentText }),
-                //     })
-                //     .then(response => {
-                //         if (response.ok) {
-                //             console.log('>> Comment Sent Successfully;');
-                //         } else {
-                //             console.log('>> Comment Sent Unsuccessfully;');
-                //         }
-                //     })
-                //     .catch(error => console.error('Error:', error));
-                // });
+                
             });
         })
         .catch(error => console.error('Error:', error));

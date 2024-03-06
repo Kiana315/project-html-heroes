@@ -88,10 +88,12 @@
         </button>
         {% else %}
             {% if post.visibility != 'PRIVATE' %}
-            <button id="share-button" class="action">
-                <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
-                Share
-            </button>
+                {% if post.visibility == 'PUBLIC' %}
+                <button id="share-button" class="action">
+                    <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
+                    Share
+                </button>
+                {% endif %}
             <button id="comment-button" class="action">
                 <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
                 Comment

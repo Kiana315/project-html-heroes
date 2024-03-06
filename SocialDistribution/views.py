@@ -140,7 +140,7 @@ class FPsAPIView(generics.ListAPIView):
         # Query the users followed by the current user
         user_following = User.objects.filter(reverse_following__user=current_user)
         # Get query set of public posts from following users
-        user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC')
+        user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC', is_draft=False)
 
         # Get query set of current user's friend list  
         friends = User.objects.filter(friends_set1__user1=current_user).values_list('friends_set1__user2', flat=True)
@@ -149,13 +149,13 @@ class FPsAPIView(generics.ListAPIView):
         # Get query set of friends’ public and friends-only posts
         friend_posts = Post.objects.filter(
             Q(author__in=friends, visibility='PUBLIC') |
-            Q(author__in=friends, visibility='FRIENDS')
+            Q(author__in=friends, visibility='FRIENDS'), is_draft=False
         )
 
         # Get query set of current user's PUBLIC and FRIENDS posts
         user_posts = Post.objects.filter(
             Q(author=current_user, visibility='PUBLIC') |
-            Q(author=current_user, visibility='FRIENDS')
+            Q(author=current_user, visibility='FRIENDS'), is_draft=False
         )
 
         # Merge query sets and remove duplicates

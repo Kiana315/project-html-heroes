@@ -17,15 +17,11 @@
 <body>
     {% include 'navbar.html' %}
     
-    
-    
     {% include 'postListContent.html' %}
         
-
     {% if user.is_authenticated %}
         <button id="floating-button">+</button>
     {% endif %}
-    
     
     {% include 'newPostModal.html' %}
 
