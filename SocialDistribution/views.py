@@ -17,6 +17,7 @@ from django.urls import reverse
 # REST Pattern:
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
@@ -611,3 +612,34 @@ class AnalyzeRelationAPIView(APIView):
             'mutual_follow': user1_follows_user2 and user2_follows_user1 and user1_followed_by_user2 and user2_followed_by_user1,
         }
         return Response(data)
+
+
+"""
+---------------------------------- Inbox Message Settings ----------------------------------
+"""
+
+
+class UserMessagesAPIView(ListAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        user = self.request.user
+        message_type = self.kwargs['type']
+        return Message.objects.filter(owner=user, message_type=message_type)
+
+
+class CreateMessageAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, format=None):
+        serializer = MessageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteMessageAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def delete(self, request, type, format=None):
+        Message.objects.filter(owner=request.user, message_type=type).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

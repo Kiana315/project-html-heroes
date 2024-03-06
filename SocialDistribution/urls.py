@@ -71,10 +71,21 @@ urlpatterns = [
     path('api/posts/<int:post_id>/update/', UpdatePostView.as_view(), name='update_post'),                                                  # GET/PUT edit and update post      --> Test Success
 
     # Inbox API System:
-    path("api/msgs/<str:username>/", MsgsAPIView.as_view(), name="API_MSGs"),                                                               # GET InboxMessages                 --> Unknown
-
-
+    path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                                    # GET TypeMessagesForUser            -->
+    path('api/msgs/create/', CreateMessageAPIView.as_view(), name='API_POSTUserMsg'),                                                       # POST TypeMessageForUser            -->
+    path('api/msgs/delete/<str:type>/', DeleteMessageAPIView.as_view(), name='API_DELETEUserMsg'),                                          # DELETE TypeMessageForUser          -->
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+"""
+MESSAGE_TYPES = [
+    ('FR', 'Follow Request'),
+    ('LK', 'Like'),
+    ('CM', 'Comment'),
+    ('NP', 'New Post Reminder'),
+    ('SU', 'New Sign Up')
+]
+"""

@@ -1,5 +1,11 @@
 'use strict';
 
+import {
+    getMessages,
+    createMessage,
+    deleteMessage,
+} from './messageOperations.js';
+
 
 function clickableListItem() {
     document.addEventListener('DOMContentLoaded', function() {
@@ -16,42 +22,30 @@ function clickableListItem() {
 function clickableFilterMessages() {
     document.addEventListener('DOMContentLoaded', function() {
         let filterForm = document.getElementById('filter-form');
-        let messageContainer = document.querySelector('.inbox-container');
         filterForm.addEventListener('submit', function(event) {
             event.preventDefault();
             let filterValue = document.getElementById('filter').value;
-            filterMessages(filterValue);
+            filterAndDisplayMessages(filterValue);
         });
     });
 }
 
-function filterMessages(filter) {
+function filterAndDisplayMessages(filter) {
+    let messageContainer = document.querySelector('.inbox-container');
     let messages = messageContainer.querySelectorAll('.message');
+
     messages.forEach(function(message) {
-        switch (filter) {
-            case 'all':
-                message.style.display = '';
-                break;
-            case 'unread':
-                if (message.classList.contains('unread')) {
-                    message.style.display = '';
-                } else {
-                    message.style.display = 'none';
-                }
-                break;
-            case 'read':
-                if (!message.classList.contains('unread')) {
-                    message.style.display = '';
-                } else {
-                    message.style.display = 'none';
-                }
-                break;
+        let subjectType = message.getAttribute('type');
+        if (filter === 'all' || filter === subjectType) {
+            message.style.display = '';
+        } else {
+            message.style.display = 'none';
         }
     });
 }
 
 
-function createMessage(msg, isNewMsg=true) {
+function createBlock(msg, type, isNewMsg = true) {
     let li_message = document.createElement("li");
     li_message.classList.add("message");
     if (isNewMsg) li_message.classList.add("unread");
@@ -66,7 +60,7 @@ function createMessage(msg, isNewMsg=true) {
     span_sender.classList.add("sender")
     span_sender.textContent = msg.sender;
     span_subject.classList.add("subject")
-    span_subject.textContent = msg.subject;
+    span_subject.textContent = type;
     div_messageHeader.appendChild(span_statusDot)
     div_messageHeader.appendChild(span_sender)
     div_messageHeader.appendChild(span_subject)
@@ -88,46 +82,25 @@ function createMessage(msg, isNewMsg=true) {
     div_messageBody.appendChild(button_star)
     li_message.appendChild(div_messageHeader)
     li_message.appendChild(div_messageBody)
+    li_message.setAttribute('type', type);
     return li_message
 }
 
 
-function fetchInboxMessage(username) {
-    let request = new Request(`api/msgs/${username}/`);
-    fetch(request)
-        .then(response => {
-            if (!response.ok) throw new Error("Invalid Request Response");
-            return response.json();
-        })
-        .then(userPosts => {
-            let ul_inboxMsgContainer = document.getElementById("inbox-messages-container");
-            for (let userPost in userPosts) {
-                let li_message = createMessage(username);
-                ul_inboxMsgContainer.appendChild(li_message);
-            }
-        })
-        .catch(error => {
-            console.error('Fetching Error', error);
-        });
-}
 
+/* TESTS */
+createMessage("FR", "aaa");
+createMessage("LK", "bbb");
+createMessage("NP", "ccc");
 
-
-/*
-var messageList = document.querySelector('ul'); // Replace 'ul' with the appropriate selector for your list
-var newMessage = createMessage({
-    header: '', // Assuming header should be empty for a status dot
-    sender: 'Eden',
-    subject: 'Hey, did you get my last message?',
-    text: 'Hey, just checking to see if you received my last message. Let me know if you have any questions about the project.'
-}, true);
-messageList.appendChild(newMessage);
-*/
-
-
-// todo - How to acquire the username?
-// todo - How to change the msg status?
 
 clickableListItem();
 clickableFilterMessages();
-fetchInboxMessage(username="Eden");
+
+let ul_inboxMsgContainer = document.getElementById("inbox-messages-container");
+for (let type in ['FR', 'LK', 'CM', 'NP', 'SU']) {
+    for (let message in getMessages(type)) {
+        let li_message = createBlock(message, type);
+        ul_inboxMsgContainer.appendChild(li_message);
+    }
+}

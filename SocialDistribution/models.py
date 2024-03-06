@@ -119,3 +119,24 @@ class Friend(models.Model):
             Follower.objects.create(user=user1, follower=user2)
         else:
             raise ValidationError("Cannot delete a friendship")
+
+
+class Message(models.Model):
+    MESSAGE_TYPES = [
+        ('FR', 'Follow Request'),
+        ('LK', 'Like'),
+        ('CM', 'Comment'),
+        ('NP', 'New Post Reminder'),
+        ('SU', 'New Sign Up')
+    ]
+    owner = models.ForeignKey(User, related_name='messages', on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    message_type = models.CharField(max_length=2, choices=MESSAGE_TYPES)
+    class Meta:
+        ordering = ['-date']
+    @classmethod
+    def get_messages_of_type_for_user(cls, user, message_type):
+        return cls.objects.filter(owner=user, message_type=message_type)
+
+
+

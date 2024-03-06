@@ -23,13 +23,17 @@
                 <label for="filter">Filter messages:</label>
                 <select name="filter" id="filter">
                     <option value="all">All</option>
-                    <option value="unread">Unread</option>
-                    <option value="read">Read</option>
+                    <option value="FR">Follow Requests</option>
+                    <option value="LK">Likes</option>
+                    <option value="CM">Comments</option>
+                    <option value="NP">NewPost Reminder</option>
+                    <option value="SU">New Signups</option>
                 </select>
                 <button type="submit">Filter</button>
             </form>
         </div>
-
+        
+        <!--
         <div class="inbox-messages">
             <ul class="inbox-messages-container">
                 <li class="message unread">
@@ -46,9 +50,9 @@
                 </li>
             </ul>
         </div>
-    </div>
+    </div>-->
 
-    <script src="{% static 'js/inbox.js' %}"></script>
+    <script type="module" src="{% static 'js/inbox.js' %}"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
