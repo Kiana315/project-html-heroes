@@ -21,7 +21,7 @@ export async function getMessages(messageType) {
 }
 
 
-export async function createMessage(messageType, content) {
+export async function createMessage(messageType, content, otherUsername=null) {
     const url = '/api/msgs/create/';
     const csrfToken = getCsrfToken();
     const response = await fetch(url, {
@@ -31,6 +31,7 @@ export async function createMessage(messageType, content) {
             'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
+            other_username: otherUsername,
             message_type: messageType,
             content: content,
         }),

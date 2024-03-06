@@ -49,9 +49,9 @@ function createBlock(msg, type, isNewMsg = true) {
 
     span_statusDot.classList.add("status-dot")
     span_sender.classList.add("sender")
-    span_sender.textContent = msg.sender;
+    span_sender.textContent = msg.body;
     span_subject.classList.add("subject")
-    span_subject.textContent = type;
+    span_subject.textContent = `[${type}] ${msg.body}`;
     div_messageHeader.appendChild(span_statusDot)
     div_messageHeader.appendChild(span_sender)
     div_messageHeader.appendChild(span_subject)
@@ -59,7 +59,7 @@ function createBlock(msg, type, isNewMsg = true) {
     let div_messageBody = document.createElement("div")
     div_messageBody.classList.add("message-body")
     let p_text = document.createElement("p")
-    p_text.textContent = msg.text;
+    p_text.textContent = msg.body;
     p_text.classList.add("message-text")
     let button_delete = document.createElement("button")
     button_delete.classList.add("inbox-delete-btn")
@@ -102,6 +102,9 @@ async function loadAndDisplayMessages() {
 
 
 document.addEventListener('DOMContentLoaded', async function() {
+
+    // createMessage("FR", "{}");
+
     await loadAndDisplayMessages();
     clickableFilterMessages();
     let messages = document.querySelectorAll('.inbox-messages .message');
