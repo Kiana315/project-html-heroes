@@ -391,17 +391,33 @@ def update_username(request, username):
 
 
 class ProfileAPIView(APIView):
-    def get(self, request, username):
-        user = get_object_or_404(User, username=username)
-        posts = Post.objects.filter(author=user, is_draft=False).order_by('-date_posted')
+    permission_classes = [IsAuthenticated]
 
-        user_serializer = UserSerializer(user)
+    def get(self, request, username):
+        profile_user = get_object_or_404(User, username=username)
+        current_user = request.user
+        print("current_user:", current_user, "\nprofile_user", profile_user)
+
+        if current_user == profile_user:
+            # Current user views own posts: Return all posts
+            posts = Post.objects.filter(author=profile_user, is_draft=False).order_by('-date_posted')
+        elif Friend.objects.filter(user1=current_user, user2=profile_user).exists() or \
+             Friend.objects.filter(user1=profile_user, user2=current_user).exists():
+            # The current user is friends with the profile user: return public and friend-only posts
+            posts = Post.objects.filter(author=profile_user, visibility__in=['PUBLIC', 'FRIENDS'], is_draft=False).order_by('-date_posted')
+        else:
+            # Other users: only public posts returned
+            posts = Post.objects.filter(author=profile_user, visibility='PUBLIC', is_draft=False).order_by('-date_posted')
+
+        user_serializer = UserSerializer(profile_user)
         posts_serializer = PostSerializer(posts, many=True)
 
         return Response({
             'user': user_serializer.data,
             'posts': posts_serializer.data
         })
+
+
 
 
 def otherProfileView(request, selfUsername, targetUsername):

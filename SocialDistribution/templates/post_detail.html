@@ -61,32 +61,33 @@
         <span id="postId" style="display: none">{{ post.id }}</span>
         <div class="post-content formatted-content" id="postContent">{{ post.content|safe }}</div>
         {% if post.image %}
-            <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
+        <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
         {% endif %}
-        {% if not post.is_draft %}
-            <div class="comments-section">
-                <h2>Comments:</h2>
-                <div id="comments-container"></div>
-            </div>
+        {% if not post.is_draft and post.visibility != 'PRIVATE' %}
+        <div class="comments-section">
+            <h2>Comments:</h2>
+            <div id="comments-container"></div>
+        </div>
         {% endif %}
     </div>
     <div class="post-actions">
         {% if post.is_draft %}
-            <button id="edit-button" class="action" onclick="EditPost()" type="button">
-                <span class="material-symbols-outlined">
-                    <ion-icon name="create-outline">Edit</ion-icon>
-                </span>
-                Edit
-            </button>
-            <button id="delete-button" class="action" onclick="deletePost(this)" data-post-id="{{ post.id }}">
-                <span class="material-symbols-outlined"><ion-icon name="trash-outline">Delete</ion-icon></span>
-                Delete
-            </button>
-            <button id="send-button" class="action" onclick="sendPost()">
-                <span class="material-symbols-outlined"><ion-icon name="send-outline">Send</ion-icon></span>
-                Post
-            </button>
+        <button id="edit-button" class="action" onclick="EditPost()" type="button">
+            <span class="material-symbols-outlined">
+                <ion-icon name="create-outline">Edit</ion-icon>
+            </span>
+            Edit
+        </button>
+        <button id="delete-button" class="action" onclick="deletePost(this)" data-post-id="{{ post.id }}">
+            <span class="material-symbols-outlined"><ion-icon name="trash-outline">Delete</ion-icon></span>
+            Delete
+        </button>
+        <button id="send-button" class="action" onclick="sendPost()">
+            <span class="material-symbols-outlined"><ion-icon name="send-outline">Send</ion-icon></span>
+            Post
+        </button>
         {% else %}
+            {% if post.visibility != 'PRIVATE' %}
             <button id="share-button" class="action">
                 <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
                 Share
@@ -104,6 +105,7 @@
                 Like
                 <span id="like-count">{{ likes_count }}</span>
             </button>
+            {% endif %}
         {% endif %}
     </div>
 </div>

@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                         </div>
                     `;
-                    style = ""
+                    
                     const interactionHTML = `
                         <div class="interact-container">
                             <button id="share-${post.id}" type="button" data-post-id="${post.id}">
