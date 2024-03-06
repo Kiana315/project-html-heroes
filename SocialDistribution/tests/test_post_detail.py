@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
-from SocialDistribution.models import Like, Post, User
+from SocialDistribution.models import Like, Post, User, Comment, Friend
 from rest_framework.authtoken.models import Token
 
 class LikeAPITests(APITestCase):
@@ -69,3 +69,63 @@ class CheckLikeStatusTests(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['has_liked'], True)
+
+
+class CommentAPITests(APITestCase):
+    def setUp(self):
+        # Create test users
+        self.user1 = User.objects.create_user(username='user1', email='test1@example.com', password='testpassword')
+        self.user2 = User.objects.create_user(username='user2', email='test2@example.com', password='testpassword')
+        self.user3 = User.objects.create_user(username='user3', email='test3@example.com', password='testpassword')
+        
+        # Login user1
+        self.client.login(username='user1', password='testpassword')
+        
+        # Create test posts
+        self.post_public = Post.objects.create(author=self.user1, title='Public Post', content='Public Content', visibility='PUBLIC')
+        self.post_friends = Post.objects.create(author=self.user1, title='Friends Only Post', content='Friends content', visibility='FRIENDS')
+        
+        # Login user2 and user3
+        self.client.login(username='user2', password='testpassword')
+        self.client.login(username='user3', password='testpassword')
+        
+        # Create friend relationships
+        Friend.objects.create(user1=self.user1, user2=self.user2)
+        Friend.objects.create(user1=self.user2, user2=self.user1)
+        
+        # Verify friend relationships
+        is_friends_1_to_2 = Friend.objects.filter(user1=self.user1, user2=self.user2).exists()
+        is_friends_2_to_1 = Friend.objects.filter(user1=self.user2, user2=self.user1).exists()
+        print("User1 and User2 are friends:", is_friends_1_to_2)
+        print("User2 and User1 are friends:", is_friends_2_to_1)
+
+
+    def test_get_comments_for_public_post(self):
+        # Get comment list
+        url = reverse('API_PComms', kwargs={'post_id': self.post_public.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_comment_on_public_post(self):
+        # test comment on public post
+        # self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user2.key)
+        url = reverse('API_PComms', kwargs={'post_id': self.post_public.id})
+        data = {'comment_text': 'A public comment'}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_comment_on_friends_post_as_friend(self):
+        # comment as a friend
+        self.client.logout()  # make sure clean the login information
+        self.client.login(username='user2', password='testpassword')
+        url = reverse('API_PComms', kwargs={'post_id': self.post_friends.id})
+        data = {'comment_text': 'A friend comment'}
+        response = self.client.post(url, data)  
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_comment_on_friends_post_not_as_friend(self):
+        # test comment as not a friend
+        url = reverse('API_PComms', kwargs={'post_id': self.post_friends.id})
+        data = {'comment_text': 'An unauthorized comment'}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
