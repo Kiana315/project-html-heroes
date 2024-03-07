@@ -1,8 +1,9 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
 from django.urls import reverse
-from SocialDistribution.models import Like, Post, User, Comment, Friend
-from rest_framework.authtoken.models import Token
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+from SocialDistribution.models import Like, Post, User, Friend
+
 
 class PostOperationAPITests(APITestCase):
     def setUp(self):
@@ -22,6 +23,7 @@ class PostOperationAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], self.post.title)
 
+
 class LikeAPITests(APITestCase):
     def setUp(self):
         # Create a test user
@@ -32,7 +34,7 @@ class LikeAPITests(APITestCase):
         self.post = Post.objects.create(author=self.user, title='Test Post', content='Test Content')
         exists = Post.objects.filter(id=self.post.id).exists()
         print("Post exists:", exists, self.post.id)
-    
+
     def test_get_likes_list(self):
         # Get like list
         url = reverse('API_PLikes', kwargs={'post_id': self.post.id})
@@ -59,6 +61,7 @@ class LikeAPITests(APITestCase):
         # confirm like amounts isn't increase
         like_count = Like.objects.filter(post=self.post).count()
         self.assertEqual(like_count, 1)
+
 
 class CheckLikeStatusTests(APITestCase):
     def setUp(self):
@@ -95,28 +98,29 @@ class CommentAPITests(APITestCase):
         self.user1 = User.objects.create_user(username='user1', email='test1@example.com', password='testpassword')
         self.user2 = User.objects.create_user(username='user2', email='test2@example.com', password='testpassword')
         self.user3 = User.objects.create_user(username='user3', email='test3@example.com', password='testpassword')
-        
+
         # Login user1
         self.client.login(username='user1', password='testpassword')
-        
+
         # Create test posts
-        self.post_public = Post.objects.create(author=self.user1, title='Public Post', content='Public Content', visibility='PUBLIC')
-        self.post_friends = Post.objects.create(author=self.user1, title='Friends Only Post', content='Friends content', visibility='FRIENDS')
-        
+        self.post_public = Post.objects.create(author=self.user1, title='Public Post', content='Public Content',
+                                               visibility='PUBLIC')
+        self.post_friends = Post.objects.create(author=self.user1, title='Friends Only Post', content='Friends content',
+                                                visibility='FRIENDS')
+
         # Login user2 and user3
         self.client.login(username='user2', password='testpassword')
         self.client.login(username='user3', password='testpassword')
-        
+
         # Create friend relationships
         Friend.objects.create(user1=self.user1, user2=self.user2)
         Friend.objects.create(user1=self.user2, user2=self.user1)
-        
+
         # Verify friend relationships
         is_friends_1_to_2 = Friend.objects.filter(user1=self.user1, user2=self.user2).exists()
         is_friends_2_to_1 = Friend.objects.filter(user1=self.user2, user2=self.user1).exists()
         print("User1 and User2 are friends:", is_friends_1_to_2)
         print("User2 and User1 are friends:", is_friends_2_to_1)
-
 
     def test_get_comments_for_public_post(self):
         # Get comment list
@@ -138,7 +142,7 @@ class CommentAPITests(APITestCase):
         self.client.login(username='user2', password='testpassword')
         url = reverse('API_PComms', kwargs={'post_id': self.post_friends.id})
         data = {'comment_text': 'A friend comment'}
-        response = self.client.post(url, data)  
+        response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_comment_on_friends_post_not_as_friend(self):
@@ -147,6 +151,7 @@ class CommentAPITests(APITestCase):
         data = {'comment_text': 'An unauthorized comment'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class ShareAPITests(APITestCase):
     def setUp(self):
@@ -157,8 +162,10 @@ class ShareAPITests(APITestCase):
         self.client.login(username='user1', password='testpassword')
 
         # Create test posts
-        self.public_post = Post.objects.create(author=self.user1, title='Public Post', content='Public Content', visibility='PUBLIC')
-        self.private_post = Post.objects.create(author=self.user1, title='Friends Only Post', content='Friends content', visibility='FRIENDS')
+        self.public_post = Post.objects.create(author=self.user1, title='Public Post', content='Public Content',
+                                               visibility='PUBLIC')
+        self.private_post = Post.objects.create(author=self.user1, title='Friends Only Post', content='Friends content',
+                                                visibility='FRIENDS')
 
         # Login user2
         self.client.login(username='user2', password='testpassword')
@@ -168,12 +175,13 @@ class ShareAPITests(APITestCase):
         url = reverse('share_post', kwargs={'post_id': self.public_post.id})
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    
+
     def test_share_non_public_post(self):
         # share friends only post
         url = reverse('share_post', kwargs={'post_id': self.private_post.id})
         response = self.client.post(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN) 
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class DeleteAPITests(APITestCase):
     def setUp(self):
@@ -205,6 +213,7 @@ class DeleteAPITests(APITestCase):
         # assert the status code
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+
 class UpdateAPITests(APITestCase):
     def setUp(self):
         # create a test user
@@ -217,7 +226,7 @@ class UpdateAPITests(APITestCase):
     def test_update_post_success(self):
         # update the info
         data = {'title': 'Updated Title', 'content': 'Updated content'}
-        response = self.client.put(reverse('update_post',kwargs={'post_id': self.post.id}), data)
+        response = self.client.put(reverse('update_post', kwargs={'post_id': self.post.id}), data)
         # check the status code
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # check if the info updated successfully
@@ -237,4 +246,3 @@ class UpdateAPITests(APITestCase):
         data = {'title': '', 'content': ''}
         response = self.client.put(reverse('update_post', kwargs={'post_id': self.post.id}), data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-

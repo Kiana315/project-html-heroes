@@ -1,17 +1,14 @@
-from django.urls import path
-from django.shortcuts import redirect
-from .views import *
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
-from rest_framework.routers import DefaultRouter
-from django.conf.urls.static import static
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
+
 from . import views
+from .views import *
 
 app_name = "SocialDistribution"
 
-router = DefaultRouter()
-router.register(r'posts', NPsAPIView)
+router = SimpleRouter()
 
 urlpatterns = [
     # Basic PAGE View Settings:
@@ -79,6 +76,9 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# DRF API Routers
+router.register(f"api/users", UsersAPIView, basename='users')
+urlpatterns.append(path('',include(router.urls)))
 
 """
 MESSAGE_TYPES = [

@@ -15,7 +15,7 @@ from django.views.decorators.http import require_POST
 from django.urls import reverse
 
 # REST Pattern:
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -435,6 +435,12 @@ def otherProfileView(request, selfUsername, targetUsername):
         'posts': Post.objects.filter(author=targetUser).order_by('-date_posted')
     }
     return render(request, 'otherProfile.html', context)
+
+
+class UsersAPIView(viewsets.ModelViewSet):
+    """ [GET] Get The Profile Info """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 class UserAPIView(generics.RetrieveAPIView):
