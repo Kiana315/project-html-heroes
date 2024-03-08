@@ -1,4 +1,5 @@
 # pip install -r requirements.txt
+# pip install --upgrade django
 
 psycopg2-binary
 django-on-heroku
@@ -8,4 +9,4 @@ sqlparse==0.4.4
 djangorestframework~=3.14.0
 Pillow
 gunicorn
-CommonMark
+commonmark
