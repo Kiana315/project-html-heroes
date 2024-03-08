@@ -85,13 +85,14 @@ class FriendSerializer(serializers.ModelSerializer):
         fields = ['id', 'user1', 'user2', 'date_became_friends']
 
 
-class MessageSerializer(serializers.ModelSerializer):
+class MessageSuperSerializer(serializers.ModelSerializer):
     owner_username = serializers.ReadOnlyField(source='owner.username')
+    content = serializers.CharField(max_length=50)
+    origin = serializers.CharField(max_length=10)
     class Meta:
-        model = Message
-        fields = ['id', 'owner_username', 'date', 'message_type']
+        model = MessageSuper
+        fields = ['id', 'owner_username', 'date', 'message_type', 'content', 'origin']
         read_only_fields = ['id', 'date', 'owner_username']
     def create(self, validated_data):
-        # Owner will be set in the view, so it's not included in validated_data
-        message = Message.objects.create(**validated_data)
+        message = MessageSuper.objects.create(**validated_data)
         return message

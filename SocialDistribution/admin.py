@@ -49,6 +49,15 @@ class FriendAdmin(admin.ModelAdmin):
     remove_following_follower_relationships.short_description = "Following & follower removed for a new friendship"
 
 
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('owner', 'date', 'message_type', 'content', 'origin')
+    list_filter = ('message_type', 'date')
+    search_fields = ('content', 'owner__username', 'origin')
+    ordering = ('-date',)
+
+    actions = ['filter_messages_by_type']
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
@@ -56,5 +65,6 @@ admin.site.register(Like, LikeAdmin)
 admin.site.register(Following, FollowingAdmin)
 admin.site.register(Follower, FollowerAdmin)
 admin.site.register(Friend, FriendAdmin)
+admin.site.register(MessageSuper, MessageAdmin)
 
 

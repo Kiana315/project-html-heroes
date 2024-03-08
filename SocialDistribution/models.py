@@ -7,7 +7,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 
-
 class User(AbstractUser):
     # A text field used to store the user's personal profile.
     #   blank=True indicates that this field is optional
@@ -121,7 +120,7 @@ class Friend(models.Model):
             raise ValidationError("Cannot delete a friendship")
 
 
-class Message(models.Model):
+class MessageSuper(models.Model):
     MESSAGE_TYPES = [
         ('FR', 'Follow Request'),
         ('LK', 'Like'),
@@ -132,6 +131,8 @@ class Message(models.Model):
     owner = models.ForeignKey(User, related_name='messages', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     message_type = models.CharField(max_length=2, choices=MESSAGE_TYPES)
+    content = models.CharField(max_length=50)
+    origin = models.CharField(max_length=10, db_column='origin')
     class Meta:
         ordering = ['-date']
     @classmethod

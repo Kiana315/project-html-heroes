@@ -1,5 +1,5 @@
 # Traditional Pattern:
-
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import render, redirect, get_list_or_404, get_object_or_404
@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, DetailView
 from django.db.models import Q
 from django.http import JsonResponse
@@ -646,26 +647,34 @@ class AnalyzeRelationAPIView(APIView):
 
 
 class UserMessagesAPIView(ListAPIView):
-    serializer_class = MessageSerializer
+    serializer_class = MessageSuperSerializer
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
         user = self.request.user
         message_type = self.kwargs['type']
-        return Message.objects.filter(owner=user, message_type=message_type)
+        return MessageSuper.objects.filter(owner=user, message_type=message_type)
 
 
 class CreateMessageAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, format=None):
-        serializer = MessageSerializer(data=request.data)
+        serializer = MessageSuperSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(owner=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteMessageAPIView(APIView):
+class DeleteTypeOfMessageAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def delete(self, request, type, format=None):
-        Message.objects.filter(owner=request.user, message_type=type).delete()
+        MessageSuper.objects.filter(owner=request.user, message_type=type).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DeleteIDOfMessageAPIView(APIView):
+    def delete(self, request, ID):
+        message = get_object_or_404(MessageSuper, pk=ID, owner=request.user)
+        message.delete()
+
+        return JsonResponse({'status': 'success', 'message': f'Message with id={ID} is deleted.'})

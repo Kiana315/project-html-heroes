@@ -3,7 +3,8 @@
 import {
     getMessages,
     createMessage,
-    deleteMessage,
+    deleteMessageType,
+    deleteMessageID,
 } from './messageOperations.js';
 
 function clickableListItem(messages) {
@@ -18,8 +19,8 @@ function clickableFilterMessages() {
     let filterForm = document.getElementById('filter-form');
     filterForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        let filterValue = document.getElementById('filter').value;
-        filterAndDisplayMessages(filterValue);
+        let type = document.getElementById('filter').value;
+        filterAndDisplayMessages(type);
     });
 }
 
@@ -30,7 +31,8 @@ function filterAndDisplayMessages(filter) {
         let subjectType = message.getAttribute('type');
         if (filter === 'all' || filter === subjectType) {
             message.style.display = '';
-        } else {
+        }
+        else {
             message.style.display = 'none';
         }
     });
@@ -47,23 +49,32 @@ function createBlock(msg, type, isNewMsg = true) {
     let span_sender = document.createElement("span")
     let span_subject = document.createElement("span")
 
+    let TYPES = {
+        'FR': 'Follow Request',
+        'LK': 'Like',
+        'CM': 'Comment',
+        'NP': 'New Post Reminder',
+        'SU': 'New Sign Up'
+    }
+
     span_statusDot.classList.add("status-dot")
-    span_sender.classList.add("sender")
-    span_sender.textContent = msg.body;
     span_subject.classList.add("subject")
-    span_subject.textContent = `[${type}] ${msg.body}`;
+    span_subject.textContent = `[New] ${TYPES[type]} `;
+    span_sender.classList.add("sender")
+    span_sender.textContent = "from " + msg.origin + " ";
     div_messageHeader.appendChild(span_statusDot)
-    div_messageHeader.appendChild(span_sender)
     div_messageHeader.appendChild(span_subject)
+    div_messageHeader.appendChild(span_sender)
 
     let div_messageBody = document.createElement("div")
     div_messageBody.classList.add("message-body")
     let p_text = document.createElement("p")
-    p_text.textContent = msg.body;
+    p_text.textContent = msg.content;
     p_text.classList.add("message-text")
     let button_delete = document.createElement("button")
     button_delete.classList.add("inbox-delete-btn")
     button_delete.textContent = "Delete"
+    button_delete.setAttribute('ID', msg.id);
     let button_star = document.createElement("button")
     button_star.classList.add("inbox-star-btn")
     button_star.textContent = "Star"
@@ -81,7 +92,7 @@ function createBlock(msg, type, isNewMsg = true) {
 async function loadAndDisplayMessages() {
     let messageTypes = ['FR', 'LK', 'CM', 'NP', 'SU']; // Array of message types
     let ul_inboxMsgContainer = document.getElementById('msgContainer');
-    ul_inboxMsgContainer.innerHTML = ''; // Clear any existing messages
+    ul_inboxMsgContainer.innerHTML = '';
 
     for (let type of messageTypes) {
         try {
@@ -91,8 +102,9 @@ async function loadAndDisplayMessages() {
                     let li_message = createBlock(msg, type);
                     ul_inboxMsgContainer.appendChild(li_message);
                 }
-            } else {
-                console.error(`Messages of type ${type} are not an array.`);
+            }
+            else {
+                console.error(`Messages of type [${type}] are not an array.`);
             }
         } catch (error) {
             console.error(`An error occurred while fetching messages of type ${type}:`, error);
@@ -101,12 +113,62 @@ async function loadAndDisplayMessages() {
 }
 
 
+function deleteMessage() {
+    const deleteButtons = document.getElementsByClassName('inbox-delete-btn');
+
+    for (let button of deleteButtons) {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            let messageID = event.target.getAttribute("ID");
+            let isDeleted = deleteMessageID(parseInt(messageID));
+            if (isDeleted) {
+                alert("Message Deleted")
+                location.reload();
+            }
+            else {
+                alert("Fail to Delete Message")
+            }
+        })
+    }
+
+    let filterForm = document.getElementById('filter-form');
+    filterForm.addEventListener('reset', function(event) {
+        event.preventDefault();
+        let type = document.getElementById('filter').value;
+        if (type === 'all') {
+            alert("Warning: You Are Deleting All Messages!! (Re-click To Confirm)")
+            filterForm.addEventListener('reset', function(event) {
+                event.preventDefault();
+                for (let type of ['FR', 'LK', 'CM', 'NP', 'SU']) {
+                    deleteMessageType(type);
+                }
+                alert(`All Messages Are Deleted`);
+                location.reload();
+            });
+        }
+        else {
+            let isDeleted = deleteMessageType(type);
+            if (isDeleted) {
+                alert(`All In-type Messages Are Deleted`);
+                location.reload();
+            }
+            else {
+                alert("Fail to Delete Message");
+            }
+        }
+    });
+}
+
+
 document.addEventListener('DOMContentLoaded', async function() {
-
-    // createMessage("FR", "{}");
-
+   /*
+    await createMessage("SU", "SU", "Eden1");
+    await createMessage("CM", "CM", "Eden2");
+    await createMessage("LK", "LK", "Eden3");
+    await createMessage("FR", "FR", "Eden4");
+*/
     await loadAndDisplayMessages();
     clickableFilterMessages();
-    let messages = document.querySelectorAll('.inbox-messages .message');
-    clickableListItem(messages);
+    clickableListItem(document.querySelectorAll('.inbox-messages .message'));
+    deleteMessage()
 });

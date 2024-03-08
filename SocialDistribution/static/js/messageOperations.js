@@ -1,13 +1,11 @@
-
-
 export async function getMessages(messageType) {
     const url = `/api/msgs/retrieve/${messageType}/`;
     const response = await fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Credentials': 'include',
         },
+        'Credentials': 'include',
     });
 
     if (response.ok) {
@@ -21,7 +19,7 @@ export async function getMessages(messageType) {
 }
 
 
-export async function createMessage(messageType, content, otherUsername=null) {
+export async function createMessage(messageType, content, origin = "SYS") {
     const url = '/api/msgs/create/';
     const csrfToken = getCsrfToken();
     const response = await fetch(url, {
@@ -31,8 +29,8 @@ export async function createMessage(messageType, content, otherUsername=null) {
             'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
-            other_username: otherUsername,
             message_type: messageType,
+            origin: origin,
             content: content,
         }),
     });
@@ -48,10 +46,9 @@ export async function createMessage(messageType, content, otherUsername=null) {
 }
 
 
-export async function deleteMessage(messageType) {
-    const url = `/api/msgs/delete/${messageType}/`;
+export async function deleteMessageType(messageType) {
+    const url = `/api/msgs/deleteType/${messageType}/`;
     const csrfToken = getCsrfToken();
-
     try {
         const response = await fetch(url, {
             method: 'DELETE',
@@ -64,27 +61,57 @@ export async function deleteMessage(messageType) {
 
         if (response.ok) {
             console.log('Message deleted successfully');
+            return true;
         }
         else {
             console.error('Failed to delete message:', response.status, response.statusText);
+            return false;
         }
     } catch (error) {
         console.error('Error while deleting message:', error);
+        return false;
+    }
+}
+
+
+export async function deleteMessageID(messageID) {
+    const url = `/api/msgs/deleteID/${messageID}/`;
+    const csrfToken = getCsrfToken();
+    try {
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            credentials: 'include',
+        });
+        if (response.ok) {
+            console.log('Message deleted successfully');
+            return true;
+        }
+        else {
+            console.error('Failed to delete message:', response.status, response.statusText);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error while deleting message:', error);
+        return false;
     }
 }
 
 
 function getCsrfToken() {
-  const csrfToken = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('csrftoken='))
-    ?.split('=')[1];
+    const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
 
-  if (!csrfToken) {
-    console.error('CSRF token not found!');
-    return '';
-  }
-  return csrfToken;
+    if (!csrfToken) {
+        console.error('CSRF token not found!');
+        return '';
+    }
+    return csrfToken;
 }
 
 

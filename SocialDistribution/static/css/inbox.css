@@ -113,6 +113,11 @@ h1, h2 {
     transform: translateY(-2px);
 }
 
+.message-text {
+    margin-left: 20px;
+    padding-left: 20px;
+}
+
 .inbox-delete-btn {
     margin-left: 30px;
     padding: 10px 20px;
