@@ -46,7 +46,6 @@ body  {
     background: #C4E4F3;
     padding: 10px 20px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    
     margin: -20px -20px;
 }
 
@@ -93,7 +92,11 @@ body  {
     margin: 5px 0; /* Add space between buttons */
     padding: 5px;  
 }
-
+.option-button:hover {
+    background-color: rgba(205, 204, 204, 0.648);
+    border-radius: 3px;
+    transform: translateX(3%); 
+}
 .back-button:hover {
     transform: scale(1.05);
 }
