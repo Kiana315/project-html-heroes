@@ -76,7 +76,7 @@ urlpatterns = [
 
 if settings.DEBUG:
     pass
-    #urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # DRF API Routers
 router.register(f"api/users", UsersAPIView, basename='users')

@@ -128,6 +128,7 @@ class MessageSuper(models.Model):
         ('NP', 'New Post Reminder'),
         ('SU', 'New Sign Up')
     ]
+    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name='messages')
     owner = models.ForeignKey(User, related_name='messages', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     message_type = models.CharField(max_length=2, choices=MESSAGE_TYPES)

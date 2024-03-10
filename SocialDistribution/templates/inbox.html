@@ -37,9 +37,13 @@
     <div class="inbox-messages">
         <ul id="msgContainer" class="inbox-messages-container">
             <!--JS Works-->
+            <script type="text/javascript">
+                var staticUrl = "{% static '' %}";
+            </script>
         </ul>
     </div>
 </div>
+
 
 <script type="module" src="{% static 'js/inbox.js' %}"></script>
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>

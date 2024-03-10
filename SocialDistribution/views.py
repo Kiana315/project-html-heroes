@@ -264,9 +264,19 @@ class CommentAPIView(generics.ListCreateAPIView):
         post_id = self.kwargs['post_id']
         post = get_object_or_404(Post, pk=post_id)
         user = self.request.user
+
         if post.visibility == 'FRIENDS' and not post.author.is_friend(user) and user != post.author:
             raise PermissionDenied('You do not have permission to comment on this post.')
-        serializer.save(post=post, commenter=user)
+
+        comment = serializer.save(post=post, commenter=user)
+
+        MessageSuper.objects.create(
+            post=post,
+            owner=post.author,
+            message_type='CM',  # 'CM' for comment
+            content=f'{user.username} commented on your post: "{comment.comment_text}"',
+            origin=user.username 
+        )
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -293,6 +303,16 @@ class LikeAPIView(generics.ListCreateAPIView):
             # raise ValidationError('You have already liked this post.')
             raise DRFValidationError('You have already liked this post.')
         serializer.save(post=post, liker=user)
+
+        message_content = f'{user.username} liked your post "{post.title}".'
+        MessageSuper.objects.create(
+            owner=post.author,
+            message_type='LK',  
+            content=message_content,
+            origin=user.username,
+            post=post
+        )
+
         post.refresh_from_db()
         likes_count = post.like.count()
         response_data = {
@@ -339,9 +359,43 @@ class SharePostView(APIView):
             # Add other necessary fields...
         )
 
+        shared_content = f"{request.user.username} shared a post: {original_post.title}"
+
+        if original_post.visibility == 'PUBLIC':
+            # Send the post notification to all followers
+            followers = User.objects.filter(reverse_followers__user=original_post.author)
+
+            friends = User.objects.filter(
+                Q(friends_set1__user2=original_post.author) | 
+                Q(friends_set2__user1=original_post.author)
+            ).distinct()
+            all_receivers = followers.union(friends, all=True)
+
+            print(all_receivers)
+            for receiver in all_receivers:
+                MessageSuper.objects.create(
+                    owner=receiver,
+                    message_type='NP',  # 'NP' for new post
+                    content=shared_content,
+                    origin=request.user.username,
+                    post=original_post
+                )
 
         return Response({'success': True, 'post_id': new_post.pk}, status=status.HTTP_201_CREATED)
 
+        # elif original_post.visibility == 'FRIENDS':
+        #     # Send the post notification to all friends
+            # friends = User.objects.filter(
+            #     Q(friends_set1__user2=original_post.author) | Q(friends_set2__user1=original_post.author)
+            # ).distinct()
+            # for friend in friends:
+            #     MessageSuper.objects.create(
+            #         owner=friend,
+            #         message_type='NP',  # 'NP' for new post
+            #         content=shared_content,
+            #         origin=request.user.username,
+            #         post=original_post
+            #     )
 
 
 """
