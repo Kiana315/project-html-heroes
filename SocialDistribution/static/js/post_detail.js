@@ -355,67 +355,67 @@ function EditPost() {
     modal.style.display = 'block'
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    // Get elements
-    const modal = document.getElementById("editModal");
-    const form = document.getElementById("editForm");
-    const postId = document.getElementById("postId").innerText;
+// document.addEventListener('DOMContentLoaded', (event) => {
+//     // Get elements
+//     const modal = document.getElementById("editModal");
+//     const form = document.getElementById("editForm");
+//     const postId = document.getElementById("postId").innerText;
 
-    // Click the x to close the pop-up window
-    document.getElementsByClassName("close")[0].onclick = function () {
-        modal.style.display = "none";
-    }
-    // Close pop-up window when clicking outside window
-    window.onclick = function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    }
-    form.onsubmit = function (event) {
-        event.preventDefault();   //Prevent form default submission behavior
+//     // Click the x to close the pop-up window
+//     document.getElementsByClassName("close")[0].onclick = function () {
+//         modal.style.display = "none";
+//     }
+//     // Close pop-up window when clicking outside window
+//     window.onclick = function (event) {
+//         if (event.target === modal) {
+//             modal.style.display = "none";
+//         }
+//     }
+//     form.onsubmit = function (event) {
+//         event.preventDefault();   //Prevent form default submission behavior
 
-        // Create FormData Obj
-        var formData = new FormData(form);
-        var isDraft = event.submitter.innerText === "Save Draft"
-        if (isDraft) {
-            formData.append("is_draft", "true")
-        }
+//         // Create FormData Obj
+//         var formData = new FormData(form);
+//         var isDraft = event.submitter.innerText === "Save Draft"
+//         if (isDraft) {
+//             formData.append("is_draft", "true")
+//         }
 
-        // Send AJAX request to server
-        fetch(`/api/posts/${postId}/`, {
-            method: 'PUT',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')   //Get CSRF token
-            },
-            credentials: 'same-origin'   // For CSRF token verification
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    emptyPost()
-                    throw new Error('Something went wrong');
-                }
-            })
-            .then(data => {
-                // After posted
-                modal.style.display = "none";   //Close pop-up window
-                if (isDraft) {
-                    history.back();
-                } else {
-                    window.location = "/"
-                    window.onload = function () {
-                        window.reload()
-                    }
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                //Add error message
-            });
-    };
-});
+//         // Send AJAX request to server
+//         fetch(`/api/posts/${postId}/`, {
+//             method: 'PUT',
+//             body: formData,
+//             headers: {
+//                 'X-CSRFToken': getCookie('csrftoken')   //Get CSRF token
+//             },
+//             credentials: 'same-origin'   // For CSRF token verification
+//         })
+//             .then(response => {
+//                 if (response.ok) {
+//                     return response.json();
+//                 } else {
+//                     emptyPost()
+//                     throw new Error('Something went wrong');
+//                 }
+//             })
+//             .then(data => {
+//                 // After posted
+//                 modal.style.display = "none";   //Close pop-up window
+//                 if (isDraft) {
+//                     history.back();
+//                 } else {
+//                     window.location = "/"
+//                     window.onload = function () {
+//                         window.reload()
+//                     }
+//                 }
+//             })
+//             .catch((error) => {
+//                 console.error('Error:', error);
+//                 //Add error message
+//             });
+//     };
+// });
 
 function sendPost() {
     var modal = document.getElementById('editModal')

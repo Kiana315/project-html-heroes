@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Load the obtained data into the form
                 document.getElementById('titleInput').value = data.title;
                 document.getElementById('contentInput').value = data.content;
-                document.getElementById('content_type').checked = data.content_type === 'COMMONMARK'; 
+                document.getElementById('content_type').checked = (data.content_type === 'COMMONMARK'); 
                 const visibilitySelect = document.getElementById('visibility');
                 for (let i = 0; i < visibilitySelect.options.length; i++) {
                     if (visibilitySelect.options[i].value === data.visibility) {
@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const updatedContent = document.getElementById('contentInput').value;
         const updatedContentType = document.getElementById('content_type').checked ? 'COMMONMARK' : 'PLAIN'; 
         const updatedVisibility = document.getElementById('visibility').value;
-        
 
         fetch(`/api/posts/${postId}/update/`, {
             method: 'PUT',  
@@ -75,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            
             console.log('Post updated:', data);
             editModal.style.display = 'none'; // Close modal after submit
             window.location.reload();
