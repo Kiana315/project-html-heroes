@@ -48,10 +48,8 @@ class Post(models.Model):
     shared_post = models.ForeignKey('self', on_delete=models.CASCADE, related_name='shared_posts', null=True, blank=True)
     ordering = ['-date_posted']
 
-    # def get_html_content(self):
-    #     if self.content_type == 'COMMONMARK':
-    #         return commonmark.commonmark(self.content)
-    #     return self.content
+    def content_as_html(self):
+        return commonmark.commonmark(self.content)
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment', default=99999)
