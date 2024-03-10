@@ -75,8 +75,8 @@ function createBlock(msg, type, isNewMsg = true) {
     };
     let span_actionType = document.createElement("span");
     span_actionType.classList.add("action-type");
-    span_actionType.textContent = `[${TYPES[type]}] `; // 根据类型设置动作描述
-    div_messageHeader.appendChild(span_actionType); // 将动作类型描述添加到消息头部容器
+    span_actionType.textContent = `[${TYPES[type]}] `;
+    div_messageHeader.appendChild(span_actionType); 
 
     // Create a div for message body that can be shown/hidden
     let div_messageBody = document.createElement("div");
@@ -127,66 +127,6 @@ function createBlock(msg, type, isNewMsg = true) {
 
     return li_message;
 }
-
-
-
-
-
-
-    
-
-
-
-
-//     let div_messageHeader = document.createElement("div")
-//     div_messageHeader.classList.add("message-header")
-//     let span_statusDot = document.createElement("span")
-//     let span_sender = document.createElement("span")
-//     let span_subject = document.createElement("span")
-//     let a_postLink = document.createElement("a") 
-
-//     let TYPES = {
-//         'FR': 'Follow Request',
-//         'LK': 'Like',
-//         'CM': 'Comment',
-//         'NP': 'New Post Reminder',
-//         'SU': 'New Sign Up'
-//     }
-
-//     span_statusDot.classList.add("status-dot")
-//     span_subject.classList.add("subject")
-//     span_subject.textContent = `[New] ${TYPES[type]} `;
-//     span_sender.classList.add("sender")
-//     span_sender.textContent = "from " + msg.origin + " ";
-//     div_messageHeader.appendChild(span_statusDot)
-//     div_messageHeader.appendChild(span_subject)
-//     div_messageHeader.appendChild(span_sender)
-
-//     a_postLink.href = `/posts/${msg.post_id}/`  // 使用msg.postId作为示例，你需要根据实际情况调整
-//     a_postLink.textContent = "View Post"  // 链接显示的文本
-
-//     let div_messageBody = document.createElement("div")
-//     div_messageBody.classList.add("message-body")
-//     let p_text = document.createElement("p")
-//     p_text.textContent = msg.content;
-//     p_text.classList.add("message-text")
-//     let button_delete = document.createElement("button")
-//     button_delete.classList.add("inbox-delete-btn")
-//     button_delete.textContent = "Delete"
-//     button_delete.setAttribute('ID', msg.id);
-//     let button_star = document.createElement("button")
-//     button_star.classList.add("inbox-star-btn")
-//     button_star.textContent = "Star"
-
-//     div_messageBody.appendChild(p_text)
-//     div_messageBody.appendChild(button_delete)
-//     div_messageBody.appendChild(button_star)
-//     div_messageBody.appendChild(a_postLink)
-//     li_message.appendChild(div_messageHeader)
-//     li_message.appendChild(div_messageBody)
-//     li_message.setAttribute('type', type);
-//     return li_message
-// }
 
 async function loadAndDisplayMessages() {
     let messageTypes = ['FR', 'LK', 'CM', 'NP', 'SU']; // Array of message types
