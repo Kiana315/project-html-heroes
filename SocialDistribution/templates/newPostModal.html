@@ -1,18 +1,28 @@
-<div id="newPostModal" class="modal">
+<div class="modal" id="post-option">
+    <div class="options-container">
+        <button class="option-button" id="text-post">
+            <ion-icon name="text-outline" size="small" style="margin-right: 8px;"></ion-icon>
+            Text Post
+        </button>
+        <button class="option-button" id="image-post">
+            <ion-icon name="images-outline" size="small" style="margin-right: 8px;"></ion-icon>
+            Image Post
+        </button>
+    </div>
+</div>
+
+<!-- Modal for text posts -->
+<div id="newTextPost" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span class="close" onclick="closeModal()">&times;</span>
         <form id="newPostForm">
+            <!-- Text input fields -->
             <input id="titleInput" type="text" name="title" placeholder="Title">
             <textarea id="contentInput" name="content" placeholder="Tell Something New..."></textarea>
             
             <div class="submit-container">
                 <div class="left">
-                    <label for="imageUpload" class="upload-icon">
-                        <ion-icon name="image"></ion-icon>
-                    </label>
-                    <input type="file" id="imageUpload" name="image" style="display: none;">
-                </div>
-                <div class="right">
+                    <!-- Set attributes of post -->
                     <input type="checkbox" id="content_type" name="content_type">
                     <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
          
@@ -21,10 +31,56 @@
                         <option value="FRIENDS">Friends-Only</option>
                         <option value="PRIVATE">Private</option>
                     </select>
-                    
+                </div>
+                
+                <div class="right">
+    
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Post</button>
                 </div>
+            </div>
+        </form>
+    </div>
+    
+</div>
+
+<!-- Modal for image posts -->
+<div id="newImagePost" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <!-- Preview image -->
+        <div class="preview-contaienr" id="imagePreviewContainer">
+            <p style="margin-top: 20px;">Preview images: </p>
+            <div id="imagePreview"></div>
+        </div>
+        
+        <!-- Upload image -->
+        <input type="file" id="imageUpload" name="image" style="display: none;">
+        <form id="newImageForm" enctype="multipart/form-data">
+            <div class="submit-container">
+                <div class="left">
+                    <label for="imageUpload" class="upload-icon">
+                        <ion-icon name="image"></ion-icon>
+                    </label>
+                    <!-- Upload image -->
+                    <input type="file" id="imageUpload" name="image" style="display: none;">
+
+                    <!-- Set attributes of post -->
+                    <!-- <input type="checkbox" id="content_type" name="content_type">
+                    <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
+         
+                    <select name="visibility" id="visibility">
+                        <option value="PUBLIC" selected>Public</option>
+                        <option value="FRIENDS">Friends-Only</option>
+                        <option value="PRIVATE">Private</option>
+                    </select> -->
+                </div>
+                
+                <!-- <div class="right">
+                    
+                    <button class="post-button" type="submit">Save Draft</button>
+                    <button class="post-button" type="submit">Post</button>
+                </div> -->
             </div>
         </form>
     </div>

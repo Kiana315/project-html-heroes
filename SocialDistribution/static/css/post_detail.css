@@ -380,17 +380,17 @@ body  {
     flex-direction: row;
     align-items: center;
 }
-.submit-container .left {
+/* .submit-container .left {
     width: 50%;
     margin-right: auto; 
     align-items: center;
-}
+} */
 
 .submit-container .right {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    width: 50%;
+    width: 100%;
     margin-left: auto;
     margin-right: 20px;
 }

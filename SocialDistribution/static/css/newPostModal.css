@@ -25,6 +25,41 @@
     background-color: var(--modal-bg-color);
 }
 
+.options-container {
+    position: fixed;
+    bottom: 200px;
+    right: 100px;
+    
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 2;
+    
+}
+
+.option-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    border: none;
+    background-color: transparent; 
+    background: none; 
+    cursor: pointer;
+    margin: 5px 0; /* Add space between buttons */
+    padding: 5px;  
+}
+.option-button:hover {
+    background-color: rgba(205, 204, 204, 0.648);
+    border-radius: 3px;
+    transform: translateX(3%); 
+}
+
+
+/* Text post css */
+
 .modal-content {
     background-color: var(--modal-content-bg-color);
     padding: 20px;
@@ -124,7 +159,6 @@
  /* the container that include upload image, visibility select and btns */
 .submit-container {
     position: relative;
-    margin-top: 20px;
     width: 100%;
     height: auto;
     display: flex;
@@ -133,16 +167,19 @@
 }
 
 .submit-container .left {
-    width: 30%;
+    width: 60%;
     margin-right: auto; 
     align-items: center;
+    display: flex;
 }
-
+.left > * {
+    margin-right: 10px; 
+}
 .submit-container .right {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    width: 70%;
+    width: 40%;
     margin-left: auto;
     margin-right: 20px;
 }
@@ -150,33 +187,12 @@
     margin-right: 10px; 
 }
 
-.upload-icon {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%; 
-    text-align: center;
-    margin: auto 20px;
-    
-    justify-content: center;
-    align-items: center;
-}
 
-.upload-icon:hover {
-    cursor: pointer;
-    background-color: rgba(202, 202, 202, 0.6); 
-}
 
-.upload-icon ion-icon {
-    color: #2fcccc; 
-    font-size: 20px; 
-    position: relative;
-    top: 10px;
-}
 .select {
     border: none;
     cursor: pointer;
-    margin-top: 10px;
+    
     margin-right: 20px;
 }
 #visibility {
@@ -209,4 +225,35 @@
 .post-button:active,
 .post-button:hover {
     background-color: var(--btn-hover-color);
+}
+
+/* Image Post css */
+
+.upload-icon {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    margin: auto 20px;
+    margin-top: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.upload-icon:hover {
+    cursor: pointer;
+    background-color: rgba(202, 202, 202, 0.6); 
+    border-radius: 50%; 
+}
+
+.upload-icon ion-icon {
+    color: #2fcccc; 
+    font-size: 20px; 
+    position: relative;
+    top: 10px;
+}
+
+.preview-contaienr {
+    margin-top: 50px;
+    height: auto;
 }

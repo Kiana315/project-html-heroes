@@ -312,6 +312,7 @@ function showNotification(message) {
 }
 
 function closeShareModal() {
+    const shareModal = document.getElementById('shareModal');
     shareModal.style.display = 'none';
 }
 

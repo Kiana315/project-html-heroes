@@ -3,7 +3,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   
-
     fetch('/api/pps/')
         .then(response => response.json())
         .then(posts => {
