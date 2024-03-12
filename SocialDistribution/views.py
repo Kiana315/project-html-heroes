@@ -28,7 +28,7 @@ from rest_framework.exceptions import PermissionDenied
 
 # Project Dependencies:
 from .serializers import *
-from .forms import SignUpForm, AvatarUploadForm, UpdateBioForm, UpdateUserNameForm, UpdateGithubUserNameForm
+from .forms import SignUpForm, AvatarUploadForm, UpdateBioForm, UpdateUserNameForm
 from .models import Post
 from .permissions import IsAuthorOrReadOnly
 from .models import *
