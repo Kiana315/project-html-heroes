@@ -60,7 +60,6 @@ function handleUserNameBlur() {
         });
 }
 
-
 document.addEventListener('DOMContentLoaded', function() {
     /*   data = {
             'user1_follows_user2': user1_follows_user2,

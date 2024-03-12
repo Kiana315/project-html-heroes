@@ -57,6 +57,10 @@ class MessageAdmin(admin.ModelAdmin):
 
     actions = ['filter_messages_by_type']
 
+class ActivityAdmin(admin.ModelAdmin):
+    list_display = ('user', 'activity_type', 'created_at')
+    list_filter = ('user', 'activity_type')
+    search_fields = ('user__username', 'activity_type')
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Post, PostAdmin)
@@ -66,5 +70,5 @@ admin.site.register(Following, FollowingAdmin)
 admin.site.register(Follower, FollowerAdmin)
 admin.site.register(Friend, FriendAdmin)
 admin.site.register(MessageSuper, MessageAdmin)
-
+admin.site.register(GithubActivity)
 

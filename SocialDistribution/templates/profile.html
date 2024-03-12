@@ -72,7 +72,6 @@
                 <input type="text" id="edit-username" onblur="handleUserNameBlur()" style="display: none">
                 <div class="email" id="email">Email: {{ user.email }}</div>
                 <p class="bio-container" id="user-bio">{{ user.bio }}</p>
-        
                 <form action="update-bio/" method="post" style="display: none;">
                     {% csrf_token %}
                     <textarea

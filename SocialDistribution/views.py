@@ -28,7 +28,7 @@ from rest_framework.exceptions import PermissionDenied
 
 # Project Dependencies:
 from .serializers import *
-from .forms import SignUpForm, AvatarUploadForm, UpdateBioForm, UpdateUserNameForm
+from .forms import SignUpForm, AvatarUploadForm, UpdateBioForm, UpdateUserNameForm, UpdateGithubUserNameForm
 from .models import Post
 from .permissions import IsAuthorOrReadOnly
 from .models import *
@@ -449,7 +449,6 @@ def update_username(request, username):
             return JsonResponse({'error': form.errors}, safe=False)
 
         return JsonResponse({'error': ''}, safe=False)
-
 
 class ProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
