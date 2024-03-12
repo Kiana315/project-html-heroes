@@ -1,4 +1,6 @@
 import commonmark
+import requests
+from time import sleep
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -15,6 +17,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField()
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
+    github_username = models.CharField(max_length=50, blank=True)
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
@@ -138,5 +141,28 @@ class MessageSuper(models.Model):
     def get_messages_of_type_for_user(cls, user, message_type):
         return cls.objects.filter(owner=user, message_type=message_type)
 
+class GithubActivity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=100)
+    created_at = models.DateTimeField()
 
+def process_github_activity(user):
+    github_activity = fetch_github_activity(user)
+    for activity in github_activity:
+        activity_type = activity.get('type')
+        created_at = activity.get('created_at')
+        GithubActivity.objects.create(user=user, activity_type=activity_type, created_at=created_at)
+        Post.objects.create(
+            author=user,
+            title=f"GitHub Activity: {activity_type}",
+            content=f"New {activity_type} activity on GitHub at {created_at}",
+            visibility='PUBLIC'
+        )
 
+def fetch_github_activity(user):
+    if user.github_username:
+        github_url = f"https://api.github.com/users/{user.github_username}/events/public"
+        response = requests.get(github_url)
+        if response.status_code == 200:
+            return response.json()
+    return []
