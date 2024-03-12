@@ -132,3 +132,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 django_on_heroku.settings(locals()) # bottom of the file
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'

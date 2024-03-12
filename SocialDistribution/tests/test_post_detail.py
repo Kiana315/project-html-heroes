@@ -5,6 +5,49 @@ from rest_framework.test import APITestCase
 from SocialDistribution.models import Like, Post, User, Friend
 
 
+class PostsAPITests(APITestCase):
+    def setUp(self):
+        # create a test user
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self.user1 = User.objects.create_user(username='testuser1', email='test1@example.com', password='testpassword1')
+        self.client.login(username='testuser', password='testpassword')
+
+        # Create a test post
+        self.post = Post.objects.create(author=self.user, title='Test Post', content='Test Content')
+
+    def test_get_public_posts(self):
+        url = reverse('API_PPs')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_friend_posts(self):
+        # Test retrieving a specific post
+        url = reverse('API_FPs', kwargs={'username': self.user.username})
+        Friend.objects.create(user1=self.user, user2=self.user1)
+        Post.objects.create(
+            author=self.user1,
+            title='Test Post',
+            content='Test Content',
+            visibility='FRIENDS'
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_create_posts(self):
+        # Test retrieving a specific post
+        url = reverse('API_NPs')
+        data = {
+            'title': 'test title',
+            'content': 'test content',
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], 'test title')
+
+
 class PostOperationAPITests(APITestCase):
     def setUp(self):
         # create a test user
