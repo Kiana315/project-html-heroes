@@ -71,6 +71,14 @@ class UserAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.user1.refresh_from_db()
         self.assertEqual(self.user1.username, data['username'])
+    
+    def test_update_github_username(self):
+        url = reverse('API_UpdateGithubUsername', kwargs={'username': self.user1.username})
+        data = {'github_username': uuid.uuid4().hex[:8]}
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.user1.refresh_from_db()
+        self.assertEqual(self.user1.github_username, data['github_username'])
 
     def test_update_bio(self):
         url = reverse('API_UpdateBio', kwargs={'username': self.user1.username})

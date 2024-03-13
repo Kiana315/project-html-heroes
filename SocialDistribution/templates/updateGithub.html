@@ -12,7 +12,7 @@
     <div class="edit-container">
         <br>
         <h2 class="edit-comment"> Link Github Account </h2>
-        <form action="{% url 'update_github_username_submit' username=user.username %}" method="post">
+        <form action="{% url 'API_UpdateGithubUsername' username=user.username %}" method="post">
             {% csrf_token %}
             <label for="github_username">Github Username:</label><br>
             <input type="text" id="github_username" name="github_username" value="{{ github_username }}"><br><br>
