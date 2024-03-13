@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const commentInput = document.getElementById('comment-input');
     const shareButton = document.getElementById('share-button');
     var shareModal = document.getElementById('shareModal');
-    // var closeSpan = document.getElementsByClassName('close_share');
     var confirmShare = document.getElementById('confirmShare');
     var shareText = document.getElementById('shareText');
 
@@ -150,6 +149,36 @@ document.addEventListener('DOMContentLoaded', function () {
         shareModal.style.display = "none";
         shareText.value = '';
     }
+
+    // show images
+    fetch(`/api/posts/${postId}`) // Get image data from backend
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); 
+    })
+    .then(data => {
+        // process data
+        var imageDataString = data.image_data; // get image_data string
+        console.log(imageDataString);
+        var imageDataArray = imageDataString.split(",");
+        console.log(imageDataArray);
+
+        for (var i = 1; i < imageDataArray.length; i += 2) {
+            var base64Data = imageDataArray[i]; // Extract Base64 encoded part
+            // Create img tag and display image
+            var img = document.createElement("img");
+            img.src = "data:image/jpeg;base64," + base64Data; // add "data:image/jpeg;base64," header
+            img.classList.add("post-image"); // add css style
+            
+            document.getElementById("imageContainer").appendChild(img);
+        }   
+        
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
 
 
 });
@@ -356,67 +385,7 @@ function EditPost() {
     modal.style.display = 'block'
 }
 
-// document.addEventListener('DOMContentLoaded', (event) => {
-//     // Get elements
-//     const modal = document.getElementById("editModal");
-//     const form = document.getElementById("editForm");
-//     const postId = document.getElementById("postId").innerText;
 
-//     // Click the x to close the pop-up window
-//     document.getElementsByClassName("close")[0].onclick = function () {
-//         modal.style.display = "none";
-//     }
-//     // Close pop-up window when clicking outside window
-//     window.onclick = function (event) {
-//         if (event.target === modal) {
-//             modal.style.display = "none";
-//         }
-//     }
-//     form.onsubmit = function (event) {
-//         event.preventDefault();   //Prevent form default submission behavior
-
-//         // Create FormData Obj
-//         var formData = new FormData(form);
-//         var isDraft = event.submitter.innerText === "Save Draft"
-//         if (isDraft) {
-//             formData.append("is_draft", "true")
-//         }
-
-//         // Send AJAX request to server
-//         fetch(`/api/posts/${postId}/`, {
-//             method: 'PUT',
-//             body: formData,
-//             headers: {
-//                 'X-CSRFToken': getCookie('csrftoken')   //Get CSRF token
-//             },
-//             credentials: 'same-origin'   // For CSRF token verification
-//         })
-//             .then(response => {
-//                 if (response.ok) {
-//                     return response.json();
-//                 } else {
-//                     emptyPost()
-//                     throw new Error('Something went wrong');
-//                 }
-//             })
-//             .then(data => {
-//                 // After posted
-//                 modal.style.display = "none";   //Close pop-up window
-//                 if (isDraft) {
-//                     history.back();
-//                 } else {
-//                     window.location = "/"
-//                     window.onload = function () {
-//                         window.reload()
-//                     }
-//                 }
-//             })
-//             .catch((error) => {
-//                 console.error('Error:', error);
-//                 //Add error message
-//             });
-//     };
-// });
 
 function sendPost() {
     var modal = document.getElementById('editModal')
@@ -457,3 +426,4 @@ function sendPost() {
             // Add error message
         });
 }
+

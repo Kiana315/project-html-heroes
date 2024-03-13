@@ -15,7 +15,7 @@
 <div id="newTextPost" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-        <form id="newPostForm">
+        <form id="newTextForm">
             <!-- Text input fields -->
             <input id="titleInput" type="text" name="title" placeholder="Title">
             <textarea id="contentInput" name="content" placeholder="Tell Something New..."></textarea>
@@ -48,39 +48,38 @@
 <div id="newImagePost" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-        <!-- Preview image -->
-        <div class="preview-contaienr" id="imagePreviewContainer">
-            <p style="margin-top: 20px;">Preview images: </p>
-            <div id="imagePreview"></div>
-        </div>
-        
-        <!-- Upload image -->
-        <input type="file" id="imageUpload" name="image" style="display: none;">
         <form id="newImageForm" enctype="multipart/form-data">
+            <input id="titleInput" type="text" name="title" placeholder="Title">
+            <!-- Preview image -->
+            <div class="preview-contaienr" id="imagePreviewContainer">
+                <p>Preview images: </p>
+                <div id="imagePreview"></div>
+            </div>
+
             <div class="submit-container">
                 <div class="left">
                     <label for="imageUpload" class="upload-icon">
                         <ion-icon name="image"></ion-icon>
                     </label>
                     <!-- Upload image -->
-                    <input type="file" id="imageUpload" name="image" style="display: none;">
+                    <input type="file" id="imageUpload" style="display: none;">
 
                     <!-- Set attributes of post -->
-                    <!-- <input type="checkbox" id="content_type" name="content_type">
+                    <input type="checkbox" id="content_type" name="content_type">
                     <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
          
                     <select name="visibility" id="visibility">
                         <option value="PUBLIC" selected>Public</option>
                         <option value="FRIENDS">Friends-Only</option>
                         <option value="PRIVATE">Private</option>
-                    </select> -->
+                    </select>
                 </div>
                 
-                <!-- <div class="right">
+                <div class="right">
                     
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Post</button>
-                </div> -->
+                </div>
             </div>
         </form>
     </div>

@@ -69,8 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const likeButton = postElement.querySelector(`#like-${post.id}`);
                 likeButton.addEventListener('click', function() {
                     console.log("like clicked",`api/posts/${post.id}/likes/`);
-                    // 点赞操作的 AJAX 请求
-                    // 更新点赞计数
+                    
                     fetch(`/api/posts/${post.id}/likes/`, {
                         method: 'POST',
                         headers: {
@@ -81,11 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === 'success') {
-                            // 更新页面上的点赞计数
+                           
                             const likeCountSpan = postElement.querySelector(`#like-${post.id} .like-count`);
                             likeCountSpan.textContent = data.likes_count; // 假设后端返回更新后的点赞计数
                         } else {
-                            // 处理错误情况
+                            
                             console.error('Error:', data.error);
                         }
                     })
@@ -99,8 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const commentButton = postElement.querySelector(`#comment-${post.id}`);
                 commentButton.addEventListener('click', function() {
                     console.log("comment clicked");
-                    // 评论操作的 AJAX 请求
-                    // 更新评论计数
+                    
                 });
 
                 

@@ -24,7 +24,7 @@
         {% endif %}
     </div>
 
-    <div id="options-container" class="options-container" style="display: none;">
+    <div id="options-container" class="modify-options-container" style="display: none;">
         <button class="option-button" id="edit-btn">
             <ion-icon size="small" name="create-outline" style="margin-right: 8px;"></ion-icon>
             Edit
@@ -65,10 +65,13 @@
         {% else %}
         <div id="postContent">{{ post.content_as_html|safe }}</div>
         {% endif %}
-        <!-- Load image content -->
-        {% if post.image %}
-        <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
+        
+        {% if post.image_data %}
+        <div class="image_container" id="imageContainer">
+            <!-- Load image content -->
+        </div>
         {% endif %}
+        
         <!-- Load post comments -->
         {% if not post.is_draft and post.visibility != 'PRIVATE' %}
         <div class="comments-section">
