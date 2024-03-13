@@ -1,7 +1,7 @@
 # Traditional Pattern:
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_list_or_404, get_object_or_404
 from django.contrib.auth import login, authenticate, get_user_model
 from django.contrib.auth.models import User
@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.urls import reverse
+import base64
 
 # REST Pattern:
 from rest_framework import generics, status, viewsets
@@ -28,8 +29,7 @@ from rest_framework.exceptions import PermissionDenied
 
 # Project Dependencies:
 from .serializers import *
-from .forms import SignUpForm, AvatarUploadForm, UpdateBioForm, UpdateUserNameForm
-from .models import Post
+from .forms import *
 from .permissions import IsAuthorOrReadOnly
 from .models import *
 
@@ -105,7 +105,6 @@ class PostDetailView(DetailView):
                 'image_url': post.image.url if post.image else '',
                 'likes_count': Like.objects.filter(post=post).count(),
                 'comments': list(post.get_comments().values('user__username', 'text')),
-                # 'html_content': post.get_html_content(),
             }
             return JsonResponse(data)
         else:

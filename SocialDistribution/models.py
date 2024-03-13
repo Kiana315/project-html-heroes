@@ -1,11 +1,14 @@
 import commonmark
 import requests
+import base64
+
 from time import sleep
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db.models import Q
 
 
@@ -41,9 +44,9 @@ class Post(models.Model):
     ]
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    content = models.TextField(blank=True)
     content_type = models.CharField(max_length=10, choices=CONTENT_TYPE_CHOICES, default='PLAIN')
-    image = models.ImageField(upload_to='posts/images/', null=True, blank=True)
+    image_data = models.JSONField(default=list)
     visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='PUBLIC')
     date_posted = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -53,6 +56,9 @@ class Post(models.Model):
 
     def content_as_html(self):
         return commonmark.commonmark(self.content)
+
+    
+
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment', default=99999)

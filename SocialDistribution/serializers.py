@@ -1,3 +1,4 @@
+import base64
 from rest_framework import serializers
 from .models import *
 from django.templatetags.static import static
@@ -6,10 +7,10 @@ from django.templatetags.static import static
 class PostSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='author.username')
     avatar = serializers.ReadOnlyField(source='author.avatar_url')
+    image_data = serializers.CharField(required=False)
     likes_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
     is_draft = serializers.BooleanField(default=False)
-    # html_content = serializers.SerializerMethodField()
     is_shared = serializers.SerializerMethodField() 
     shared_post_id = serializers.IntegerField(source='shared_post.id', read_only=True)
     shared_post_title = serializers.CharField(source='shared_post.title', read_only=True)
@@ -17,7 +18,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 'author', 'username', 'title', 'content', 'content_type', 'image', 'visibility',
+            'id', 'author', 'username', 'title', 'content', 'image_data', 'content_type', 'visibility',
             'date_posted', 'last_modified', 'likes_count', 'avatar', 'is_draft',
             'is_shared', 'shared_post_id', 'shared_post_title', 'comment_count'
         ]
