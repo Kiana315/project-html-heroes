@@ -71,7 +71,51 @@
             <!-- Load image content -->
         </div>
         {% endif %}
+
+        <div class="post-actions">
+            {% if post.is_draft %}
+            <button id="edit-button" class="action" onclick="EditPost()" type="button">
+                <span class="material-symbols-outlined">
+                    <ion-icon name="create-outline">Edit</ion-icon>
+                </span>
+                Edit
+            </button>
+            <button id="delete-button" class="action" onclick="deletePost(this)" data-post-id="{{ post.id }}">
+                <span class="material-symbols-outlined"><ion-icon name="trash-outline">Delete</ion-icon></span>
+                Delete
+            </button>
+            <button id="send-button" class="action" onclick="sendPost()">
+                <span class="material-symbols-outlined"><ion-icon name="send-outline">Send</ion-icon></span>
+                Post
+            </button>
+            {% else %}
+                {% if post.visibility != 'PRIVATE' %}
+                    {% if post.visibility == 'PUBLIC' %}
+                    <button id="share-button" class="action">
+                        <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
+                        Share
+                    </button>
+                    {% endif %}
+                <button id="comment-button" class="action">
+                    <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
+                    Comment
+                </button>
+                
+                <button id="like-button" class="action">
+                    <ion-icon id="like-icon" size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>
+                    Like
+                    <span id="like-count">{{ likes_count }}</span>
+                </button>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div id="comment-form" class="comment-form" style="display: none;">
+            <textarea id="comment-input" placeholder="Add a comment..." rows="1"></textarea>
+            <button id="submit-comment" class="post-button">Comment</button>
+            <button id="cancel-comment" class="post-button">Cancel</button>
         
+        </div>
         <!-- Load post comments -->
         {% if not post.is_draft and post.visibility != 'PRIVATE' %}
         <div class="comments-section">
@@ -80,47 +124,11 @@
         </div>
         {% endif %}
     </div>
-    <div class="post-actions">
-        {% if post.is_draft %}
-        <button id="edit-button" class="action" onclick="EditPost()" type="button">
-            <span class="material-symbols-outlined">
-                <ion-icon name="create-outline">Edit</ion-icon>
-            </span>
-            Edit
-        </button>
-        <button id="delete-button" class="action" onclick="deletePost(this)" data-post-id="{{ post.id }}">
-            <span class="material-symbols-outlined"><ion-icon name="trash-outline">Delete</ion-icon></span>
-            Delete
-        </button>
-        <button id="send-button" class="action" onclick="sendPost()">
-            <span class="material-symbols-outlined"><ion-icon name="send-outline">Send</ion-icon></span>
-            Post
-        </button>
-        {% else %}
-            {% if post.visibility != 'PRIVATE' %}
-                {% if post.visibility == 'PUBLIC' %}
-                <button id="share-button" class="action">
-                    <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
-                    Share
-                </button>
-                {% endif %}
-            <button id="comment-button" class="action">
-                <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
-                Comment
-            </button>
-            <div id="comment-form" class="comment-form" style="display: none;">
-                <textarea id="comment-input" placeholder="Add a comment..."></textarea>
-                <button id="submit-comment" class="action">Post Comment</button>
-            </div>
-            <button id="like-button" class="action">
-                <ion-icon id="like-icon" size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>
-                Like
-                <span id="like-count">{{ likes_count }}</span>
-            </button>
-            {% endif %}
-        {% endif %}
-    </div>
+    
+    
+    
 </div>
+
 
 <div id="shareModal" class="modal">
     <div class="modal-content">

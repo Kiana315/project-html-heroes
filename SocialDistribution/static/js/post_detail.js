@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const commentButton = document.getElementById('comment-button');
     const commentForm = document.getElementById('comment-form');
     const submitCommentButton = document.getElementById('submit-comment');
+    const cancelCommentButton = document.getElementById('cancel-comment');
     const commentInput = document.getElementById('comment-input');
     const shareButton = document.getElementById('share-button');
     var shareModal = document.getElementById('shareModal');
@@ -60,12 +61,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (commentButton) {
         fetchComments();
         commentButton.addEventListener('click', function () {
-            commentForm.style.display = 'block'; // Show the comment form
+            if (commentForm.style.display === 'block' || commentForm.style.display === '') {
+                commentForm.style.display = 'none'; // Hide the comment form
+            } else {
+                commentForm.style.display = 'block'; // Show the comment form
+            }
         });
 
         // Event listener for submitting a comment
         submitCommentButton.addEventListener('click', function () {
             const commentText = commentInput.value.trim();
+
+            commentInput.style.height = 'initial';
 
             if (commentText === '') {
                 alert('Please enter a comment.');
@@ -90,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     fetchComments();
                     commentInput.value = ''; // Clear the input field
                     commentForm.style.display = 'none'; // Hide the comment form again
+                    
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -97,7 +105,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert(error.message);
                 });
         });
+
+        cancelCommentButton.addEventListener('click', function() {
+            commentInput.value = ''; // Clear <textarea> 
+            commentInput.style.height = 'initial';
+        });
     }
+
+    
 
     if (shareButton) {
         shareButton.addEventListener('click', function () {
@@ -275,30 +290,28 @@ function renderComments(comments) {
 
     comments.forEach(comment => {
         // Create Content Container
-        const commentElement = document.createElement('div');
-        commentElement.classList.add('comment');
 
-        const avatarElement = document.createElement('img');
-        avatarElement.src = comment.commenter_avatar_url;
-        avatarElement.alt = 'User Avatar';
-        avatarElement.classList.add('comment-avatar');
+        const dateCommented = new Date(comment.date_commented);
+        const formattedDate = `${dateCommented.getFullYear()}-${dateCommented.getMonth() + 1}-${dateCommented.getDate()}`;
+        
+        const commentHTML = `
+            <div class="comment">
+                <div class="comment-avatar">
+                    <img src="${comment.commenter_avatar_url}" alt="User Avatar">
+                </div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <div class="comment-user-name">${comment.commenter_username}</div>
+                        <div class="comment-time">${formattedDate}</div>
+                    </div> 
+                        <p class="comment-text">${comment.comment_text}</p>
+                
+                </div>  
+            </div>
+        `;
 
-        // add username
-        const commenterNameElement = document.createElement('h5');
-        commenterNameElement.textContent = comment.commenter_username;
-        commenterNameElement.classList.add('commenter-name');
-
-        // add comment text
-        const commentTextElement = document.createElement('p');
-        commentTextElement.textContent = comment.comment_text;
-        commentTextElement.classList.add('comment-text');
-
-        // append username, comment text, and
-        commentElement.appendChild(avatarElement);
-        commentElement.appendChild(commenterNameElement);
-        commentElement.appendChild(commentTextElement);
-
-        commentsContainer.appendChild(commentElement);
+        commentsContainer.innerHTML += commentHTML;
+        
     });
 }
 
@@ -426,4 +439,17 @@ function sendPost() {
             // Add error message
         });
 }
+
+function autoResizeTextarea() {
+    var textareas = document.querySelectorAll('#comment-input');
+
+    textareas.forEach(function(textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight-2+'px' ;
+        });
+    });
+}
+document.addEventListener('DOMContentLoaded', autoResizeTextarea);
+
 

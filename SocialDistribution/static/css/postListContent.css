@@ -139,6 +139,3 @@
     justify-content: center; 
     display: flex;
 }
-.interact-container button:hover {
-    background-color: var(--icon-hover-bg-color);
-}

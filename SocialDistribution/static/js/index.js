@@ -38,10 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const interactionHTML = `
                     <div class="interact-container">
-                        <button id="share-${post.id}" type="button" data-post-id="${post.id}">
+                        <!-- <button id="share-${post.id}" type="button" data-post-id="${post.id}">
                             <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
                             Share <span class="share-count">${post.share_count}</span>
-                        </button>
+                        </button> -->
                         <button id="comment-${post.id}" type="button" data-post-id="${post.id}">
                             <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
                             </ion-icon>
@@ -59,47 +59,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 // Append userInfoHTML, contentHTML, and interactionHTML to postLink instead of postElement
-                postLink.innerHTML = userInfoHTML + contentHTML;
+                postLink.innerHTML = userInfoHTML + contentHTML + interactionHTML;
                 postElement.appendChild(postLink);
-                postElement.innerHTML += interactionHTML;
+                // postElement.innerHTML += interactionHTML;
                 postContainer.appendChild(postElement);
 
                 
-                // Event listeners for like button
-                const likeButton = postElement.querySelector(`#like-${post.id}`);
-                likeButton.addEventListener('click', function() {
-                    console.log("like clicked",`api/posts/${post.id}/likes/`);
+                // // Event listeners for like button
+                // const likeButton = postElement.querySelector(`#like-${post.id}`);
+                // likeButton.addEventListener('click', function() {
+                //     console.log("like clicked",`api/posts/${post.id}/likes/`);
                     
-                    fetch(`/api/posts/${post.id}/likes/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'), 
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
+                //     fetch(`/api/posts/${post.id}/likes/`, {
+                //         method: 'POST',
+                //         headers: {
+                //             'X-CSRFToken': getCookie('csrftoken'), 
+                //             'Content-Type': 'application/json'
+                //         }
+                //     })
+                //     .then(response => response.json())
+                //     .then(data => {
+                //         if (data.status === 'success') {
                            
-                            const likeCountSpan = postElement.querySelector(`#like-${post.id} .like-count`);
-                            likeCountSpan.textContent = data.likes_count; // 假设后端返回更新后的点赞计数
-                        } else {
+                //             const likeCountSpan = postElement.querySelector(`#like-${post.id} .like-count`);
+                //             likeCountSpan.textContent = data.likes_count; // 假设后端返回更新后的点赞计数
+                //         } else {
                             
-                            console.error('Error:', data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                });
+                //             console.error('Error:', data.error);
+                //         }
+                //     })
+                //     .catch(error => {
+                //         console.error('Error:', error);
+                //     });
+                // });
 
 
-                // Event listeners for like button
-                const commentButton = postElement.querySelector(`#comment-${post.id}`);
-                commentButton.addEventListener('click', function() {
-                    console.log("comment clicked");
+                // // Event listeners for like button
+                // const commentButton = postElement.querySelector(`#comment-${post.id}`);
+                // commentButton.addEventListener('click', function() {
+                //     console.log("comment clicked");
                     
-                });
+                // });
 
                 
             });
