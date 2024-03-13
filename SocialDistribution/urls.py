@@ -53,6 +53,8 @@ urlpatterns = [
     path("profile/<str:username>/upload-avatar/", upload_avatar, name="API_UploadAvatar"),
     path("profile/<str:username>/update-bio/", update_bio, name="API_UpdateBio"),
     path("profile/<str:username>/update-username/", update_username, name="API_UpdateUsername"),
+    path('profile/<str:username>/update-github-username/', views.update_github_username, name='PAGE_UpdateGithub'),
+    path('profile/<str:username>/update-github-username-submit/', views.update_github_username_submit, name='update_github_username_submit'),
     path("profile/<str:selfUsername>/<str:targetUsername>/", otherProfileView, name="PAGE_OtherProfile"),
 
     # Post API System:

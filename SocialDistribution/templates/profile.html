@@ -71,6 +71,7 @@
                 <div class="username" id="username" >{{ user.username }}</div>
                 <input type="text" id="edit-username" onblur="handleUserNameBlur()" style="display: none">
                 <div class="email" id="email">Email: {{ user.email }}</div>
+                <div class="github" id="github">Github: {{ user.github_username }}</div>
                 <p class="bio-container" id="user-bio">{{ user.bio }}</p>
                 <form action="update-bio/" method="post" style="display: none;">
                     {% csrf_token %}
@@ -82,6 +83,10 @@
                     >{{ user.bio }}</textarea>
                     <button class="saveButton" type="submit">Save</button>
                 </form>
+
+                <a href="{% url 'PAGE_UpdateGithub' username=user.username %}">
+                    <button type="button" id="github-btn" class="github-button">Github</button>
+                </a>
                 
             </div>
             <div class="follow-container">

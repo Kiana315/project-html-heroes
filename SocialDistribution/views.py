@@ -449,6 +449,19 @@ def update_username(request, username):
 
         return JsonResponse({'error': ''}, safe=False)
 
+def update_github_username(request, username):
+    github_username = request.user.github_username
+    return render(request, 'updateGithub.html', {'github_username': github_username})
+
+def update_github_username_submit(request, username):
+    if request.method == 'POST':
+        github_username = request.POST.get('github_username')
+        # Update the GitHub username in the database (assuming you have a UserProfile model)
+        request.user.github_username = github_username
+        request.user.save()
+        return redirect('PAGE_Profile', username=request.user.username)  # Redirect to the profile page
+    return redirect('update_github_username')  # Redirect back to the update page if not POST method
+
 class ProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
