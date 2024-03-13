@@ -3,6 +3,7 @@ import requests
 import base64
 
 from time import sleep
+from django.utils import timezone
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -21,6 +22,7 @@ class User(AbstractUser):
     email = models.EmailField()
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
     github_username = models.CharField(max_length=50, blank=True)
+    recent_processed_activity = models.DateTimeField(null=True, blank=True)
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
@@ -157,13 +159,16 @@ def process_github_activity(user):
     for activity in github_activity:
         activity_type = activity.get('type')
         created_at = activity.get('created_at')
-        GithubActivity.objects.create(user=user, activity_type=activity_type, created_at=created_at)
-        Post.objects.create(
-            author=user,
-            title=f"GitHub Activity: {activity_type}",
-            content=f"New {activity_type} activity on GitHub at {created_at}",
-            visibility='PUBLIC'
-        )
+        if user.recent_processed_activity is None or created_at > user.recent_processed_activity:
+            GithubActivity.objects.create(user=user, activity_type=activity_type, created_at=created_at)
+            Post.objects.create(
+                author=user,
+                title=f"GitHub Activity: {activity_type}",
+                content=f"New {activity_type} activity on GitHub at {created_at}",
+                visibility='PUBLIC'
+            )
+    user.recent_processed_activity = timezone.now()
+    user.save()
 
 def fetch_github_activity(user):
     if user.github_username:
