@@ -163,8 +163,8 @@ def process_github_activity(user):
             GithubActivity.objects.create(user=user, activity_type=activity_type, created_at=created_at)
             Post.objects.create(
                 author=user,
-                title=f"GitHub Activity: {activity_type}",
-                content=f"New {activity_type} activity on GitHub at {created_at}",
+                title=f"GitHub Activity",
+                content=f"{activity_type} activity on GitHub at {created_at}",
                 visibility='PUBLIC'
             )
     user.recent_processed_activity = timezone.now()
