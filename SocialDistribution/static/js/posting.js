@@ -89,14 +89,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     };
 
-    // Preview images
+    // Handling image posts(omly images)
     imageUploadInput.addEventListener('change', function(event) {
         if (this.files && this.files[0]) {
             var reader = new FileReader();
  
             reader.onload = function(e) {
-                var imageData = e.target.result;    // 获取Base64编码的图像数据
-                imageDatas.push(imageData);     // 将图片数据添加到全局数组中
+                var imageData = e.target.result;    // Get Base64 encoded image data
+                imageDatas.push(imageData);     //Add image data to the global array
                 console.log("images>>>>>> ", imageDatas);
                 var imgElement = document.createElement('img');
                 imgElement.src = imageData;
@@ -111,31 +111,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 imageForm.onsubmit = function(event) {
                     event.preventDefault(); // Prevent form default submission behavior
                 
-                    let useCommonMark = document.getElementById('content_type').checked;
-                    let contentType = useCommonMark ? 'COMMONMARK' : 'PLAIN';
-            
-                    // 创建 FormData 对象
                     var formData = new FormData(imageForm);
-                    formData.append("content_type", contentType);
-            
-                    // 将存储在 imageDatas 数组中的图片数据附加到 FormData 对象中
-                    
-                    
+                            
+                    // Append the image data stored in the imageDatas array to the FormData object                    
                     formData.append('image_data', imageDatas);
                     
-            
-                    for (var pair of formData.entries()) {
-                        console.log(pair[0]+ ', ' + pair[1]); 
-                    }
-            
-                    // 发送 AJAX 请求到服务器
+                 
                     fetch('/api/nps/', {
                         method: 'POST',
                         body: formData,
                         headers: {
-                            'X-CSRFToken': getCookie('csrftoken') // 获取 CSRF token 的方法
+                            'X-CSRFToken': getCookie('csrftoken') 
                         },
-                        credentials: 'same-origin' // 同源请求，用于 CSRF token 验证
+                        credentials: 'same-origin' 
                     })
                     .then(response => {
                         if(response.ok) {
@@ -148,10 +136,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         }
                     })
                     .then(data => {
-                        // 提交后执行的操作
-                        imageModal.style.display = "none"; // 关闭弹出窗口
-                        // submitPost();
-                        console.log(data);
+                        imageModal.style.display = "none"; 
                     })
                     .catch((error) => {
                         console.error('Error:', error);

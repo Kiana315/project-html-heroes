@@ -31,6 +31,7 @@ urlpatterns = [
     path("profile/<str:username>/draft/", author_draft_view, name="API_AuthorDraft"),
 
     path('api/user/<str:username>/posts/', ProfileAPIView.as_view(), name='API_profile'),
+    
     path("api/user/<str:username>/followers/", FollowersAPIView.as_view(), name="API_GETFollowers"),                                        # GET User FollowerList             --> Test Success
     path("api/user/<str:username>/following/", FollowingAPIView.as_view(), name="API_GETFollowing"),                                        # GET User FollowerList             --> Test Success
     path("api/user/<str:username>/friends/", FriendsAPIView.as_view(), name="API_GETFriends"),                                              # GET User FriendList               --> Test Success
@@ -69,6 +70,7 @@ urlpatterns = [
     path('api/posts/<int:post_id>/delete/', DeletePostView.as_view(), name='API_delete_post'),                                              # DELETE post                       --> Test Success
     path('api/posts/<int:post_id>/update/', UpdatePostView.as_view(), name='update_post'),                                                  # GET/PUT edit and update post      --> Test Success
 
+    # path('api/api/posts/<int:post_id>/image'),
     # Inbox API System:
     path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                           # GET TypeMessagesForUser           --> Test Success
     path('api/msgs/create/', CreateMessageAPIView.as_view(), name='API_POSTUserMsg'),                                                       # POST TypeMessageForUser           --> Test Success

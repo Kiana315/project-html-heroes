@@ -59,8 +59,6 @@ class Post(models.Model):
     def content_as_html(self):
         return commonmark.commonmark(self.content)
 
-    
-
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment', default=99999)

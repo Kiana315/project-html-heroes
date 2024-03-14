@@ -22,7 +22,16 @@
             
             <div class="submit-container">
                 <div class="left">
+                    <label for="imageUpload" class="upload-icon">
+                        <ion-icon name="image"></ion-icon>
+                    </label>
+                    <!-- Upload image -->
+                    <input type="file" id="imageUpload" style="display: none;">
                     <!-- Set attributes of post -->
+                    
+                </div>
+                
+                <div class="right">
                     <input type="checkbox" id="content_type" name="content_type">
                     <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
          
@@ -31,10 +40,7 @@
                         <option value="FRIENDS">Friends-Only</option>
                         <option value="PRIVATE">Private</option>
                     </select>
-                </div>
-                
-                <div class="right">
-    
+
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Post</button>
                 </div>
@@ -63,20 +69,14 @@
                     </label>
                     <!-- Upload image -->
                     <input type="file" id="imageUpload" style="display: none;">
-
-                    <!-- Set attributes of post -->
-                    <input type="checkbox" id="content_type" name="content_type">
-                    <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
-         
+                </div>
+                
+                <div class="right">
                     <select name="visibility" id="visibility">
                         <option value="PUBLIC" selected>Public</option>
                         <option value="FRIENDS">Friends-Only</option>
                         <option value="PRIVATE">Private</option>
                     </select>
-                </div>
-                
-                <div class="right">
-                    
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Post</button>
                 </div>
