@@ -48,7 +48,7 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
     content_type = models.CharField(max_length=10, choices=CONTENT_TYPE_CHOICES, default='PLAIN')
-    image_data = models.JSONField(default=list)
+    image_data = models.TextField(blank=True, null=True)
     visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='PUBLIC')
     date_posted = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -59,6 +59,14 @@ class Post(models.Model):
     def content_as_html(self):
         return commonmark.commonmark(self.content)
 
+    def add_image(self, image_base64):
+        if self.image_data:
+            images = json.loads(self.image_data)
+        else:
+            images = []
+        images.append(image_base64)
+        self.image_data = json.dumps(images)
+        self.save()
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment', default=99999)

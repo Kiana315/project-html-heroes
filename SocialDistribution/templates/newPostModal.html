@@ -11,27 +11,17 @@
     </div>
 </div>
 
-<!-- Modal for text posts -->
+<!-- Modal for text posts/common mark posts -->
 <div id="newTextPost" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
         <form id="newTextForm">
             <!-- Text input fields -->
-            <input id="titleInput" type="text" name="title" placeholder="Title">
+            <input class="title-input" id="titleInput" type="text" name="title" placeholder="Title">
             <textarea id="contentInput" name="content" placeholder="Tell Something New..."></textarea>
             
             <div class="submit-container">
                 <div class="left">
-                    <label for="imageUpload" class="upload-icon">
-                        <ion-icon name="image"></ion-icon>
-                    </label>
-                    <!-- Upload image -->
-                    <input type="file" id="imageUpload" style="display: none;">
-                    <!-- Set attributes of post -->
-                    
-                </div>
-                
-                <div class="right">
                     <input type="checkbox" id="content_type" name="content_type">
                     <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
          
@@ -40,7 +30,9 @@
                         <option value="FRIENDS">Friends-Only</option>
                         <option value="PRIVATE">Private</option>
                     </select>
-
+                </div>
+                
+                <div class="right">
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Post</button>
                 </div>
@@ -55,11 +47,10 @@
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
         <form id="newImageForm" enctype="multipart/form-data">
-            <input id="titleInput" type="text" name="title" placeholder="Title">
+            <input class="title-input" id="titleInput2" type="text" name="title" placeholder="Title">
             <!-- Preview image -->
             <div class="preview-contaienr" id="imagePreviewContainer">
-                <p>Preview images: </p>
-                <div id="imagePreview"></div>
+                <!-- Preview images -->
             </div>
 
             <div class="submit-container">
@@ -68,15 +59,16 @@
                         <ion-icon name="image"></ion-icon>
                     </label>
                     <!-- Upload image -->
-                    <input type="file" id="imageUpload" style="display: none;">
-                </div>
-                
-                <div class="right">
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
                     <select name="visibility" id="visibility">
                         <option value="PUBLIC" selected>Public</option>
                         <option value="FRIENDS">Friends-Only</option>
                         <option value="PRIVATE">Private</option>
                     </select>
+                </div>
+                
+                <div class="right">
+                    
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Post</button>
                 </div>
@@ -84,3 +76,6 @@
         </form>
     </div>
 </div>
+<script>
+    var username = "{{ user.username }}";
+</script>
