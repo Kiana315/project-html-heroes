@@ -98,3 +98,17 @@ class MessageSuperSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         message = MessageSuper.objects.create(**validated_data)
         return message
+
+
+class OpenAPIServerNodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServerNode
+        fields = ['id', 'name', 'host']
+
+
+class OpenAPIUserSerializer(serializers.ModelSerializer):
+    server_node = OpenAPIServerNodeSerializer()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'avatar', 'bio', 'server_node']

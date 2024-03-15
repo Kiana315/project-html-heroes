@@ -784,3 +784,19 @@ class DeleteIDOfMessageAPIView(APIView):
         message.delete()
 
         return JsonResponse({'status': 'success', 'message': f'Message with id={ID} is deleted.'})
+
+
+class OpenAPIUserAPIView(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = OpenAPIUserSerializer
+
+
+class OpenAPIServerNodeAPIView(viewsets.ModelViewSet):
+    queryset = ServerNode.objects.all()
+    serializer_class = OpenAPIServerNodeSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        server_node = self.get_object()
+        # Delete all users from this server node
+        User.objects.filter(server_node=server_node).delete()
+        return super().destroy(request, *args, **kwargs)

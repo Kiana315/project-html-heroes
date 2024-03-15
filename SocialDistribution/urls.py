@@ -87,7 +87,13 @@ if settings.DEBUG:
 
 # DRF API Routers
 router.register(f"api/users", UsersAPIView, basename='users')
-urlpatterns.append(path('',include(router.urls)))
+
+# Server Node OpenAPI
+router.register(f"/openapi/users", OpenAPIUserAPIView, basename='openapi-users')
+router.register(f"/openapi/server-nodes", OpenAPIServerNodeAPIView, basename='openapi-server-node')
+
+# Add routers
+urlpatterns.append(path('', include(router.urls)))
 
 """
 MESSAGE_TYPES = [

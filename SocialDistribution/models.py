@@ -1,3 +1,5 @@
+import json
+
 import commonmark
 import requests
 import base64
@@ -23,6 +25,7 @@ class User(AbstractUser):
     github_username = models.CharField(max_length=50, blank=True)
     recent_processed_activity = models.DateTimeField(null=True, blank=True)
     is_approved = models.BooleanField(default=False)
+    server_node = models.ForeignKey('ServerNode', on_delete=models.SET_NULL, default=None, null=True)
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
@@ -186,3 +189,8 @@ def fetch_github_activity(user):
         if response.status_code == 200:
             return response.json()
     return []
+
+
+class ServerNode(models.Model):
+    name = models.CharField(max_length=64)
+    host = models.URLField()
