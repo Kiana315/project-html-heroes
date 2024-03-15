@@ -103,7 +103,7 @@ class MessageSuperSerializer(serializers.ModelSerializer):
 class OpenAPIServerNodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServerNode
-        fields = ['id', 'name', 'host']
+        fields = ['id', 'name', 'host', 'userAPI']
 
 
 class OpenAPIUserSerializer(serializers.ModelSerializer):

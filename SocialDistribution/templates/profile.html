@@ -26,6 +26,10 @@
         {% csrf_token %}
         <button type="submit" class="logout-button">Log Out</button>
     </form>
+    <form action="{% url 'PAGE_AddConnect' %}" method="get">
+        {% csrf_token %}
+        <button type="submit" id="ntn-button">Add Node Connection</button>
+    </form>
     {% if request.user == user and request.user %}
         <div>
             <button><a href="{% url 'API_AuthorDraft' username=user.username %}" title="Post Draft">

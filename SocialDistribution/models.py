@@ -194,3 +194,4 @@ def fetch_github_activity(user):
 class ServerNode(models.Model):
     name = models.CharField(max_length=64)
     host = models.URLField()
+    userAPI = models.URLField()

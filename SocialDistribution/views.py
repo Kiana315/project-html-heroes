@@ -138,6 +138,11 @@ class FriendPostsView(TemplateView):
     template_name = "friendPosts.html"
 
 
+class AddConnectView(TemplateView):
+    """ * [GET] Get The AddConnect Page """
+    template_name = "addConnect.html"
+
+
 class PPsAPIView(generics.ListAPIView):
     """ [GET] Get The Public Posts """
     serializer_class = PostSerializer

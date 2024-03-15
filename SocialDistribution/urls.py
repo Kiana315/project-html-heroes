@@ -15,6 +15,7 @@ urlpatterns = [
     path("", approved_user_required(IndexView.as_view()), name="PAGE_Home"),
     path('admin/', admin.site.urls, name="PAGE_Admin"),
     path("login/", LoginView.as_view(), name="PAGE_Login"),
+    path("addConnect/", AddConnectView.as_view(), name="PAGE_AddConnect"),
     path('logout/', LogoutView.as_view(), name='PAGE_Logout'),
     path("signup/", signupView, name="PAGE_Signup"),
     path("friendPosts/<str:username>/", FriendPostsView.as_view(), name="PAGE_FriendPosts"),
@@ -76,8 +77,8 @@ urlpatterns = [
     # Inbox API System:
     path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                           # GET TypeMessagesForUser           --> Test Success
     path('api/msgs/create/', CreateMessageAPIView.as_view(), name='API_POSTUserMsg'),                                                       # POST TypeMessageForUser           --> Test Success
-    path('api/msgs/deleteType/<str:type>/', DeleteTypeOfMessageAPIView.as_view(), name='API_DELETEMsgType'),                                    # DELETE TypeMessageForUser         -->
-    path('api/msgs/deleteID/<int:ID>/', DeleteIDOfMessageAPIView.as_view(), name='API_DELETEMsgID'),                                      # DELETE TypeMessageForUser         -->
+    path('api/msgs/deleteType/<str:type>/', DeleteTypeOfMessageAPIView.as_view(), name='API_DELETEMsgType'),                                # DELETE TypeMessageForUser         -->
+    path('api/msgs/deleteID/<int:ID>/', DeleteIDOfMessageAPIView.as_view(), name='API_DELETEMsgID'),                                        # DELETE TypeMessageForUser         -->
 ] 
 
 if settings.DEBUG:
@@ -89,8 +90,8 @@ if settings.DEBUG:
 router.register(f"api/users", UsersAPIView, basename='users')
 
 # Server Node OpenAPI
-router.register(f"/openapi/users", OpenAPIUserAPIView, basename='openapi-users')
-router.register(f"/openapi/server-nodes", OpenAPIServerNodeAPIView, basename='openapi-server-node')
+router.register(f"openapi/users", OpenAPIUserAPIView, basename='openapi-users')
+router.register(f"openapi/server-nodes", OpenAPIServerNodeAPIView, basename='openapi-server-node')
 
 # Add routers
 urlpatterns.append(path('', include(router.urls)))
