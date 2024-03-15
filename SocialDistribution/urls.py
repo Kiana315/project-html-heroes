@@ -69,18 +69,21 @@ urlpatterns = [
     path('api/posts/<int:post_id>/share/', SharePostView.as_view(), name='share_post'),
     path('api/posts/<int:post_id>/delete/', DeletePostView.as_view(), name='API_delete_post'),                                              # DELETE post                       --> Test Success
     path('api/posts/<int:post_id>/update/', UpdatePostView.as_view(), name='update_post'),                                                  # GET/PUT edit and update post      --> Test Success
+    path('user/<str:username>/posts/<int:post_id>/image/<int:image_id>', views.get_image, name='image-post'),
 
-    # path('api/api/posts/<int:post_id>/image'),
+    
+
     # Inbox API System:
     path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                           # GET TypeMessagesForUser           --> Test Success
     path('api/msgs/create/', CreateMessageAPIView.as_view(), name='API_POSTUserMsg'),                                                       # POST TypeMessageForUser           --> Test Success
     path('api/msgs/deleteType/<str:type>/', DeleteTypeOfMessageAPIView.as_view(), name='API_DELETEMsgType'),                                    # DELETE TypeMessageForUser         -->
     path('api/msgs/deleteID/<int:ID>/', DeleteIDOfMessageAPIView.as_view(), name='API_DELETEMsgID'),                                      # DELETE TypeMessageForUser         -->
-]
+] 
 
 if settings.DEBUG:
-    pass
+    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    pass
 
 # DRF API Routers
 router.register(f"api/users", UsersAPIView, basename='users')

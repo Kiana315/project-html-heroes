@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.urls import reverse
+from django.core.files.base import ContentFile
 import base64
 
 # REST Pattern:
@@ -174,6 +175,32 @@ class NPsAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)  # set current user as author
+
+
+def get_image(request, username, post_id, image_id):
+    try:
+        image_index = image_id - 1
+        post = Post.objects.get(id=post_id)
+
+        if post.visibility == 'PUBLIC' and post.image_data:
+            # Split the image data and select the corresponding image data based on the index
+            image_data_list = post.image_data.split(',')
+            
+
+            if 0 <= image_index < (len(image_data_list)/2):
+                # Merge prefix and actual base64 encoded part
+                image_data = image_data_list[image_index*2] + "," + image_data_list[image_index*2+1]
+                
+                image_binary_data = base64.b64decode(image_data.split(',')[1])
+                return HttpResponse(image_binary_data, content_type='image/jpeg')
+            else:
+                return HttpResponse(f"Sorry, there are only {image_index} images in post {post.id}.", status=404)
+        else:
+            return HttpResponse("No image data found for this post or this is not a PUBLIC post.", status=404)
+    except Post.DoesNotExist:
+        return HttpResponse("Post not found.", status=404)
+
+
 
 
 class DeletePostView(APIView):
@@ -468,7 +495,7 @@ class ProfileAPIView(APIView):
     def get(self, request, username):
         profile_user = get_object_or_404(User, username=username)
         current_user = request.user
-        print("current_user:", current_user, "\nprofile_user", profile_user)
+        
 
         if current_user == profile_user:
             # Current user views own posts: Return all posts
