@@ -57,6 +57,10 @@ class MessageAdmin(admin.ModelAdmin):
 
     actions = ['filter_messages_by_type']
 
+class SignUpAdmin(admin.ModelAdmin):
+    list_display = ('id', 'is_signup_enabled')
+    list_editable = ('is_signup_enabled',)
+
 class ActivityAdmin(admin.ModelAdmin):
     list_display = ('user', 'activity_type', 'created_at')
     list_filter = ('user', 'activity_type')
@@ -70,5 +74,6 @@ admin.site.register(Following, FollowingAdmin)
 admin.site.register(Follower, FollowerAdmin)
 admin.site.register(Friend, FriendAdmin)
 admin.site.register(MessageSuper, MessageAdmin)
-admin.site.register(GithubActivity)
+admin.site.register(SignUpSettings, SignUpAdmin)
+admin.site.register(GithubActivity, ActivityAdmin)
 

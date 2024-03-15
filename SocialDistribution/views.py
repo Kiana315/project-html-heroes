@@ -1,4 +1,6 @@
 # Traditional Pattern:
+from django.http import HttpResponseForbidden
+from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import Http404, HttpResponse
@@ -52,28 +54,40 @@ def signupView(request):
         password = request.POST.get('password1')
         confirm_password = request.POST.get('password2')
 
-        if password == confirm_password:
-            # user existence check
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "Username already exists")
-                return render(request, 'signup.html')
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, "Email already exists")
-                return render(request, 'signup.html')
+        if SignUpSettings.objects.first().is_signup_enabled:
+            if password == confirm_password:
+                # user existence check
+                if User.objects.filter(username=username).exists():
+                    messages.error(request, "Username already exists")
+                    return render(request, 'signup.html')
+                elif User.objects.filter(email=email).exists():
+                    messages.error(request, "Email already exists")
+                    return render(request, 'signup.html')
+                else:
+                    # create new account
+                    user = User.objects.create_user(username=username, password=password, email=email)
+                    user.save()
+                    user = authenticate(username=username, password=password)
+                    login(request, user)
+                    return redirect('PAGE_Login')
             else:
-                # create new account
-                user = User.objects.create_user(username=username, password=password, email=email)
-                user.save()
-                user = authenticate(username=username, password=password)
-                login(request, user)
-                return redirect('PAGE_Login')
+                messages.error(request, "Passwords do not match")
+                return render(request, 'signup.html')
         else:
-            messages.error(request, "Passwords do not match")
+            messages.error(request, "Sign up is disabled right now")
             return render(request, 'signup.html')
     else:
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
 
+def approved_user_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_approved:
+            return view_func(request, *args, **kwargs)
+        else:
+            return render(request, 'notApproved.html')
+    return wrapper
 
 """
 ---------------------------------- Posts Presentation Settings ----------------------------------

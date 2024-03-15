@@ -2,7 +2,6 @@ import commonmark
 import requests
 import base64
 
-from time import sleep
 from django.utils import timezone
 from django.db import models
 from django.conf import settings
@@ -23,6 +22,7 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
     github_username = models.CharField(max_length=50, blank=True)
     recent_processed_activity = models.DateTimeField(null=True, blank=True)
+    is_approved = models.BooleanField(default=False)
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
@@ -154,6 +154,9 @@ class MessageSuper(models.Model):
     @classmethod
     def get_messages_of_type_for_user(cls, user, message_type):
         return cls.objects.filter(owner=user, message_type=message_type)
+
+class SignUpSettings(models.Model):
+    is_signup_enabled = models.BooleanField(default=True)
 
 class GithubActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

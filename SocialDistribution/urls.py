@@ -12,7 +12,7 @@ router = SimpleRouter()
 
 urlpatterns = [
     # Basic PAGE View Settings:
-    path("", IndexView.as_view(), name="PAGE_Home"),
+    path("", approved_user_required(IndexView.as_view()), name="PAGE_Home"),
     path('admin/', admin.site.urls, name="PAGE_Admin"),
     path("login/", LoginView.as_view(), name="PAGE_Login"),
     path('logout/', LogoutView.as_view(), name='PAGE_Logout'),
