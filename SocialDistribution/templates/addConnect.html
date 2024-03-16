@@ -17,12 +17,16 @@
     <div class="ac-container">
         <br>
         <h1 class="ac-title">- Let's Build SocialDistrib!! - </h1>
-        <h2 class="ac-comment"> Please add the connection to a remote node </h2>
-        <form action="/login/" method="post">
+        <h2 class="ac-comment"> Please add a remote node connection </h2>
+        <form>
             {% csrf_token %}
-            <input type="url" class="ac-input" name="targetHost"  placeholder="Target Host URL" required autofocus>
-            <input type="text" class="ac-input" name="username"  placeholder="Username" required autofocus>
-            <input type="password" class="ac-input" name="password" placeholder="Password" required>
+            <input type="url" class="ac-input" name="targetHost"  placeholder="URL for OpenAPI (Remote)" required autofocus>
+            <input type="text" class="ac-input" name="username"  placeholder="Username (Connection Key)" required autofocus>
+            <input type="password" class="ac-input" name="password" placeholder="Password (Connection Key)" required>
+            <h2 class="ac-comment"> Please provide local info for remote tracking </h2>
+            <input type="text" class="ac-input" name="localName" placeholder="Our Server Name (Local)" required>
+            <input type="url" class="ac-input" name="localUserListAPI" placeholder="URL for Our UserListAPI (Local)" required>
+        
             <button type="submit" class="ac-button">Connect Node</button>
             {% if form.non_field_errors %}
                 <div class="error">

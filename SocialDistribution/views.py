@@ -796,12 +796,31 @@ class OpenAPIUserAPIView(viewsets.ModelViewSet):
     serializer_class = OpenAPIUserSerializer
 
 
-class OpenAPIServerNodeAPIView(viewsets.ModelViewSet):
+class OpenAPIView(viewsets.ModelViewSet):
     queryset = ServerNode.objects.all()
     serializer_class = OpenAPIServerNodeSerializer
 
-    def destroy(self, request, *args, **kwargs):
-        server_node = self.get_object()
-        # Delete all users from this server node
-        User.objects.filter(server_node=server_node).delete()
-        return super().destroy(request, *args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        username = request.data.get('username')
+        password = request.data.get('password')
+        remoteName = str(request.data.get('from'))
+        remoteUsers = str(request.data.get('userAPI'))
+        if not self._checkAccount(username, password):
+            return JsonResponse({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+        ServerNode.objects.create(name=remoteName,
+                                  host=remoteName,
+                                  userAPI=remoteUsers)
+        return Response(status=status.HTTP_201_CREATED)
+
+    def _checkAccount(self, username, password):
+        ACCOUNTS = [
+            {'username': 'SD1', 'password': 'SD111'},
+            {'username': 'SD2', 'password': 'SD222'},
+        ]
+        for account in ACCOUNTS:
+            if account['username'] == username and account['password'] == password:
+                return True
+        return False
+
