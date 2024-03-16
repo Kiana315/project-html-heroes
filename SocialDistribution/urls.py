@@ -18,17 +18,17 @@ urlpatterns = [
     path("addConnect/", AddConnectView.as_view(), name="PAGE_AddConnect"),
     path('logout/', LogoutView.as_view(), name='PAGE_Logout'),
     path("signup/", signupView, name="PAGE_Signup"),
-    path("friendPosts/<str:username>/", FriendPostsView.as_view(), name="PAGE_FriendPosts"),
-    path("inbox/<str:username>/", InboxView.as_view(), name="PAGE_Inbox"),
-    path("posts/<int:post_id>/", PostDetailView.as_view(), name="PAGE_postDetail"),
+    path("friendPosts/<str:username>/", approved_user_required(FriendPostsView.as_view()), name="PAGE_FriendPosts"),
+    path("inbox/<str:username>/", approved_user_required(InboxView.as_view()), name="PAGE_Inbox"),
+    path("posts/<int:post_id>/", approved_user_required(PostDetailView.as_view()), name="PAGE_postDetail"),
 
 
     # Friend API System:
-    path('search/', views.search_user, name='PAGE_SearchUser'),
-    path('profile/<str:username>/followers/', FollowerView.as_view(), name='PAGE_FollowersList'),
-    path('profile/<str:username>/following/', FollowingView.as_view(), name='PAGE_FollowingList'),
-    path('profile/<str:username>/friends/', FriendView.as_view(), name='PAGE_FriendList'),
-    path("profile/<str:username>/draft/", author_draft_view, name="API_AuthorDraft"),
+    path('search/', approved_user_required(views.search_user), name='PAGE_SearchUser'),
+    path('profile/<str:username>/followers/', approved_user_required(FollowerView.as_view()), name='PAGE_FollowersList'),
+    path('profile/<str:username>/following/', approved_user_required(FollowingView.as_view()), name='PAGE_FollowingList'),
+    path('profile/<str:username>/friends/', approved_user_required(FriendView.as_view()), name='PAGE_FriendList'),
+    path("profile/<str:username>/draft/", approved_user_required(author_draft_view), name="API_AuthorDraft"),
 
     path('api/user/<str:username>/posts/', ProfileAPIView.as_view(), name='API_profile'),
     
@@ -49,17 +49,17 @@ urlpatterns = [
     # Identity API System:
     path("api/user/<str:username>/", UserAPIView.as_view(), name="API_USER"),                                                               # GET Self User/Profile Info        --> Test Success
     path("api/user/<str:user1_id>/<str:user2_id>/", UserAPIView.as_view(), name="API_USER_TWO"),                                            # GET Other's User/Profile Info     --> Test Success
-    path("profile/<str:username>/", ProfileView.as_view(), name="PAGE_Profile"),
+    path("profile/<str:username>/", approved_user_required(ProfileView.as_view()), name="PAGE_Profile"),
     
     path("friendPosts/<str:username>/profile/<str:selfUsername>/<str:targetUsername>/",
         lambda request, username, selfUsername, targetUsername: 
         redirect('PAGE_OtherProfile', selfUsername=selfUsername, targetUsername=targetUsername)),
-    path("profile/<str:username>/upload-avatar/", upload_avatar, name="API_UploadAvatar"),
-    path("profile/<str:username>/update-bio/", update_bio, name="API_UpdateBio"),
-    path("profile/<str:username>/update-username/", update_username, name="API_UpdateUsername"),
-    path('profile/<str:username>/update-github-username/', views.update_github_username, name='PAGE_LinkGithub'),
-    path('profile/<str:username>/update-github-username-submit/', views.update_github_username_submit, name='API_UpdateGithubUsername'),
-    path("profile/<str:selfUsername>/<str:targetUsername>/", otherProfileView, name="PAGE_OtherProfile"),
+    path("profile/<str:username>/upload-avatar/", approved_user_required(upload_avatar), name="API_UploadAvatar"),
+    path("profile/<str:username>/update-bio/", approved_user_required(update_bio), name="API_UpdateBio"),
+    path("profile/<str:username>/update-username/", approved_user_required(update_username), name="API_UpdateUsername"),
+    path('profile/<str:username>/update-github-username/', approved_user_required(views.update_github_username), name='PAGE_LinkGithub'),
+    path('profile/<str:username>/update-github-username-submit/', approved_user_required(views.update_github_username_submit), name='API_UpdateGithubUsername'),
+    path("profile/<str:selfUsername>/<str:targetUsername>/", approved_user_required(otherProfileView), name="PAGE_OtherProfile"),
 
     # Post API System:
     path("api/pps/", PPsAPIView.as_view(), name="API_PPs"),                                                                                 # GET PublicPostsList               --> Test Success
@@ -72,7 +72,7 @@ urlpatterns = [
     path('api/posts/<int:post_id>/share/', SharePostView.as_view(), name='share_post'),
     path('api/posts/<int:post_id>/delete/', DeletePostView.as_view(), name='API_delete_post'),                                              # DELETE post                       --> Test Success
     path('api/posts/<int:post_id>/update/', UpdatePostView.as_view(), name='update_post'),                                                  # GET/PUT edit and update post      --> Test Success
-    path('user/<str:username>/posts/<int:post_id>/image/<int:image_id>', views.get_image, name='image-post'),
+    path('user/<str:username>/posts/<int:post_id>/image/<int:image_id>', approved_user_required(views.get_image), name='image-post'),
 
     # Inbox API System:
     path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                           # GET TypeMessagesForUser           --> Test Success
