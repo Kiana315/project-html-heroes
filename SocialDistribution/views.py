@@ -83,7 +83,7 @@ def signupView(request):
 def approved_user_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if request.user.is_approved:
+        if getattr(request.user, 'is_approved', False):
             return view_func(request, *args, **kwargs)
         else:
             return render(request, 'notApproved.html')
@@ -181,7 +181,7 @@ class FPsAPIView(generics.ListAPIView):
         # Merge query sets and remove duplicates
         posts = user_following_posts | friend_posts | user_posts
         posts = posts.distinct().order_by('-date_posted')
-        
+
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
@@ -204,12 +204,12 @@ def get_image(request, username, post_id, image_id):
         if post.visibility == 'PUBLIC' and post.image_data:
             # Split the image data and select the corresponding image data based on the index
             image_data_list = post.image_data.split(',')
-            
+
 
             if 0 <= image_index < (len(image_data_list)/2):
                 # Merge prefix and actual base64 encoded part
                 image_data = image_data_list[image_index*2] + "," + image_data_list[image_index*2+1]
-                
+
                 image_binary_data = base64.b64decode(image_data.split(',')[1])
                 return HttpResponse(image_binary_data, content_type='image/jpeg')
             else:
@@ -270,7 +270,7 @@ def author_draft_view(request, username):
 class PostOperationAPIView(generics.RetrieveUpdateDestroyAPIView):
     """ [GET/PUT/DELETE] Get, Update, or Delete A Specific Post """
     queryset = Post.objects.all()
-    serializer_class = PostSerializer   
+    serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
 
     def get_object(self):
@@ -291,10 +291,10 @@ class CommentAPIView(generics.ListCreateAPIView):
         # If the post is friends-only, filter comments
         if post.visibility == 'FRIENDS':
             friends = User.objects.filter(
-                Q(friends_set1__user2=post.author) | 
+                Q(friends_set1__user2=post.author) |
                 Q(friends_set2__user1=post.author)
             ).distinct()
-            
+
             # Check if the user is a friend or the author of the post
             if user in friends or user == post.author:
                 return Comment.objects.filter(post=post)
@@ -320,7 +320,7 @@ class CommentAPIView(generics.ListCreateAPIView):
             owner=post.author,
             message_type='CM',  # 'CM' for comment
             content=f'{user.username} commented on your post: "{comment.comment_text}"',
-            origin=user.username 
+            origin=user.username
         )
 
     def get_serializer_context(self):
@@ -335,7 +335,7 @@ class LikeAPIView(generics.ListCreateAPIView):
 
     # def get_queryset(self):
     #     return get_list_or_404(Like, post_id=self.kwargs['post_id'])
-    
+
     def get_queryset(self):
         post_id = self.kwargs['post_id']
         return Like.objects.filter(post_id=post_id)
@@ -352,7 +352,7 @@ class LikeAPIView(generics.ListCreateAPIView):
         message_content = f'{user.username} liked your post "{post.title}".'
         MessageSuper.objects.create(
             owner=post.author,
-            message_type='LK',  
+            message_type='LK',
             content=message_content,
             origin=user.username,
             post=post
@@ -411,7 +411,7 @@ class SharePostView(APIView):
             followers = User.objects.filter(reverse_followers__user=original_post.author)
 
             friends = User.objects.filter(
-                Q(friends_set1__user2=original_post.author) | 
+                Q(friends_set1__user2=original_post.author) |
                 Q(friends_set2__user1=original_post.author)
             ).distinct()
             all_receivers = followers.union(friends, all=True)
@@ -514,7 +514,7 @@ class ProfileAPIView(APIView):
     def get(self, request, username):
         profile_user = get_object_or_404(User, username=username)
         current_user = request.user
-        
+
 
         if current_user == profile_user:
             # Current user views own posts: Return all posts
