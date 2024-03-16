@@ -60,16 +60,18 @@
     <div class="scrollable-content">
         <span id="postId" style="display: none">{{ post.id }}</span>
         <!-- Load text content -->
-        {% if post.content_type != 'COMMONMARK'%}
-        <div class="post-content formatted-content" id="postContent">{{ post.content|safe }}</div>
+        {% if post.content %}
+            {% if post.content_type != 'COMMONMARK'%}
+            <div class="post-content" id="postContent">{{ post.content|safe }}</div>
+            {% else %}
+            <div class="post-content" id="postContent" >{{ post.content_as_html|safe }}</div>
+            {% endif %}
         {% else %}
-        <div id="postContent">{{ post.content_as_html|safe }}</div>
-        {% endif %}
-        
-        {% if post.image_data %}
-        <div class="image_container" id="imageContainer">
-            <!-- Load image content -->
-        </div>
+            {% if post.image_data %}
+            <div class="image_container" id="imageContainer">
+                <!-- Load image content -->
+            </div>
+            {% endif %}
         {% endif %}
 
         <div class="post-actions">
@@ -144,17 +146,11 @@
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
         <form id="editForm">
-            <input id="titleInput" type="text" name="title" placeholder="Title">
+            <input class="title-input" id="titleInput" type="text" name="title" placeholder="Title">
             <textarea id="contentInput" name="content" placeholder="Tell Something New..."></textarea>
 
             <div class="submit-container">
                 <div class="left">
-                    <label for="imageUpload" class="upload-icon">
-                        <ion-icon name="image"></ion-icon>
-                    </label>
-                    <input type="file" id="imageUpload" name="image" style="display: none;">
-                </div>
-                <div class="right">
                     <input type="checkbox" id="content_type" name="content_type">
                     <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
 
@@ -163,6 +159,42 @@
                         <option value="FRIENDS">Friends-Only</option>
                         <option value="PRIVATE">Private</option>
                     </select>
+                </div>
+                <div class="right">
+                    <button class="post-button" type="submit">Save Draft</button>
+                    <button class="post-button" type="submit">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editImageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <form id="editImageForm" enctype="multipart/form-data">
+            <input class="title-input" id="titleInput2" type="text" name="title" placeholder="Title">
+            <!-- Preview image -->
+            <div class="preview-contaienr" id="imagePreviewContainer">
+                <!-- Preview images -->
+            </div>
+
+            <div class="submit-container">
+                <div class="left">
+                    <label for="imageUpload" class="upload-icon">
+                        <ion-icon name="image"></ion-icon>
+                    </label>
+                    <!-- Upload image -->
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                    <select name="visibility" id="visibility">
+                        <option value="PUBLIC" selected>Public</option>
+                        <option value="FRIENDS">Friends-Only</option>
+                        <option value="PRIVATE">Private</option>
+                    </select>
+                </div>
+                
+                <div class="right">
+                    
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Save Changes</button>
                 </div>
@@ -173,7 +205,7 @@
 
 <script type="text/javascript">
     const currentPostTitle = "{{ post.title }}";
-    // const currentPostContent = "{{ post.content }}";
+    // const currentPostContent = `{{ post.content }}`;
 </script>
 
 <script src="{% static 'js/common.js' %}"></script>

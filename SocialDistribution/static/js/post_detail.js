@@ -16,11 +16,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var shareModal = document.getElementById('shareModal');
     var confirmShare = document.getElementById('confirmShare');
     var shareText = document.getElementById('shareText');
+    var postContent = document.getElementById('postContent');
 
     checkLikeStatusAndUpdateIcon(postId);
 
     if (moreOptionsButton) {
         moreOptionsButton.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' 
+            });
             if (optionsContainer.style.display === 'none') {
                 optionsContainer.style.display = 'block';
             } else {
@@ -165,35 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         shareText.value = '';
     }
 
-    // show images
-    fetch(`/api/posts/${postId}`) // Get image data from backend
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json(); 
-    })
-    .then(data => {
-        // process data
-        var imageDataString = data.image_data; // get image_data string
-        console.log(imageDataString);
-        var imageDataArray = imageDataString.split(",");
-        console.log(imageDataArray);
-
-        for (var i = 1; i < imageDataArray.length; i += 2) {
-            var base64Data = imageDataArray[i]; // Extract Base64 encoded part
-            // Create img tag and display image
-            var img = document.createElement("img");
-            img.src = "data:image/jpeg;base64," + base64Data; // add "data:image/jpeg;base64," header
-            img.classList.add("post-image"); // add css style
-            
-            document.getElementById("imageContainer").appendChild(img);
-        }   
-        
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-    });
+    if (!postContent){showImage();}
 
 
 });
@@ -452,4 +429,35 @@ function autoResizeTextarea() {
 }
 document.addEventListener('DOMContentLoaded', autoResizeTextarea);
 
-
+function showImage() {
+    const postContainer = document.querySelector('.post-container');
+    const postId = postContainer.getAttribute('data-post-id');
+    
+    fetch(`/api/posts/${postId}`) // Get image data from backend
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); 
+    })
+    .then(data => {
+        // process data
+        var imageDataString = data.image_data; // get image_data string
+        
+        var imageDataArray = imageDataString.split(",");
+        
+        for (var i = 1; i < imageDataArray.length; i += 2) {
+            var base64Data = imageDataArray[i]; // Extract Base64 encoded part
+            // Create img tag and display image
+            var img = document.createElement("img");
+            img.src = "data:image/jpeg;base64," + base64Data; // add "data:image/jpeg;base64," header
+            img.classList.add("post-image"); // add css style
+            
+            document.getElementById("imageContainer").appendChild(img);
+        }   
+        
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+}

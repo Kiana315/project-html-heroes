@@ -12,15 +12,15 @@ router = SimpleRouter()
 
 urlpatterns = [
     # Basic PAGE View Settings:
-    path("", IndexView.as_view(), name="PAGE_Home"),
+    path("", approved_user_required(IndexView.as_view()), name="PAGE_Home"),
     path('admin/', admin.site.urls, name="PAGE_Admin"),
     path("login/", LoginView.as_view(), name="PAGE_Login"),
+    path("addConnect/", AddConnectView.as_view(), name="PAGE_AddConnect"),
     path('logout/', LogoutView.as_view(), name='PAGE_Logout'),
     path("signup/", signupView, name="PAGE_Signup"),
     path("friendPosts/<str:username>/", FriendPostsView.as_view(), name="PAGE_FriendPosts"),
     path("inbox/<str:username>/", InboxView.as_view(), name="PAGE_Inbox"),
     path("posts/<int:post_id>/", PostDetailView.as_view(), name="PAGE_postDetail"),
-
 
 
     # Friend API System:
@@ -40,7 +40,7 @@ urlpatterns = [
     path('api/user/<str:selfUsername>/friend/<str:targetUsername>/', createFriendshipAPIView, name='API_POSTFriend'),                       # POST Create Friend Case           --> Test Success
     path('api/user/<str:selfUsername>/unfollowerOf/<str:targetUsername>/', DeleteFollowerAPIView.as_view(), name='API_DELETEFollowerOf'),   # DELETE Follower Case for usr1     --> ??
     path('api/user/<str:selfUsername>/unfollowing/<str:targetUsername>/', DeleteFollowingAPIView.as_view(), name='API_DELETEFollowing'),    # DELETE Following Case for usr1    --> ??
-    path('api/user/<str:selfUsername>/unfriend/<str:targetUsername>/', deleteFriendshipAPIView, name='API_DELETEFriend'),                   # DELETE Friend Case for usr1       --> ??
+    path('api/user/<str:selfUsername>/unfriend/<str:targetUsername>/', deleteFriendshipAPIView, name='API_DELETEFriend'),               # DELETE Friend Case for usr1       --> ??
     path('api/user/<str:username1>/anyRelations/<str:username2>/', AnalyzeRelationAPIView.as_view(), name='API_AnalyzeRelation'),           # GET Check Relations b/w Users     --> Test Success
 
     path('api/follow-requests/accept/<str:origin_username>/', AcceptFollowRequestAPIView.as_view(), name='accept-follow-request'),
@@ -72,22 +72,30 @@ urlpatterns = [
     path('api/posts/<int:post_id>/share/', SharePostView.as_view(), name='share_post'),
     path('api/posts/<int:post_id>/delete/', DeletePostView.as_view(), name='API_delete_post'),                                              # DELETE post                       --> Test Success
     path('api/posts/<int:post_id>/update/', UpdatePostView.as_view(), name='update_post'),                                                  # GET/PUT edit and update post      --> Test Success
+    path('user/<str:username>/posts/<int:post_id>/image/<int:image_id>', views.get_image, name='image-post'),
 
-    # path('api/api/posts/<int:post_id>/image'),
     # Inbox API System:
     path('api/msgs/retrieve/<str:type>/', UserMessagesAPIView.as_view(), name='API_GETUserMsgs'),                                           # GET TypeMessagesForUser           --> Test Success
     path('api/msgs/create/', CreateMessageAPIView.as_view(), name='API_POSTUserMsg'),                                                       # POST TypeMessageForUser           --> Test Success
-    path('api/msgs/deleteType/<str:type>/', DeleteTypeOfMessageAPIView.as_view(), name='API_DELETEMsgType'),                                    # DELETE TypeMessageForUser         -->
-    path('api/msgs/deleteID/<int:ID>/', DeleteIDOfMessageAPIView.as_view(), name='API_DELETEMsgID'),                                      # DELETE TypeMessageForUser         -->
-]
+    path('api/msgs/deleteType/<str:type>/', DeleteTypeOfMessageAPIView.as_view(), name='API_DELETEMsgType'),                                # DELETE TypeMessageForUser         -->
+    path('api/msgs/deleteID/<int:ID>/', DeleteIDOfMessageAPIView.as_view(), name='API_DELETEMsgID'),
+
+
+    # OpenAPI System:
+    path('openapi/', OpenAPIView.as_view({'post': 'create', }), name='OPENAPI_AddConnect'),
+] 
 
 if settings.DEBUG:
-    pass
+    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    pass
 
 # DRF API Routers
 router.register(f"api/users", UsersAPIView, basename='users')
-urlpatterns.append(path('',include(router.urls)))
+
+
+# Add routers
+urlpatterns.append(path('', include(router.urls)))
 
 """
 MESSAGE_TYPES = [

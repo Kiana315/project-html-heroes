@@ -1,8 +1,9 @@
+import json
+
 import commonmark
 import requests
 import base64
 
-from time import sleep
 from django.utils import timezone
 from django.db import models
 from django.conf import settings
@@ -23,6 +24,8 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
     github_username = models.CharField(max_length=50, blank=True)
     recent_processed_activity = models.DateTimeField(null=True, blank=True)
+    is_approved = models.BooleanField(default=False)
+    server_node = models.ForeignKey('ServerNode', on_delete=models.SET_NULL, default=None, null=True)
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
@@ -48,7 +51,7 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
     content_type = models.CharField(max_length=10, choices=CONTENT_TYPE_CHOICES, default='PLAIN')
-    image_data = models.JSONField(default=list)
+    image_data = models.TextField(blank=True, null=True)
     visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='PUBLIC')
     date_posted = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -59,6 +62,14 @@ class Post(models.Model):
     def content_as_html(self):
         return commonmark.commonmark(self.content)
 
+    def add_image(self, image_base64):
+        if self.image_data:
+            images = json.loads(self.image_data)
+        else:
+            images = []
+        images.append(image_base64)
+        self.image_data = json.dumps(images)
+        self.save()
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment', default=99999)
@@ -153,6 +164,9 @@ class MessageSuper(models.Model):
     def get_messages_of_type_for_user(cls, user, message_type):
         return cls.objects.filter(owner=user, message_type=message_type)
 
+class SignUpSettings(models.Model):
+    is_signup_enabled = models.BooleanField(default=True)
+
 class GithubActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     activity_type = models.CharField(max_length=100)
@@ -181,3 +195,9 @@ def fetch_github_activity(user):
         if response.status_code == 200:
             return response.json()
     return []
+
+
+class ServerNode(models.Model):
+    name = models.CharField(max_length=64)
+    host = models.URLField()
+    userAPI = models.URLField()

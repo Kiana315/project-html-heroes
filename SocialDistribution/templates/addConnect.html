@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Node Connection</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/addConnect.css' %}">
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/">&#20 Home Page</a>
+    </div>
+    <div class="ac-container">
+        <br>
+        <h1 class="ac-title">- Let's Build SocialDistrib!! - </h1>
+        <h2 class="ac-comment"> Please add a remote node connection </h2>
+        <form>
+            {% csrf_token %}
+            <input type="url" class="ac-input" name="targetHost"  placeholder="URL for OpenAPI (Remote)" required autofocus>
+            <input type="text" class="ac-input" name="username"  placeholder="Username (Connection Key)" required autofocus>
+            <input type="password" class="ac-input" name="password" placeholder="Password (Connection Key)" required>
+            <h2 class="ac-comment"> Please provide local info for remote tracking </h2>
+            <input type="text" class="ac-input" name="localName" placeholder="Our Server Name (Local)" required>
+            <input type="url" class="ac-input" name="localUserListAPI" placeholder="URL for Our UserListAPI (Local)" required>
+        
+            <button type="submit" class="ac-button">Connect Node</button>
+            {% if form.non_field_errors %}
+                <div class="error">
+                    <p>Please enter correct information.</p>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+<script src="{% static 'js/addConnect.js' %}"></script>
+</body>
+
+</html>
+

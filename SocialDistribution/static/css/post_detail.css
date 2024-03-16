@@ -144,13 +144,22 @@ body  {
     border-bottom: 1px dashed #ccc;
 }
 
+.post-content img{
+    display: block;
+    position: relative;
+    width: auto;
+    max-width: 100%;
+    max-height: 400px;
+    margin: 10px auto;
+}
+
 .image_container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-bottom: 1px dashed #ccc;
 }
 .post-image {
+    display: block;
     position: relative;
     width: auto;
     max-width: 100%;
@@ -357,7 +366,7 @@ body  {
     float: right;
 }
 
-#titleInput {
+.title-input {
     width: 100%;
     height: 36px;
     border-radius: 10px;
@@ -453,6 +462,54 @@ body  {
     height: auto;
 }
 
-.formatted-content {
-    white-space: pre-wrap; 
+.preview-contaienr {
+    margin: 10px 0;
+    height: auto;
+}
+
+.preview-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-right: 10px;
+    padding: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+}
+
+.preview-wrapper:hover {
+    transform: scale(1.05);
+}
+
+.image-preview {
+    width: auto; 
+    max-width: 150px;
+    height: auto;
+    max-height: 150px;
+}
+.image-preview:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.delete-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+    padding: 5px;
+    background-color: transparent;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+}
+.delete-btn ion-icon {
+    color: rgb(255, 0, 0);
+    font-size: 28px;
+    background-color: #fff;
+    border-radius: 50%;
+  }
+
+.delete-btn ion-icon:hover {
+    border-radius: 50%;
+    transform: scale(1.05); 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    color: rgb(255, 89, 89);
 }

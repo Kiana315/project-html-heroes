@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.html import format_html
+
 from .models import *
 
 
@@ -57,10 +59,27 @@ class MessageAdmin(admin.ModelAdmin):
 
     actions = ['filter_messages_by_type']
 
+
+class SignUpAdmin(admin.ModelAdmin):
+    list_display = ('id', 'is_signup_enabled')
+    list_editable = ('is_signup_enabled',)
+
+
 class ActivityAdmin(admin.ModelAdmin):
     list_display = ('user', 'activity_type', 'created_at')
     list_filter = ('user', 'activity_type')
     search_fields = ('user__username', 'activity_type')
+
+
+class ServerNodeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'host', 'userAPI', 'host_link')
+    def host_link(self, obj):
+        return format_html("<a href='{url}'>{url}</a>", url=obj.host)
+
+    host_link.short_description = "Host URL"
+    host_link.admin_order_field = None
+    readonly_fields = ('host_link',)
+
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Post, PostAdmin)
@@ -70,5 +89,8 @@ admin.site.register(Following, FollowingAdmin)
 admin.site.register(Follower, FollowerAdmin)
 admin.site.register(Friend, FriendAdmin)
 admin.site.register(MessageSuper, MessageAdmin)
-admin.site.register(GithubActivity)
+admin.site.register(SignUpSettings, SignUpAdmin)
+admin.site.register(GithubActivity, ActivityAdmin)
+admin.site.register(ServerNode, ServerNodeAdmin)
+
 

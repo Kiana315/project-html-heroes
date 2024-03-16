@@ -1,4 +1,6 @@
 # Traditional Pattern:
+from django.http import HttpResponseForbidden
+from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import Http404, HttpResponse
@@ -14,6 +16,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.urls import reverse
+from django.core.files.base import ContentFile
 import base64
 
 # REST Pattern:
@@ -51,28 +54,40 @@ def signupView(request):
         password = request.POST.get('password1')
         confirm_password = request.POST.get('password2')
 
-        if password == confirm_password:
-            # user existence check
-            if User.objects.filter(username=username).exists():
-                messages.error(request, "Username already exists")
-                return render(request, 'signup.html')
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, "Email already exists")
-                return render(request, 'signup.html')
+        if SignUpSettings.objects.first().is_signup_enabled:
+            if password == confirm_password:
+                # user existence check
+                if User.objects.filter(username=username).exists():
+                    messages.error(request, "Username already exists")
+                    return render(request, 'signup.html')
+                elif User.objects.filter(email=email).exists():
+                    messages.error(request, "Email already exists")
+                    return render(request, 'signup.html')
+                else:
+                    # create new account
+                    user = User.objects.create_user(username=username, password=password, email=email)
+                    user.save()
+                    user = authenticate(username=username, password=password)
+                    login(request, user)
+                    return redirect('PAGE_Login')
             else:
-                # create new account
-                user = User.objects.create_user(username=username, password=password, email=email)
-                user.save()
-                user = authenticate(username=username, password=password)
-                login(request, user)
-                return redirect('PAGE_Login')
+                messages.error(request, "Passwords do not match")
+                return render(request, 'signup.html')
         else:
-            messages.error(request, "Passwords do not match")
+            messages.error(request, "Sign up is disabled right now")
             return render(request, 'signup.html')
     else:
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
 
+def approved_user_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_approved:
+            return view_func(request, *args, **kwargs)
+        else:
+            return render(request, 'notApproved.html')
+    return wrapper
 
 """
 ---------------------------------- Posts Presentation Settings ----------------------------------
@@ -121,6 +136,11 @@ class IndexView(TemplateView):
 class FriendPostsView(TemplateView):
     """ * [GET] Get The FP Page """
     template_name = "friendPosts.html"
+
+
+class AddConnectView(TemplateView):
+    """ * [GET] Get The AddConnect Page """
+    template_name = "addConnect.html"
 
 
 class PPsAPIView(generics.ListAPIView):
@@ -174,6 +194,32 @@ class NPsAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)  # set current user as author
+
+
+def get_image(request, username, post_id, image_id):
+    try:
+        image_index = image_id - 1
+        post = Post.objects.get(id=post_id)
+
+        if post.visibility == 'PUBLIC' and post.image_data:
+            # Split the image data and select the corresponding image data based on the index
+            image_data_list = post.image_data.split(',')
+            
+
+            if 0 <= image_index < (len(image_data_list)/2):
+                # Merge prefix and actual base64 encoded part
+                image_data = image_data_list[image_index*2] + "," + image_data_list[image_index*2+1]
+                
+                image_binary_data = base64.b64decode(image_data.split(',')[1])
+                return HttpResponse(image_binary_data, content_type='image/jpeg')
+            else:
+                return HttpResponse(f"Sorry, there are only {image_index} images in post {post.id}.", status=404)
+        else:
+            return HttpResponse("No image data found for this post or this is not a PUBLIC post.", status=404)
+    except Post.DoesNotExist:
+        return HttpResponse("Post not found.", status=404)
+
+
 
 
 class DeletePostView(APIView):
@@ -468,7 +514,7 @@ class ProfileAPIView(APIView):
     def get(self, request, username):
         profile_user = get_object_or_404(User, username=username)
         current_user = request.user
-        print("current_user:", current_user, "\nprofile_user", profile_user)
+        
 
         if current_user == profile_user:
             # Current user views own posts: Return all posts
@@ -803,3 +849,38 @@ class DeleteIDOfMessageAPIView(APIView):
         message.delete()
 
         return JsonResponse({'status': 'success', 'message': f'Message with id={ID} is deleted.'})
+
+
+class OpenAPIUserAPIView(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = OpenAPIUserSerializer
+
+
+class OpenAPIView(viewsets.ModelViewSet):
+    queryset = ServerNode.objects.all()
+    serializer_class = OpenAPIServerNodeSerializer
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        username = request.data.get('username')
+        password = request.data.get('password')
+        remoteName = str(request.data.get('from'))
+        remoteUsers = str(request.data.get('userAPI'))
+        if not self._checkAccount(username, password):
+            return JsonResponse({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+        ServerNode.objects.create(name=remoteName,
+                                  host=remoteName,
+                                  userAPI=remoteUsers)
+        return Response(status=status.HTTP_201_CREATED)
+
+    def _checkAccount(self, username, password):
+        ACCOUNTS = [
+            {'username': 'SD1', 'password': 'SD111'},
+            {'username': 'SD2', 'password': 'SD222'},
+        ]
+        for account in ACCOUNTS:
+            if account['username'] == username and account['password'] == password:
+                return True
+        return False
+

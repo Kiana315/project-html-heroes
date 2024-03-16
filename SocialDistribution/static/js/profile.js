@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Load firend list
+// Load friend list
 document.addEventListener('DOMContentLoaded', () => {
     const friendListContainer = document.getElementById('friendList');
     const username = friendListContainer.getAttribute('data-username'); 
