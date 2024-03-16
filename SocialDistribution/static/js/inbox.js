@@ -5,6 +5,8 @@ import {
     createMessage,
     deleteMessageType,
     deleteMessageID,
+    acceptFollowRequest,
+    rejectFollowRequest,
 } from './messageOperations.js';
 
 function clickableListItem(messages) {
@@ -73,6 +75,7 @@ function createBlock(msg, type, isNewMsg = true) {
         'NP': 'New Post Reminder',
         'SU': 'New Sign Up'
     };
+
     let span_actionType = document.createElement("span");
     span_actionType.classList.add("action-type");
     span_actionType.textContent = `[${TYPES[type]}] `;
@@ -85,6 +88,30 @@ function createBlock(msg, type, isNewMsg = true) {
     p_content.textContent = msg.content;
     p_content.classList.add("message-text");
     div_messageBody.appendChild(p_content);
+
+    if (type === 'FR') {
+        // add accpet and reject Button
+        const acceptButton = document.createElement("button");
+        acceptButton.textContent = "Accept";
+        // add click listener
+        acceptButton.addEventListener('click', function() {
+            event.stopPropagation();
+            // accepct
+            acceptFollowRequest(msg.origin, msg.id);
+        });
+    
+        const rejectButton = document.createElement("button");
+        rejectButton.textContent = "Reject";
+        // reject
+        rejectButton.addEventListener('click', function() {
+            event.stopPropagation();    
+            rejectFollowRequest(msg.origin, msg.id);
+        });
+    
+        // add button to message body
+        div_messageBody.appendChild(acceptButton);
+        div_messageBody.appendChild(rejectButton);
+    }
 
     let a_postLink = document.createElement("a");
     a_postLink.href = `/posts/${msg.post_id}/`;

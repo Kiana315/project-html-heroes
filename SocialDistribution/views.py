@@ -562,6 +562,8 @@ class FollowersAPIView(generics.ListAPIView):
         username = self.kwargs['username']
         user = User.objects.get(username=username)
         return user.followers.all()
+        # return Following.objects.filter(following=user, status='ACCEPTED')
+
 
 
 class FollowingAPIView(generics.ListAPIView):
@@ -570,7 +572,8 @@ class FollowingAPIView(generics.ListAPIView):
     def get_queryset(self):
         username = self.kwargs['username']
         user = User.objects.get(username=username)
-        return user.following.all()
+        # return user.following.all()
+        return Following.objects.filter(user=user, status='ACCEPTED')
 
 
 class FriendsAPIView(generics.ListAPIView):
@@ -580,6 +583,7 @@ class FriendsAPIView(generics.ListAPIView):
         username = self.kwargs['username']
         user = User.objects.get(username=username)
         return Friend.objects.filter(Q(user1=user) | Q(user2=user)).distinct()
+
 
 
 class CreateFollowerAPIView(APIView):
@@ -602,18 +606,74 @@ class CreateFollowerAPIView(APIView):
 class CreateFollowingAPIView(APIView):
     """ [POST] Create New Following Relation Case """
     def post(self, request, selfUsername, targetUsername):
-        # Get both users based on their usernames
+        # Get both users based on their usernames   
         self_user = get_object_or_404(User, username=selfUsername)
         target_user = get_object_or_404(User, username=targetUsername)
+        print(self_user, target_user,"self, target")
         if self_user != target_user:
-            try:
-                Following.objects.create(user=target_user, following=self_user)
-                return Response(status=status.HTTP_201_CREATED)
-            except IntegrityError:
-                return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
+        #     try:
+        #         Following.objects.create(user=target_user, following=self_user)
+        #         return Response(status=status.HTTP_201_CREATED)
+        #     except IntegrityError:
+        #         return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
+        # else:
+        #     return Response({"detail": "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if a follow request already exists
+            following, created = Following.objects.get_or_create(
+                user=self_user,
+                following=target_user,
+                defaults={'status': 'PENDING'}  # Default status is 'PENDING'
+            )
+            print(f'Following status: {following.status}, Created: {created}')
+            if created:
+                # New follow request was created, notify target user
+                message_content = f'{self_user.username} wants to follow you.'
+                MessageSuper.objects.create(
+                    owner=target_user,
+                    message_type='FR',  # Follow Request
+                    content=message_content,
+                    origin=self_user.username,
+                )
+                return Response({"message": "Follow request sent."}, status=status.HTTP_201_CREATED)
+            else:
+                # Follow request already exists, check its status
+                if following.status == 'ACCEPTED':
+                    return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
+                elif following.status == 'PENDING':
+                    return Response({"message": "Follow request already sent and pending approval."}, status=status.HTTP_200_OK)
+                elif following.status == 'REJECTED':
+                    # Optional: Allow retrying a previously rejected request
+                    following.status = 'PENDING'
+                    following.save()
+                    return Response({"message": "Follow request resent."}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
+class AcceptFollowRequestAPIView(APIView):
+    def post(self, request, origin_username):
+        print("accept 调用")
+        # get current user
+        target_user = request.user
+        # get request user
+        origin_user = get_object_or_404(User, username=origin_username)
+        # find the request
+        follow_request = get_object_or_404(Following, user=origin_user, following=target_user, status='PENDING')
+        follow_request.status = 'ACCEPTED'
+        follow_request.save()
+        return Response({"message": "Follow request accepted."}, status=status.HTTP_200_OK)
+
+class RejectFollowRequestAPIView(APIView):
+    def post(self, request, origin_username):
+        # get current user
+        target_user = request.user
+        # get request user
+        origin_user = get_object_or_404(User, username=origin_username)
+        # find the request
+        follow_request = get_object_or_404(Following, user=origin_user, following=target_user, status='PENDING')
+        follow_request.status = 'REJECTED'
+        follow_request.save()
+        return Response({"message": "Follow request rejected."}, status=status.HTTP_200_OK)
 
 class DeleteFollowerAPIView(APIView):
     """ [DELETE] Delete Follower Relation Case """

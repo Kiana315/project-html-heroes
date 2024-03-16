@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     unfollowButton.style.display = 'inline';
 
                                     // Todo - For `USER_TARGET`, set `USER_SELF` as a follower of `USER_TARGET`:
-                                    fetch(`/api/user/${targetUsername}/following/${selfUsername}/`, {
+                                    fetch(`/api/user/${selfUsername}/following/${targetUsername}/`, {
                                         method: 'POST',
                                         headers: {
                                             'X-CSRFToken': getCookie('csrftoken'),
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     })
                                         .then(response => {
                                             if (response.ok) {
-                                                alert("Follow Success!");
+                                                alert("Follow request sent successfully!");
                                                 // Todo - For BOTH, if the two are following each other and being followed by each other,
                                                 //  then activate the “friend mechanism”, remove their following & follower relations but
                                                 //  keep a friend relation between them:

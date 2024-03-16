@@ -100,6 +100,60 @@ export async function deleteMessageID(messageID) {
     }
 }
 
+export async function acceptFollowRequest(originUsername, msgId) {
+    const url = `/api/follow-requests/accept/${originUsername}/`;
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            credentials: 'include', 
+        });
+        if (response.ok) {
+            console.log('Follow request accepted successfully.');
+            // delete the message
+            deleteMessageID(msgId);
+            return true;
+        } else {
+            console.error('Failed to accept follow request:', response.status, response.statusText);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error accepting follow request:', error);
+        return false;
+    }
+}
+
+
+export async function rejectFollowRequest(originUsername, msgId) {
+    const url = `/api/follow-requests/reject/${originUsername}/`;
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(), 
+            },
+            credentials: 'include', 
+        });
+        if (response.ok) {
+            console.log('Follow request rejected successfully.');
+            // delete the message
+            deleteMessageID(msgId);
+            return true;
+        } else {
+            console.error('Failed to reject follow request:', response.status, response.statusText);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error rejecting follow request:', error);
+        return false;
+    }
+}
+
+
 
 function getCsrfToken() {
     const csrfToken = document.cookie

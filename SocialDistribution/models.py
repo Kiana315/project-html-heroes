@@ -80,6 +80,12 @@ class Like(models.Model):
 class Following(models.Model):
     user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
     following = models.ForeignKey(User, related_name='reverse_following', on_delete=models.CASCADE)
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Approval'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected'),   
+    ]
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='PENDING')
     date_followed = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ('user', 'following',)
