@@ -98,3 +98,100 @@ body {
         margin-top: 20%;
     }
 }
+
+.search-bar {
+    width: 100%;
+    padding: 5px 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.8);
+    margin: 10px auto;
+    border: 3px solid #ddd;
+    border-radius: 8px;
+    max-width: 800px;
+    height: 40px;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+}
+
+
+#search-form {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+}
+
+
+#search-form input,
+#search-form button {
+
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 16px;
+}
+
+#search-form input {
+    margin: 0 10px;
+    width: 100%;
+}
+
+#search-form button {
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+#acSearch {
+    padding-top: 20px;
+    margin-top: 20px;
+}
+#searchInstruction {
+    color: #fcfcfc;
+    horiz-align: center;
+    padding-top: 50px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+
+.ac-filters {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#filter-form {
+    display: inline-block;
+}
+
+#filter-form select {
+    border: 2px solid #5b28a7;
+    border-radius: 4px;
+    padding: 5px;
+    width: 200px;
+    background-color: #fff;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+#filter-form button {
+    padding: 5px 15px;
+    background-color: #5b28a7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#filter-form button:hover {
+    background-color: #5b28a7;
+}
+
+#filter-form button:hover {
+    background-color: #5b28a7;
+}

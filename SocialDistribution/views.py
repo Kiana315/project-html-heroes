@@ -884,3 +884,7 @@ class OpenAPIView(viewsets.ModelViewSet):
                 return True
         return False
 
+class ServerNodeList(generics.ListAPIView):
+	queryset = ServerNode.objects.all()
+	serializer_class = OpenAPIServerNodeSerializer
+

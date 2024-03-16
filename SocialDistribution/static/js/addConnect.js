@@ -1,4 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const selectElement = document.getElementById('filter');
+
+    function fetchServerNodes() {
+        fetch('/api/servernodes/')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(serverNode => {
+                    const option = document.createElement('option');
+                    option.value = serverNode.name;
+                    option.textContent = serverNode.name;
+                    selectElement.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching ServerNodes:', error));
+    }
+
+    fetchServerNodes();
+    document.getElementById('filter-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent form from submitting normally
+        const selectedValue = selectElement.value;
+        console.log('Selected ServerNode:', selectedValue);
+    });
+
     let form = document.querySelector('.ac-container form');
 
     form.addEventListener('submit', function(event) {
@@ -25,24 +48,40 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(formData)
         })
-        .then(response => {
-            if (response.ok) {
-                alert("Connection created. The remote nodes can be managed in `/admin/`");
-                return response.json();
-            } else {
-                alert("Failed to connect new node.");
-                throw new Error('Network response was not ok.');
-            }
-        })
-        .then(data => {
-            console.log('Success:', data);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+            .then(response => {
+                if (response.ok) {
+                    fetch("/openapi/", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        },
+                        body: JSON.stringify({
+                            username: "SD1",
+                            password: "SD111",
+                            from: targetHost,
+                            userAPI: "search/",
+                        })
+                    }).then(r => {
+                        if (response.ok) {
+                            alert("Connection created. The remote nodes can be managed in `/admin/`");
+                            return response.json();
+                        }
+                    })
+                    return response.json();
+                }
+                else {
+                    alert("Failed to connect new node.");
+                    throw new Error('Network response was not ok.');
+                }
+            })
+            .then(data => {
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     });
 });
-
 
 
 function getCSRFToken() {
@@ -59,3 +98,4 @@ function getCSRFToken() {
     }
     return cookieValue;
 }
+

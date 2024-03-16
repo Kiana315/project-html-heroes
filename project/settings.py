@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-l%yxlc1qwka*2vg@gb%d*lg4u@pzv54$z2x89hqmivhe2e$=2y
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-APPEND_SLASH = False
+#APPEND_SLASH = False
 
 
 ALLOWED_HOSTS = ['social-distrib-html-heros-5b236e4147b2.herokuapp.com']

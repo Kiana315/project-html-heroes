@@ -83,6 +83,7 @@ urlpatterns = [
 
     # OpenAPI System:
     path('openapi/', OpenAPIView.as_view({'post': 'create', }), name='OPENAPI_AddConnect'),
+    path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
 ] 
 
 if settings.DEBUG:
