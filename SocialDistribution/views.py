@@ -114,7 +114,6 @@ class PostDetailView(DetailView):
     #     post = self.get_object()
     #     context['likes_count'] = Like.objects.filter(post=post).count()
     #     return context
-
     def render_to_response(self, context, **response_kwargs):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             post = self.get_object()
@@ -203,6 +202,9 @@ class NPsAPIView(generics.CreateAPIView):
         # Save the post and set the current user as the author
         original_post = serializer.save(author=self.request.user)
 
+        post_content = f"{self.request.user.username} created a new post: {original_post.title}"
+
+
         # Logic to send notifications to all followers and friends
         followers = User.objects.filter(reverse_followers__user=original_post.author)
         friends = User.objects.filter(
@@ -215,7 +217,7 @@ class NPsAPIView(generics.CreateAPIView):
             MessageSuper.objects.create(
                 owner=receiver,
                 message_type='NP',  # 'NP' for new post
-                content=original_post.content,  # Assuming content is a field of Post model
+                content=post_content,  # Assuming content is a field of Post model
                 origin=self.request.user.username,
                 post=original_post
             )

@@ -68,6 +68,12 @@ function createBlock(msg, type, isNewMsg = true) {
     div_messageHeader.appendChild(img_avatar);
     div_messageHeader.appendChild(span_sender);
 
+    let span_date = document.createElement("span");
+    span_date.classList.add("message-date");
+    let messageDate = new Date(msg.date);
+    span_date.textContent = messageDate.toLocaleString();
+    div_messageHeader.appendChild(span_date);
+
     let TYPES = {
         'FR': 'Follow Request',
         'LK': 'Like',
@@ -168,6 +174,9 @@ async function loadAndDisplayMessages() {
         try {
             let messages = await getMessages(type);
             if (messages && Array.isArray(messages)) {
+                // sort by time
+                messages.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
                 for (let msg of messages) {
                     let li_message = createBlock(msg, type);
                     ul_inboxMsgContainer.appendChild(li_message);
