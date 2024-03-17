@@ -80,6 +80,7 @@ def signupView(request):
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
 
+
 def approved_user_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -87,7 +88,9 @@ def approved_user_required(view_func):
             return view_func(request, *args, **kwargs)
         else:
             return render(request, 'notApproved.html')
+
     return wrapper
+
 
 """
 ---------------------------------- Posts Presentation Settings ----------------------------------
@@ -127,7 +130,6 @@ class PostDetailView(DetailView):
             return super().render_to_response(context, **response_kwargs)
 
 
-
 class IndexView(TemplateView):
     """ * [GET] Get The Home/PP Page """
     template_name = "index.html"
@@ -154,8 +156,9 @@ class PPsAPIView(generics.ListAPIView):
 
 class FPsAPIView(generics.ListAPIView):
     """ [GET] Get The Username-based Friend Posts """
+
     def get(self, request, username):
-        current_user = get_object_or_404(User, username=username)   # get current user
+        current_user = get_object_or_404(User, username=username)  # get current user
 
         # Query the users followed by the current user
         user_following = User.objects.filter(reverse_following__user=current_user)
@@ -164,7 +167,6 @@ class FPsAPIView(generics.ListAPIView):
 
         # Get query set of current user's friend list  
         friends = User.objects.filter(friends_set1__user1=current_user).values_list('friends_set1__user2', flat=True)
-
 
         # Get query set of friends’ public and friends-only posts
         friend_posts = Post.objects.filter(
@@ -205,10 +207,9 @@ def get_image(request, username, post_id, image_id):
             # Split the image data and select the corresponding image data based on the index
             image_data_list = post.image_data.split(',')
 
-
-            if 0 <= image_index < (len(image_data_list)/2):
+            if 0 <= image_index < (len(image_data_list) / 2):
                 # Merge prefix and actual base64 encoded part
-                image_data = image_data_list[image_index*2] + "," + image_data_list[image_index*2+1]
+                image_data = image_data_list[image_index * 2] + "," + image_data_list[image_index * 2 + 1]
 
                 image_binary_data = base64.b64decode(image_data.split(',')[1])
                 return HttpResponse(image_binary_data, content_type='image/jpeg')
@@ -218,8 +219,6 @@ def get_image(request, username, post_id, image_id):
             return HttpResponse("No image data found for this post or this is not a PUBLIC post.", status=404)
     except Post.DoesNotExist:
         return HttpResponse("Post not found.", status=404)
-
-
 
 
 class DeletePostView(APIView):
@@ -340,7 +339,6 @@ class LikeAPIView(generics.ListCreateAPIView):
         post_id = self.kwargs['post_id']
         return Like.objects.filter(post_id=post_id)
 
-
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs['post_id'])
         user = self.request.user
@@ -430,17 +428,17 @@ class SharePostView(APIView):
 
         # elif original_post.visibility == 'FRIENDS':
         #     # Send the post notification to all friends
-            # friends = User.objects.filter(
-            #     Q(friends_set1__user2=original_post.author) | Q(friends_set2__user1=original_post.author)
-            # ).distinct()
-            # for friend in friends:
-            #     MessageSuper.objects.create(
-            #         owner=friend,
-            #         message_type='NP',  # 'NP' for new post
-            #         content=shared_content,
-            #         origin=request.user.username,
-            #         post=original_post
-            #     )
+        # friends = User.objects.filter(
+        #     Q(friends_set1__user2=original_post.author) | Q(friends_set2__user1=original_post.author)
+        # ).distinct()
+        # for friend in friends:
+        #     MessageSuper.objects.create(
+        #         owner=friend,
+        #         message_type='NP',  # 'NP' for new post
+        #         content=shared_content,
+        #         origin=request.user.username,
+        #         post=original_post
+        #     )
 
 
 """
@@ -462,6 +460,7 @@ class MsgsAPIView(generics.ListAPIView):
 """
 ----------------------------------  Profile & Identity Settings ----------------------------------
 """
+
 
 class ProfileView(TemplateView):
     """ * [GET] Get The FollowerList Page """
@@ -495,9 +494,11 @@ def update_username(request, username):
 
         return JsonResponse({'error': ''}, safe=False)
 
+
 def update_github_username(request, username):
     github_username = request.user.github_username
     return render(request, 'updateGithub.html', {'github_username': github_username})
+
 
 def update_github_username_submit(request, username):
     if request.method == 'POST':
@@ -508,6 +509,7 @@ def update_github_username_submit(request, username):
         return redirect('PAGE_Profile', username=request.user.username)  # Redirect to the profile page
     return redirect('update_github_username')  # Redirect back to the update page if not POST method
 
+
 class ProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -515,17 +517,18 @@ class ProfileAPIView(APIView):
         profile_user = get_object_or_404(User, username=username)
         current_user = request.user
 
-
         if current_user == profile_user:
             # Current user views own posts: Return all posts
             posts = Post.objects.filter(author=profile_user, is_draft=False).order_by('-date_posted')
         elif Friend.objects.filter(user1=current_user, user2=profile_user).exists() or \
-             Friend.objects.filter(user1=profile_user, user2=current_user).exists():
+                Friend.objects.filter(user1=profile_user, user2=current_user).exists():
             # The current user is friends with the profile user: return public and friend-only posts
-            posts = Post.objects.filter(author=profile_user, visibility__in=['PUBLIC', 'FRIENDS'], is_draft=False).order_by('-date_posted')
+            posts = Post.objects.filter(author=profile_user, visibility__in=['PUBLIC', 'FRIENDS'],
+                                        is_draft=False).order_by('-date_posted')
         else:
             # Other users: only public posts returned
-            posts = Post.objects.filter(author=profile_user, visibility='PUBLIC', is_draft=False).order_by('-date_posted')
+            posts = Post.objects.filter(author=profile_user, visibility='PUBLIC', is_draft=False).order_by(
+                '-date_posted')
 
         user_serializer = UserSerializer(profile_user)
         posts_serializer = PostSerializer(posts, many=True)
@@ -534,8 +537,6 @@ class ProfileAPIView(APIView):
             'user': user_serializer.data,
             'posts': posts_serializer.data
         })
-
-
 
 
 def otherProfileView(request, selfUsername, targetUsername):
@@ -604,6 +605,7 @@ class FriendView(TemplateView):
 class FollowersAPIView(generics.ListAPIView):
     """ [GET] Get The FollowerList For A Spec-username """
     serializer_class = FollowerSerializer
+
     def get_queryset(self):
         username = self.kwargs['username']
         user = User.objects.get(username=username)
@@ -611,10 +613,10 @@ class FollowersAPIView(generics.ListAPIView):
         # return Following.objects.filter(following=user, status='ACCEPTED')
 
 
-
 class FollowingAPIView(generics.ListAPIView):
     """ [GET] Get The FollowingList For A Spec-username """
     serializer_class = FollowingSerializer
+
     def get_queryset(self):
         username = self.kwargs['username']
         user = User.objects.get(username=username)
@@ -625,15 +627,16 @@ class FollowingAPIView(generics.ListAPIView):
 class FriendsAPIView(generics.ListAPIView):
     """ [GET] Get The FriendsList For A Spec-username """
     serializer_class = FriendSerializer
+
     def get_queryset(self):
         username = self.kwargs['username']
         user = User.objects.get(username=username)
         return Friend.objects.filter(Q(user1=user) | Q(user2=user)).distinct()
 
 
-
 class CreateFollowerAPIView(APIView):
     """ [POST] Create New Follower Relation Case  """
+
     def post(self, request, selfUsername, targetUsername):
         # Get both users based on their usernames
         self_user = get_object_or_404(User, username=selfUsername)
@@ -651,19 +654,20 @@ class CreateFollowerAPIView(APIView):
 
 class CreateFollowingAPIView(APIView):
     """ [POST] Create New Following Relation Case """
+
     def post(self, request, selfUsername, targetUsername):
         # Get both users based on their usernames   
         self_user = get_object_or_404(User, username=selfUsername)
         target_user = get_object_or_404(User, username=targetUsername)
-        print(self_user, target_user,"self, target")
+        print(self_user, target_user, "self, target")
         if self_user != target_user:
-        #     try:
-        #         Following.objects.create(user=target_user, following=self_user)
-        #         return Response(status=status.HTTP_201_CREATED)
-        #     except IntegrityError:
-        #         return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
-        # else:
-        #     return Response({"detail": "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+            #     try:
+            #         Following.objects.create(user=target_user, following=self_user)
+            #         return Response(status=status.HTTP_201_CREATED)
+            #     except IntegrityError:
+            #         return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
+            # else:
+            #     return Response({"detail": "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Check if a follow request already exists
             following, created = Following.objects.get_or_create(
@@ -687,7 +691,8 @@ class CreateFollowingAPIView(APIView):
                 if following.status == 'ACCEPTED':
                     return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
                 elif following.status == 'PENDING':
-                    return Response({"message": "Follow request already sent and pending approval."}, status=status.HTTP_200_OK)
+                    return Response({"message": "Follow request already sent and pending approval."},
+                                    status=status.HTTP_200_OK)
                 elif following.status == 'REJECTED':
                     # Optional: Allow retrying a previously rejected request
                     following.status = 'PENDING'
@@ -695,6 +700,7 @@ class CreateFollowingAPIView(APIView):
                     return Response({"message": "Follow request resent."}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class AcceptFollowRequestAPIView(APIView):
     def post(self, request, origin_username):
@@ -709,6 +715,7 @@ class AcceptFollowRequestAPIView(APIView):
         follow_request.save()
         return Response({"message": "Follow request accepted."}, status=status.HTTP_200_OK)
 
+
 class RejectFollowRequestAPIView(APIView):
     def post(self, request, origin_username):
         # get current user
@@ -721,8 +728,10 @@ class RejectFollowRequestAPIView(APIView):
         follow_request.save()
         return Response({"message": "Follow request rejected."}, status=status.HTTP_200_OK)
 
+
 class DeleteFollowerAPIView(APIView):
     """ [DELETE] Delete Follower Relation Case """
+
     def delete(self, request, selfUsername, targetUsername):
         # Get both users based on their usernames
         self_user = get_object_or_404(User, username=selfUsername)
@@ -733,13 +742,15 @@ class DeleteFollowerAPIView(APIView):
                 Follower.objects.filter(user=target_user, follower=self_user).delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
-                return Response({"detail": "An error occurred while deleting the follower relation."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"detail": "An error occurred while deleting the follower relation."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({"detail": "Cannot remove yourself as a follower."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DeleteFollowingAPIView(APIView):
     """ [DELETE] Delete Following Relation Case """
+
     def delete(self, request, selfUsername, targetUsername):
         # Get both users based on their usernames
         self_user = get_object_or_404(User, username=selfUsername)
@@ -750,7 +761,8 @@ class DeleteFollowingAPIView(APIView):
                 Following.objects.filter(user=target_user, following=self_user).delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Exception as e:
-                return Response({"detail": "An error occurred while deleting the following relation."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"detail": "An error occurred while deleting the following relation."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({"detail": "Cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -789,6 +801,7 @@ def deleteFriendshipAPIView(request, selfUsername, targetUsername):
 
 class AnalyzeRelationAPIView(APIView):
     """ [GET] Get The Relationship Between Two Users """
+
     def get(self, request, username1, username2):
         user1 = get_object_or_404(User, username=username1)
         user2 = get_object_or_404(User, username=username2)
@@ -820,6 +833,7 @@ class AnalyzeRelationAPIView(APIView):
 class UserMessagesAPIView(ListAPIView):
     serializer_class = MessageSuperSerializer
     permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         user = self.request.user
         message_type = self.kwargs['type']
@@ -828,6 +842,7 @@ class UserMessagesAPIView(ListAPIView):
 
 class CreateMessageAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request, format=None):
         serializer = MessageSuperSerializer(data=request.data)
         if serializer.is_valid():
@@ -838,6 +853,7 @@ class CreateMessageAPIView(APIView):
 
 class DeleteTypeOfMessageAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     def delete(self, request, type, format=None):
         MessageSuper.objects.filter(owner=request.user, message_type=type).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -885,6 +901,18 @@ class OpenAPIView(viewsets.ModelViewSet):
         return False
 
 class ServerNodeList(generics.ListAPIView):
-	queryset = ServerNode.objects.all()
-	serializer_class = OpenAPIServerNodeSerializer
+    queryset = ServerNode.objects.all()
+    serializer_class = OpenAPIServerNodeSerializer
 
+
+"""
+def getRemoteUserAPIS(request):
+    remoteUser = request.remoteUser
+    urls = {
+        'remote_node_Name': remoteUser.remoteNodeName,
+        'remote_openapi_url': remoteUser.remoteOpenapi,
+        'remote_inbox_api_url': remoteUser.remoteInboxAPI,
+        'remote_follow_api_url': remoteUser.remoteFollowAPI,
+    }
+    return JsonResponse(urls)
+"""

@@ -12,7 +12,6 @@ function editUserName() {
 
 
 function handleUserNameBlur() {
-
     let el = document.getElementById("edit-username");
     let formData = new FormData();
     formData.append("username", el.value)

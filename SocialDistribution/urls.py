@@ -84,6 +84,7 @@ urlpatterns = [
     # OpenAPI System:
     path('openapi/', OpenAPIView.as_view({'post': 'create', }), name='OPENAPI_AddConnect'),
     path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
+    #path('api/remoteUser/', views.getRemoteUserAPIS, name='API_GetRemoteUserInfo')
 ] 
 
 if settings.DEBUG:

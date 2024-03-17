@@ -90,7 +90,7 @@ function createBlock(msg, type, isNewMsg = true) {
     div_messageBody.appendChild(p_content);
 
     if (type === 'FR') {
-        // add accpet and reject Button
+        // add accept and reject Button
         const acceptButton = document.createElement("button");
         acceptButton.textContent = "Accept";
         // add click listener
@@ -98,6 +98,8 @@ function createBlock(msg, type, isNewMsg = true) {
             event.stopPropagation();
             // accepct
             acceptFollowRequest(msg.origin, msg.id);
+            alert("Request Accepted!!");
+            window.location.reload();
         });
     
         const rejectButton = document.createElement("button");
@@ -106,6 +108,8 @@ function createBlock(msg, type, isNewMsg = true) {
         rejectButton.addEventListener('click', function() {
             event.stopPropagation();    
             rejectFollowRequest(msg.origin, msg.id);
+            alert("Request Rejected!!");
+            window.location.reload();
         });
     
         // add button to message body
