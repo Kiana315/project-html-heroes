@@ -18,6 +18,7 @@ from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.core.files.base import ContentFile
 import base64
+import requests
 
 # REST Pattern:
 from rest_framework import generics, status, viewsets
@@ -573,7 +574,7 @@ def otherProfileView(request, selfUsername, targetUsername):
 
 
 class UsersAPIView(viewsets.ModelViewSet):
-    """ [GET] Get The Profile Info """
+    """ [GET] Get The User List """
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -969,6 +970,20 @@ class ServerNodeList(generics.ListAPIView):
     queryset = ServerNode.objects.all()
     serializer_class = OpenAPIServerNodeSerializer
 
+@api_view(['GET'])
+def getRemoteUsers(request, server_node_name):
+    server_node = get_object_or_404(ServerNode, name=server_node_name)
+    print(server_node)
+    
+    try:
+        response = requests.get(server_node.userAPI, timeout=10)
+        response.raise_for_status()  
+        users = response.json() 
+        serializer = UserSerializer(users, many=True)  
+
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def getRemoteUserAPIS(request, username):
     remoteUser = get_object_or_404(User, username=username)

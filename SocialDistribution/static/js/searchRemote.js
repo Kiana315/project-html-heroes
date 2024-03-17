@@ -3,11 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterValue = document.getElementById('filter');
     var serverNode;
 
-    document.getElementById('filter-form').addEventListener('submit', function(event) {
-        event.preventDefault(); 
 
+    document.getElementById('filter-form').addEventListener('submit', async function(event) {
+        event.preventDefault(); 
+    
         serverNode = filterValue.value;
         console.log(serverNode);
+    
     });
 
     
@@ -16,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    searchForm.addEventListener('submit', function(event) {
+    searchForm.addEventListener('submit', async function(event) {
         event.preventDefault();
 
 
@@ -28,41 +30,26 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        
         const currentUser = currentUserInput.value;
         const searchQuery = searchQueryInput.value;
         console.log("current: ", currentUser, "searching --> ", searchQuery, "from", serverNode,);
 
-        // 调用搜索函数并传递搜索查询参数
-        searchRemoteUsers(serverNode, currentUser, searchQuery);
-
+        
+        try {
+            const response = await fetch(`/api/servernodes/${serverNode}/search/?q=${searchQuery}`);
+            if (!response.ok) {
+                throw new Error('Failed to search users on the selected server');
+            }
+            const data = await response.json();
+            
+            console.log(data);
+            // 返回用户的profile页面
+        } catch (error) {
+            console.error('Error searching users:', error);
+        }
         
     });
 });
-
-
-function searchRemoteUsers(serverNode, current, query) {
-    const url = `/openapi/search/?query=` + encodeURIComponent(query);
-
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            // 处理搜索结果
-            console.log(data);
-            if (data.url) {
-                fetch(`profile/${current}/${query}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            alert("User not found");
-                        }
-                        window.location.href = `profile/${current}/${query}`;
-                    })
-            } else {
-                alert("User not found");
-            }
-        })
-        .catch(error => {
-            console.error('Error searching remote users:', error);
-        });
-}
 
 

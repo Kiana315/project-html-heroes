@@ -2,6 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.getElementById('search-form');
+  
     if (!searchForm) {
         console.error('Search form not found');
         return;
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchQuery = searchQueryInput.value;
         console.log(currentUser, searchQuery);
 
-        
+
         fetch(`/search?q=${encodeURIComponent(searchQuery)}`)
             .then(response => response.json())
             .then(data => {
