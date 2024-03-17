@@ -111,10 +111,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
 
+        // cancelCommentButton.addEventListener('click', function() {
+        //     commentInput.value = ''; // Clear <textarea> 
+        //     commentInput.style.height = 'initial';
+        // });
         cancelCommentButton.addEventListener('click', function() {
-            commentInput.value = ''; // Clear <textarea> 
-            commentInput.style.height = 'initial';
-        });
+            commentInput.value = ''; // Clear <textarea>
+            const commentForm = document.getElementById('comment-form');
+            if (commentForm.style.display !== 'none') {
+                commentForm.style.display = 'none'; // Hide the comment form
+            } else {
+                commentForm.style.display = 'flex'; // Re-display the comment form if needed
+            }
+        });        
     }
 
     

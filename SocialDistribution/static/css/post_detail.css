@@ -8,6 +8,7 @@ body  {
     display: flex;           
     flex-direction: column; 
     margin: 0;
+    border-radius: 20px;
 }
 
 .notification {
@@ -35,6 +36,7 @@ body  {
     max-width: 600px;
     margin: 20px auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
 }
 
 .back-button-container {
@@ -48,6 +50,7 @@ body  {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     margin: -20px -20px;
     z-index: 100;
+    border-radius: 20px 20px 0px 0px;
 }
 
 .more-options-button {
@@ -171,6 +174,7 @@ body  {
 #comments-container .comment {
     display: flex;
     margin-top: 10px;
+    margin-bottom: 30px;
     background-color: #f9f9f9;
     border-radius: 5px;
     padding: 10px;
@@ -230,7 +234,12 @@ body  {
 }
 
 #comment-form {
-    position: sticky;
+    /* position: sticky; */
+    position:absolute;
+    bottom: 25px;
+    left: 0;
+    right: 0;
+    width: 100%; 
     display: flex;
     flex-direction: column;
     margin: 30px 0;
@@ -238,6 +247,14 @@ body  {
     height: auto;
     width: 100%;
 }
+
+.comment-form-actions {
+    display: flex;
+    justify-content: flex-end; /* Aligns items to the right */
+    padding-right: 20px; /* Adjust as needed for space on the right */
+    gap: 10px; /* Space between buttons */
+}
+
 
 #comment-input {
     overflow-y: hidden;
@@ -254,15 +271,18 @@ body  {
 
 
 .post-actions {
-    position: sticky;
+    /* position: sticky; */
+    position: absolute;
     bottom: 0;
+    left: 0;
+    right: 0;
     background: #fff;
     display: flex;
     justify-content: space-between;
     padding: 10px 0; /* Only top and bottom padding */
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    margin: 30px -20px;
-    /* margin-top: 30px; */
+    margin: 0 0;
+    border-radius: 0px 0px 20px 20px;
 }
 
 .action {

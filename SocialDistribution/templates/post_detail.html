@@ -112,12 +112,20 @@
             {% endif %}
         </div>
 
-        <div id="comment-form" class="comment-form" style="display: none;">
+        <!-- <div id="comment-form" class="comment-form" style="display: none;">
             <textarea id="comment-input" placeholder="Add a comment..." rows="1"></textarea>
             <button id="submit-comment" class="post-button">Comment</button>
             <button id="cancel-comment" class="post-button">Cancel</button>
         
+        </div> -->
+        <div id="comment-form" class="comment-form" style="display: none;">
+            <textarea id="comment-input" placeholder="Add a comment..." rows="1"></textarea>
+            <div class="comment-form-actions">
+                <button id="submit-comment" class="post-button">Comment</button>
+                <button id="cancel-comment" class="post-button">Cancel</button>
+            </div>
         </div>
+        
         <!-- Load post comments -->
         {% if not post.is_draft and post.visibility != 'PRIVATE' %}
         <div class="comments-section">

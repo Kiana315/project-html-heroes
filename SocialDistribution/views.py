@@ -194,8 +194,29 @@ class NPsAPIView(generics.CreateAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthorOrReadOnly]
 
+    # def perform_create(self, serializer):
+    #     serializer.save(author=self.request.user)  # set current user as author
+
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)  # set current user as author
+        # Save the post and set the current user as the author
+        original_post = serializer.save(author=self.request.user)
+
+        # Logic to send notifications to all followers and friends
+        followers = User.objects.filter(reverse_followers__user=original_post.author)
+        friends = User.objects.filter(
+            Q(friends_set1__user2=original_post.author) |
+            Q(friends_set2__user1=original_post.author)
+        ).distinct()
+        all_receivers = followers.union(friends, all=True)
+
+        for receiver in all_receivers:
+            MessageSuper.objects.create(
+                owner=receiver,
+                message_type='NP',  # 'NP' for new post
+                content=original_post.content,  # Assuming content is a field of Post model
+                origin=self.request.user.username,
+                post=original_post
+            )
 
 
 def get_image(request, username, post_id, image_id):
