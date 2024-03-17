@@ -422,7 +422,7 @@ class SharePostView(APIView):
             author=request.user,
             title=repost_title,
             content=content_with_mention,
-            image=original_post.image,
+            image_data=original_post.image_data,
             shared_post=original_post,
             # Add other necessary fields...
         )
