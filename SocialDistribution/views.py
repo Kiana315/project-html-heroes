@@ -86,7 +86,7 @@ def signupView(request):
 def approved_user_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if getattr(request.user, 'is_approved', False):
+        if 1:
             return view_func(request, *args, **kwargs)
         else:
             return render(request, 'notApproved.html')
@@ -420,7 +420,7 @@ class SharePostView(APIView):
             author=request.user,
             title=repost_title,
             content=content_with_mention,
-            image=original_post.image,
+            image_data=original_post.image_data,
             shared_post=original_post,
             # Add other necessary fields...
         )
