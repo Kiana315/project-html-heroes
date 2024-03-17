@@ -86,7 +86,7 @@ def signupView(request):
 def approved_user_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if 1:
+        if getattr(request.user, 'is_approved', False):
             return view_func(request, *args, **kwargs)
         else:
             return render(request, 'notApproved.html')
