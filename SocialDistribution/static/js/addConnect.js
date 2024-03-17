@@ -16,11 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     fetchServerNodes();
-    document.getElementById('filter-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent form from submitting normally
-        const selectedValue = selectElement.value;
-        console.log('Selected ServerNode:', selectedValue);
-    });
 
     let form = document.querySelector('.ac-container form');
 

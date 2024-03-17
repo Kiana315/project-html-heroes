@@ -91,10 +91,7 @@ urlpatterns = [
     path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
 ]
 
-if settings.DEBUG:
-    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    pass
+
 
 # DRF API Routers
 router.register(f"api/users", UsersAPIView, basename='users')
