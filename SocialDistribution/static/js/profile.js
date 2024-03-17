@@ -384,7 +384,7 @@ function _getRelationAnalysis(relationResponse) {
 }
 
 
-function getCookie(name) {
+function getCookie(name){
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');

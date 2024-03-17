@@ -31,7 +31,7 @@ urlpatterns = [
     path("profile/<str:username>/draft/", approved_user_required(author_draft_view), name="API_AuthorDraft"),
 
     path('api/user/<str:username>/posts/', ProfileAPIView.as_view(), name='API_profile'),
-    
+
     path("api/user/<str:username>/followers/", FollowersAPIView.as_view(), name="API_GETFollowers"),                                        # GET User FollowerList             --> Test Success
     path("api/user/<str:username>/following/", FollowingAPIView.as_view(), name="API_GETFollowing"),                                        # GET User FollowerList             --> Test Success
     path("api/user/<str:username>/friends/", FriendsAPIView.as_view(), name="API_GETFriends"),                                              # GET User FriendList               --> Test Success
@@ -40,7 +40,7 @@ urlpatterns = [
     path('api/user/<str:selfUsername>/friend/<str:targetUsername>/', createFriendshipAPIView, name='API_POSTFriend'),                       # POST Create Friend Case           --> Test Success
     path('api/user/<str:selfUsername>/unfollowerOf/<str:targetUsername>/', DeleteFollowerAPIView.as_view(), name='API_DELETEFollowerOf'),   # DELETE Follower Case for usr1     --> ??
     path('api/user/<str:selfUsername>/unfollowing/<str:targetUsername>/', DeleteFollowingAPIView.as_view(), name='API_DELETEFollowing'),    # DELETE Following Case for usr1    --> ??
-    path('api/user/<str:selfUsername>/unfriend/<str:targetUsername>/', deleteFriendshipAPIView, name='API_DELETEFriend'),               # DELETE Friend Case for usr1       --> ??
+    path('api/user/<str:selfUsername>/unfriend/<str:targetUsername>/', deleteFriendshipAPIView, name='API_DELETEFriend'),                   # DELETE Friend Case for usr1       --> ??
     path('api/user/<str:username1>/anyRelations/<str:username2>/', AnalyzeRelationAPIView.as_view(), name='API_AnalyzeRelation'),           # GET Check Relations b/w Users     --> Test Success
 
     path('api/follow-requests/accept/<str:origin_username>/', AcceptFollowRequestAPIView.as_view(), name='accept-follow-request'),
@@ -50,9 +50,9 @@ urlpatterns = [
     path("api/user/<str:username>/", UserAPIView.as_view(), name="API_USER"),                                                               # GET Self User/Profile Info        --> Test Success
     path("api/user/<str:user1_id>/<str:user2_id>/", UserAPIView.as_view(), name="API_USER_TWO"),                                            # GET Other's User/Profile Info     --> Test Success
     path("profile/<str:username>/", approved_user_required(ProfileView.as_view()), name="PAGE_Profile"),
-    
+
     path("friendPosts/<str:username>/profile/<str:selfUsername>/<str:targetUsername>/",
-        lambda request, username, selfUsername, targetUsername: 
+        lambda request, username, selfUsername, targetUsername:
         redirect('PAGE_OtherProfile', selfUsername=selfUsername, targetUsername=targetUsername)),
     path("profile/<str:username>/upload-avatar/", approved_user_required(upload_avatar), name="API_UploadAvatar"),
     path("profile/<str:username>/update-bio/", approved_user_required(update_bio), name="API_UpdateBio"),
@@ -82,10 +82,14 @@ urlpatterns = [
 
 
     # OpenAPI System:
-    path('openapi/', OpenAPIView.as_view({'post': 'create', }), name='OPENAPI_AddConnect'),
+    path('openapi/', OpenAPIView.as_view({'post': 'create', 'get': 'list', }), name='OPENAPI_AddConnect'),
+    path('openapi/search/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
+    path('openapi/message/<str:username>/', CreateMessageOPENAPIView.as_view(), name='OPENAPI_POSTUserMsg'),
+    path('openapi/followrequest/accept/<str:username>/', AcceptFollowRequestAPIView.as_view(), name='OPENAPI_AcceptFollowRequest'),
+    path('openapi/followrequest/reject/<str:username>/', RejectFollowRequestAPIView.as_view(), name='OPENAPI_RejectFollowRequest'),
+
     path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
-    #path('api/remoteUser/', views.getRemoteUserAPIS, name='API_GetRemoteUserInfo')
-] 
+]
 
 if settings.DEBUG:
     # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

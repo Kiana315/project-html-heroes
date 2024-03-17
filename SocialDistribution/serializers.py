@@ -36,9 +36,27 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'avatar', 'bio']
+        fields = [
+            'id',
+            'username',
+            'email',
+            'avatar',
+            'avatar_url',
+            'bio',
+            'github_username',
+            'recent_processed_activity',
+            'is_approved',
+            'server_node',
+            'server_node_name',
+            'remoteOpenapi',
+            'remoteInboxAPI',
+            'remoteFollowAPI',
+        ]
+    def get_avatar_url(self, obj):
+        return obj.avatar_url if obj.avatar else None
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -103,12 +121,6 @@ class MessageSuperSerializer(serializers.ModelSerializer):
 class OpenAPIServerNodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServerNode
-        fields = ['id', 'name', 'host', 'userAPI']
+        fields = ['id', 'name', 'host', 'userAPI', 'messageAPI']
 
 
-class OpenAPIUserSerializer(serializers.ModelSerializer):
-    server_node = OpenAPIServerNodeSerializer()
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'avatar', 'bio', 'server_node']

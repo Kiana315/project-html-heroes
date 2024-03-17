@@ -37,6 +37,7 @@ from .permissions import IsAuthorOrReadOnly
 from .models import *
 
 User = get_user_model()
+LOCALHOST = "http://127.0.0.1:8000"
 
 """
 ---------------------------------- Signup/Login Settings ----------------------------------
@@ -582,6 +583,19 @@ def search_user(request):
         return JsonResponse({'error': 'User not found'}, status=404)
 
 
+def searchUserOPENAPI(request):
+    query = request.GET.get('q', '')
+    current_user = request.user.username
+
+    try:
+        user = User.objects.get(username=query)
+        # Or use email search：User.objects.get(email=query)
+        # Returns a URL pointing to the user's profile
+        return JsonResponse({'url': f'{LOCALHOST}/profile/{user.username}/'})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+
 """
 ---------------------------------- Friend System Settings ----------------------------------
 """
@@ -851,6 +865,17 @@ class CreateMessageAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CreateMessageOPENAPIView(APIView):
+    def post(self, request, username, format=None):
+        data_with_username = request.data.copy()
+        data_with_username['username'] = username
+        serializer = MessageSuperSerializer(data=data_with_username)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class DeleteTypeOfMessageAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -869,12 +894,31 @@ class DeleteIDOfMessageAPIView(APIView):
 
 class OpenAPIUserAPIView(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = OpenAPIUserSerializer
+    serializer_class = OpenAPIServerNodeSerializer
 
 
 class OpenAPIView(viewsets.ModelViewSet):
     queryset = ServerNode.objects.all()
     serializer_class = OpenAPIServerNodeSerializer
+
+    def list(self, request, *args, **kwargs):
+        json_response = {
+            'our_openapi_instruction': "This is an auto-response that may help you set connection to our OpenAPIs, you "
+                                       "could fetch the OpenAPIs shown below to access specific information about ours.",
+            'our_openapi_url': {
+                'to_add_a_connection_with_us': f'{LOCALHOST}/openapi/',
+                'to_search_a_spec_user': f'{LOCALHOST}/openapi/search/?q=<str:username>',
+                'to_info_a_spec_user': f'{LOCALHOST}/openapi/message/<str:username>/',
+            },
+            'our_openapi_method': {
+                'to_add_a_connection_with_us': 'POST, GET',
+                'to_search_a_spec_user': 'GET',
+                'to_info_a_spec_user': 'POST',
+            },
+
+        }
+
+        return Response(json_response)
 
     def create(self, request, *args, **kwargs):
         print(request.data)
@@ -905,14 +949,12 @@ class ServerNodeList(generics.ListAPIView):
     serializer_class = OpenAPIServerNodeSerializer
 
 
-"""
-def getRemoteUserAPIS(request):
-    remoteUser = request.remoteUser
+def getRemoteUserAPIS(request, username):
+    remoteUser = get_object_or_404(User, username=username)
     urls = {
-        'remote_node_Name': remoteUser.remoteNodeName,
-        'remote_openapi_url': remoteUser.remoteOpenapi,
-        'remote_inbox_api_url': remoteUser.remoteInboxAPI,
-        'remote_follow_api_url': remoteUser.remoteFollowAPI,
+        'remote_node_Name': remoteUser.server_node_name if remoteUser.server_node_name else "",
+        'remote_openapi_url': remoteUser.remoteOpenapi if remoteUser.remoteOpenapi else "",
+        'remote_inbox_api_url': remoteUser.remoteInboxAPI if remoteUser.remoteInboxAPI else "",
+        'remote_follow_api_url': remoteUser.remoteFollowAPI if remoteUser.remoteFollowAPI else "",
     }
     return JsonResponse(urls)
-"""
