@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('SocialDistribution', '0032_user_is_approved'),
+        ('SocialDistribution', '0032_servernode_signupsettings_following_status_and_more'),
     ]
 
     operations = [
