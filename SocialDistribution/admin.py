@@ -5,8 +5,28 @@ from .models import *
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'date_joined', 'bio')
-    search_fields = ('username', 'email')
+    list_display = (
+        'username',
+        'email',
+        'date_joined',
+        'bio',
+        'github_username',
+        'recent_processed_activity',
+        'is_approved',
+        'avatar_url',
+        'server_node_name',
+        'remoteOpenapi',
+        'remoteInboxAPI',
+        'remoteFollowAPI',
+    )
+    search_fields = (
+        'username',
+        'email',
+        'github_username',
+        'server_node_name',
+    )
+    list_filter = ('is_approved', 'server_node_name',)
+    ordering = ('-date_joined',)
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -72,12 +92,11 @@ class ActivityAdmin(admin.ModelAdmin):
 
 
 class ServerNodeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'host', 'userAPI', 'host_link')
+    list_display = ('name', 'host', 'userAPI', 'messageAPI', 'host_link')
     def host_link(self, obj):
         return format_html("<a href='{url}'>{url}</a>", url=obj.host)
-
     host_link.short_description = "Host URL"
-    host_link.admin_order_field = None
+    host_link.admin_order_field = 'host'
     readonly_fields = ('host_link',)
 
 
