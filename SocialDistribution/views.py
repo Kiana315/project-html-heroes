@@ -600,22 +600,30 @@ def search_user(request):
         user = User.objects.get(username=query)
         # Or use eamil search：User.objects.get(email=query)
         # Returns a URL pointing to the user's profile
-        return JsonResponse({'url': f'/profile/{user.username}/'})
-    except User.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
-
-
-def searchUserOPENAPI(request):
-    query = request.GET.get('q', '')
-    current_user = request.user.username
-
-    try:
-        user = User.objects.get(username=query)
-        # Or use email search：User.objects.get(email=query)
-        # Returns a URL pointing to the user's profile
         return JsonResponse({'url': f'{LOCALHOST}/profile/{user.username}/'})
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
+
+
+def searchUserOPENAPI(request, server_node_name):
+    query = request.GET.get('q', '')
+    current_user = request.user.username
+    server_node = get_object_or_404(ServerNode, name=server_node_name)
+
+    try:
+        search_results = perform_user_search(server_node, search_query)
+        if search_results:
+            # 如果找到了用户，则返回用户的 URL
+            user_url = search_results.get('url', '')
+            if user_url:
+                return JsonResponse({'url': user_url})
+            else:
+                return JsonResponse({'error': 'User URL not found'}, status=404)
+        else:
+            # 如果没有找到用户，则返回错误信息
+            return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 """

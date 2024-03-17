@@ -84,8 +84,7 @@ urlpatterns = [
 
     # OpenAPI System:
     path('openapi/', OpenAPIView.as_view({'post': 'create', 'get': 'list', }), name='OPENAPI_AddConnect'),
-    path('openapi/search/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
-    path('openapi/<str:server_node_name>/users/', views.getRemoteUsers, name='get_remote_users'),
+    path('openapi/<str:server_node_name>/search/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
     path('openapi/message/<str:username>/', CreateMessageOPENAPIView.as_view(), name='OPENAPI_POSTUserMsg'),
     path('openapi/followrequest/accept/<str:username>/', AcceptFollowRequestAPIView.as_view(), name='OPENAPI_AcceptFollowRequest'),
     path('openapi/followrequest/reject/<str:username>/', RejectFollowRequestAPIView.as_view(), name='OPENAPI_RejectFollowRequest'),

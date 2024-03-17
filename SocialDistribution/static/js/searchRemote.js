@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         
         try {
-            const response = await fetch(`/api/servernodes/${serverNode}/search/?q=${searchQuery}`);
+            const response = await fetch(`/openapi/${serverNode}/search/?q=${searchQuery}`);
             if (!response.ok) {
                 throw new Error('Failed to search users on the selected server');
             }
