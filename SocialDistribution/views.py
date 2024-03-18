@@ -1009,11 +1009,26 @@ def searchUserOPENAPI(request, server_node_name, remoteUsername):
 @api_view(['POST'])
 class CreateLocalProjUser(APIView):
     def post(self, request, format=None):
+        print(request)
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        bio = request.POST.get('bio')
+        server_node_name = request.POST.get('server_node_name')
+        remoteOpenapi = request.POST.get('remoteOpenapi')
+        remoteInboxAPI = request.POST.get('remoteInboxAPI')
+        remoteFollowAPI = request.POST.get('remoteFollowAPI')
+
+        print(username,email,bio)
+        # 检查是否已经存在具有相同节点和用户名组合的用户
+        if User.objects.filter(server_node_name=server_node_name, username=username).exists():
+            return Response({'error': 'User with the same node and username combination already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET'])
