@@ -24,7 +24,7 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
     github_username = models.CharField(max_length=50, blank=True)
     recent_processed_activity = models.DateTimeField(null=True, blank=True)
-    is_approved = models.BooleanField(default=True)
+    is_approved = models.BooleanField(default=False)
 
     server_node = models.ForeignKey('ServerNode', on_delete=models.SET_NULL, default=None, null=True)
     server_node_name = models.CharField(max_length=30, blank=True, default="Local")

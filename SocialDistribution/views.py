@@ -38,6 +38,7 @@ from .permissions import IsAuthorOrReadOnly
 from .models import *
 
 User = get_user_model()
+HOSTNAME = "A"
 LOCALHOST = "http://127.0.0.1:8000"
 
 """
@@ -607,25 +608,6 @@ def search_user(request):
         return JsonResponse({'error': 'User not found'}, status=404)
 
 
-def searchUserOPENAPI(request, server_node_name):
-    query = request.GET.get('q', '')
-    current_user = request.user.username
-    server_node = get_object_or_404(ServerNode, name=server_node_name)
-
-    try:
-        search_results = perform_user_search(server_node, search_query)
-        if search_results:
-            # 如果找到了用户，则返回用户的 URL
-            user_url = search_results.get('url', '')
-            if user_url:
-                return JsonResponse({'url': user_url})
-            else:
-                return JsonResponse({'error': 'User URL not found'}, status=404)
-        else:
-            # 如果没有找到用户，则返回错误信息
-            return JsonResponse({'error': 'User not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
 
 
 """
@@ -924,6 +906,11 @@ class DeleteIDOfMessageAPIView(APIView):
         return JsonResponse({'status': 'success', 'message': f'Message with id={ID} is deleted.'})
 
 
+"""
+---------------------------------- OpenAPI Settings ----------------------------------
+"""
+
+
 class OpenAPIUserAPIView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = OpenAPIServerNodeSerializer
@@ -938,16 +925,18 @@ class OpenAPIView(viewsets.ModelViewSet):
             'our_openapi_instruction': "This is an auto-response that may help you set connection to our OpenAPIs, you "
                                        "could fetch the OpenAPIs shown below to access specific information about ours.",
             'our_openapi_url': {
+                'our_host_name': HOSTNAME,
                 'to_add_a_connection_with_us': f'{LOCALHOST}/openapi/',
-                'to_search_a_spec_user': f'{LOCALHOST}/openapi/search/?q=<str:username>',
+                'to_search_a_spec_user': f'{LOCALHOST}/openapi/search/<str:server_node_name>/?q=<str:username>',
                 'to_info_a_spec_user': f'{LOCALHOST}/openapi/message/<str:username>/',
+                'to_get_our_user_list': f'{LOCALHOST}/api/users/',
             },
             'our_openapi_method': {
+                'our_host_name': HOSTNAME,
                 'to_add_a_connection_with_us': 'POST, GET',
                 'to_search_a_spec_user': 'GET',
                 'to_info_a_spec_user': 'POST',
             },
-
         }
 
         return Response(json_response)
@@ -995,6 +984,7 @@ def getRemoteUsers(request, server_node_name):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 def getRemoteUserAPIS(request, username):
     remoteUser = get_object_or_404(User, username=username)
     urls = {
@@ -1004,3 +994,25 @@ def getRemoteUserAPIS(request, username):
         'remote_follow_api_url': remoteUser.remoteFollowAPI if remoteUser.remoteFollowAPI else "",
     }
     return JsonResponse(urls)
+
+
+def searchUserOPENAPI(request, server_node_name):
+    query = request.GET.get('q', '')
+    current_user = request.user.username
+
+    try:
+        user = User.objects.get(username=query, server_node_name=server_node_name)
+        return JsonResponse({'url': f'{LOCALHOST}/profile/{user.username}/'})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+
+class CreateLocalProjUser(APIView):
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+

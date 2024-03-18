@@ -5,14 +5,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     document.getElementById('filter-form').addEventListener('submit', async function(event) {
-        event.preventDefault(); 
-    
+        event.preventDefault();
+
         serverNode = filterValue.value;
         console.log(serverNode);
-    
+
     });
 
-    
+
     if (!searchForm) {
         console.error('Search form not found');
         return;
@@ -30,25 +30,30 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        
+
         const currentUser = currentUserInput.value;
         const searchQuery = searchQueryInput.value;
         console.log("current: ", currentUser, "searching --> ", searchQuery, "from", serverNode,);
 
-        
+
         try {
-            const response = await fetch(`/openapi/${serverNode}/search/?q=${searchQuery}`);
+            const response = await fetch(`openapi/search/?q=${searchQuery}`);
             if (!response.ok) {
                 throw new Error('Failed to search users on the selected server');
             }
             const data = await response.json();
-            
             console.log(data);
-            // 返回用户的profile页面
+            fetch(`profile/${currentUser}/${searchQuery}`)
+                .then(response => {
+                    if (!response.ok) {
+                        alert("User not found");
+                    }
+                    window.location.href = `profile/${currentUser}/${searchQuery}`;
+                })
         } catch (error) {
             console.error('Error searching users:', error);
         }
-        
+
     });
 });
 
