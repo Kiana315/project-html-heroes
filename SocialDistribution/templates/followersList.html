@@ -12,11 +12,13 @@
 </head>
 <body>
 
-<button class="back-button" onclick="history.back()">Back</button>
+    <div class="people-container">
+        <button class="back-button" onclick="history.back()">Back</button>
+        <ul id="followers-list">
+            <!--followersList.js loads in data here-->
+        </ul>
+    </div>
 
-<ul id="followers-list">
-    <!--followersList.js loads in data here-->
-</ul>
 
  <script src="{% static 'js/followersList.js' %}"></script>
 

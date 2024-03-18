@@ -1,17 +1,22 @@
 function editUserName() {
     let el = document.getElementById("username");
+    
     el.style.display = 'none';
 
     let input = document.getElementById("edit-username");
     input.style.display = 'inline';
     input.focus();
     input.value = el.innerText;
+
 }
 
+
 function handleUserNameBlur() {
+    
     let el = document.getElementById("edit-username");
     let formData = new FormData();
     formData.append("username", el.value)
+
     fetch(`update-username/`, {
         method: 'POST',
         headers: {
