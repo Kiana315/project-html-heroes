@@ -1,3 +1,6 @@
+'use strict';
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.getElementById('search-form');
     const filterValue = document.getElementById('filter');
@@ -6,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('filter-form').addEventListener('submit', async function(event) {
         event.preventDefault();
-
         serverNode = filterValue.value;
         console.log(serverNode);
 

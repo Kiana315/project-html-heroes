@@ -93,6 +93,7 @@ urlpatterns = [
     path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
     path('api/getRemoteUserOPENAPIS/<str:username>/', views.getRemoteUserAPIS, name='API_GETRemoteUserAPIS'),
     path('api/createLocalProjUser/', CreateLocalProjUser.as_view(), name='API_POSTLocalProjUser'),
+    path("profile/<str:selfUsername>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
 ]
 
 
