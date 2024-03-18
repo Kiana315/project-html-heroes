@@ -39,8 +39,8 @@ from .permissions import IsAuthorOrReadOnly
 from .models import *
 
 User = get_user_model()
-HOSTNAME = "A"
-LOCALHOST = "http://127.0.0.1:8000"
+HOSTNAME = "socialdistrib-server-kiana"
+LOCALHOST = "https://social-distribution1-baa6b6141c07.herokuapp.com/"
 
 """
 ---------------------------------- Signup/Login Settings ----------------------------------
