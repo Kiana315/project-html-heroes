@@ -30,15 +30,7 @@ class User(AbstractUser):
     server_node_name = models.CharField(max_length=30, blank=True, default="Local")
     remoteOpenapi = models.URLField(blank=True, default="http://127.0.0.1:8000/openapi/")
     remoteInboxAPI = models.URLField(blank=True, default=f"http://127.0.0.1:8000/api/msgs/create/")
-    remoteFollowAPI = models.URLField(blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.remoteFollowAPI:
-            self.remoteFollowAPI = self.generate_follow_api_url()
-        super().save(*args, **kwargs)
-
-    def generate_follow_api_url(self):
-        return f'http://127.0.0.1:8000/api/user/{self.username}/following/{username}/'
+    remoteFollowAPI = models.URLField(blank=True, default=f"http://127.0.0.1:8000/api/user/<name>/following/{username}/")
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
