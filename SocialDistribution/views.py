@@ -984,7 +984,7 @@ def getRemoteUsers(request, server_node_name):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def getRemoteUserAPIS(request, username):
+def getRemoteUserAPIS(request, server_node_name, username):
     remoteUser = get_object_or_404(User, username=username)
     urls = {
         'remote_node_Name': remoteUser.server_node_name if remoteUser.server_node_name else "",
@@ -997,11 +997,11 @@ def getRemoteUserAPIS(request, username):
 
 @api_view(['GET'])
 def searchUserOPENAPI(request, server_node_name, remoteUsername):
-    #query = request.GET.get('q', '')
-    #current_user = request.user.username
     try:
         remoteUser = User.objects.filter(username=remoteUsername, server_node_name=server_node_name)
-        return JsonResponse({'url': f'{LOCALHOST}/profile/{remoteUsername}/'})
+        print("remoteUsername", remoteUsername)
+        print("server_node_name", server_node_name)
+        return Response({"message": "user valid."}, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
 
@@ -1031,16 +1031,14 @@ class CreateLocalProjUser(APIView):
 
 
 
-@api_view(['GET'])
-def remoteProfileView(request, selfUsername, remoteUsername):
+def remoteProfileView(request, selfUsername, server_node_name, remoteUsername):
     selfUser = get_object_or_404(User, username=selfUsername)
-    targetUser = get_object_or_404(User, username=remoteUsername)
-
+    remoteUser = get_object_or_404(User, username=remoteUsername)
     context = {
-        'user': targetUser,
-        'posts': Post.objects.filter(author=targetUser).order_by('-date_posted')
+        'user': remoteUser,
+        'posts': Post.objects.filter(author=remoteUser).order_by('-date_posted')
     }
-    return render(request, 'otherProfile.html', context)
+    return render(request, 'remoteProfile.html', context)
 
 
 def _checkRelation(username1, username2):
@@ -1068,9 +1066,9 @@ def _checkRelation(username1, username2):
 
 @api_view(['GET'])
 class AcceptRemoteFollowRequestOPENAPIView(APIView):
-    def get(self, request, node, localUsername, remoteUsername, format=None):
+    def get(self, request, nodename, localUsername, remoteUsername, format=None):
         localUser = get_object_or_404(User, username=localUsername)
-        remoteUser = get_object_or_404(User, username=remoteUsername, server_node_name=node)
+        remoteUser = get_object_or_404(User, username=remoteUsername, server_node_name=nodename)
 
         follow_request = get_object_or_404(Following, user=localUser, following=remoteUser, status='PENDING')
         follow_request.status = 'ACCEPTED'
@@ -1080,9 +1078,9 @@ class AcceptRemoteFollowRequestOPENAPIView(APIView):
 
 @api_view(['GET'])
 class RejectRemoteFollowRequestOPENAPIView(APIView):
-    def get(self, request, node, localUsername, remoteUsername, format=None):
+    def get(self, request, nodename, localUsername, remoteUsername, format=None):
         localUser = get_object_or_404(User, username=localUsername)
-        remoteUser = get_object_or_404(User, username=remoteUsername, server_node_name=node)
+        remoteUser = get_object_or_404(User, username=remoteUsername, server_node_name=nodename)
 
         follow_request = get_object_or_404(Following, user=localUser, following=remoteUser, status='PENDING')
         follow_request.status = 'REJECTED'

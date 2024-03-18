@@ -1,4 +1,4 @@
-function editUserName() {
+function editUserName(){
     let el = document.getElementById("username");
 
     el.style.display = 'none';
