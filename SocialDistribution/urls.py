@@ -83,17 +83,16 @@ urlpatterns = [
 
     # OpenAPI System:
     path('openapi/', OpenAPIView.as_view({'post': 'create', 'get': 'list', }), name='OPENAPI_AddConnect'),
-    path('openapi/search/<str:server_node_name>/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
+    path('openapi/search/<str:server_node_name>/<str:remoteUsername>/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
     path('openapi/message/<str:username>/', CreateMessageOPENAPIView.as_view(), name='OPENAPI_POSTUserMsg'),
-
+    path("openapi/profile/<str:selfUsername>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
     #path('openapi/followrequest/accept/<str:username>/', AcceptFollowRequestAPIView.as_view(), name='OPENAPI_AcceptFollowRequest'),
     #path('openapi/followrequest/reject/<str:username>/', RejectFollowRequestAPIView.as_view(), name='OPENAPI_RejectFollowRequest'),
 
     path("api/users/", UsersAPIView.as_view({'get': 'list'}), name="API_ALL_USER"),
     path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
     path('api/getRemoteUserOPENAPIS/<str:username>/', views.getRemoteUserAPIS, name='API_GETRemoteUserAPIS'),
-    path('api/createLocalProjUser/', CreateLocalProjUser.as_view(), name='API_POSTLocalProjUser'),
-    path("profile/<str:selfUsername>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
+    path('api/createLocalProjUser/', CreateLocalProjUser, name='API_POSTLocalProjUser'),
 ]
 
 """

@@ -995,17 +995,18 @@ def getRemoteUserAPIS(request, username):
     return JsonResponse(urls)
 
 
-def searchUserOPENAPI(request, server_node_name):
-    query = request.GET.get('q', '')
-    current_user = request.user.username
-
+@api_view(['GET'])
+def searchUserOPENAPI(request, server_node_name, remoteUsername):
+    #query = request.GET.get('q', '')
+    #current_user = request.user.username
     try:
-        user = User.objects.get(username=query, server_node_name=server_node_name)
-        return JsonResponse({'url': f'{LOCALHOST}/profile/{user.username}/'})
+        remoteUser = User.objects.filter(username=remoteUsername, server_node_name=server_node_name)
+        return JsonResponse({'url': f'{LOCALHOST}/profile/{remoteUsername}/'})
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
 
 
+@api_view(['POST'])
 class CreateLocalProjUser(APIView):
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
