@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
             username: username,
             password: password,
             from: localName,
-            get_for_our_connection: window.location.origin + "openapi/"
+            get_for_our_connection: window.location.origin + "/openapi/"
         };
 
         fetch(targetOpenapi, {
@@ -51,73 +51,91 @@ document.addEventListener('DOMContentLoaded', function() {
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': getCSRFToken()
                             },
-                        }).then(response => response.json()) // Parse the JSON from the response
+                        }).then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok: ' + response.statusText);
+                            }
+                            return response.json();
+                        }) // Parse the JSON from the response
                             .then(jsonResponse => {
-                                    if (response.ok) {
-                                        alert("New node connect.");
-                                        let urls = jsonResponse.our_openapi_url;
-                                        console.log("?? ", urls)
+                                
+                                    alert("New node connect.");
+                                    let urls = jsonResponse.our_openapi_url;
+                                    console.log("?? ", urls)
 
-                                        let our_host_name = urls.our_host_name;
-                                        let to_add_a_connection_with_us = urls.to_add_a_connection_with_us;
-                                        let to_search_a_spec_user = urls.to_search_a_spec_user;
-                                        let to_info_a_spec_user = urls.to_info_a_spec_user;
-                                        let to_get_our_user_list = urls.to_get_our_user_list;
+                                    let our_host_name = urls.our_host_name;
+                                    let to_add_a_connection_with_us = urls.to_add_a_connection_with_us;
+                                    let to_search_a_spec_user = urls.to_search_a_spec_user;
+                                    let to_info_a_spec_user = urls.to_info_a_spec_user;
+                                    let to_get_our_user_list = urls.to_get_our_user_list;
 
-                                        console.log("* ", targetHost + "api/users/")
-                                        fetch(targetHost + "api/users/", {
-                                            method: 'GET',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRFToken': getCSRFToken()
-                                            }
-                                        }).then(response => response.json())
-                                            .then(remoteUserList => {
-                                                console.log("& ", remoteUserList)
-                                                for (let remoteUser of remoteUserList) {
+                                    console.log("* ", targetHost + "api/users/")
+                                    fetch(targetHost + "api/users/", {
+                                        method: 'GET',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRFToken': getCSRFToken()
+                                        }
+                                    }).then(response => response.json())
+                                        .then(remoteUserList => {
+                                            console.log("remote User List: ", remoteUserList)
+                                            for (let remoteUser of remoteUserList) {
 
-                                                    let formData = new FormData();
-                                                    formData.append('username', remoteUser.name);
-                                                    //formData.append('email', remoteUser.email);
-                                                    formData.append('bio', remoteUser.bio);
-                                                    //formData.append('github_username', remoteUser.github_username);
-                                                    //formData.append('is_approved', false);
-                                                    formData.append('server_node_name', our_host_name);
-                                                    formData.append('remoteOpenapi', targetOpenapi.toString());
-                                                    formData.append('remoteInboxAPI', (_removeLastPartOfUrl(to_info_a_spec_user) + remoteUser.name + "/").toString());
-                                                    formData.append('remoteFollowAPI', targetOpenapi.toString());
+                                                let userData = {
+                                                    username: remoteUser.username,
+                                                    email: remoteUser.email,
+                                                    bio: remoteUser.bio,
+                                                    server_node_name: our_host_name,
+                                                    remoteOpenapi: targetOpenapi.toString(),
+                                                    remoteInboxAPI: (_removeLastPartOfUrl(to_info_a_spec_user) + remoteUser.username + "/").toString(),
+                                                    remoteFollowAPI: targetOpenapi.toString()
+                                                };
+                                                console.log("userData:", userData);
+                                                // let userFormData = new FormData();
+                                                // userFormData.append('username', remoteUser.username);
+                                                // userFormData.append('email', remoteUser.email);
+                                                // userFormData.append('bio', remoteUser.bio);
+                                                // //userFormData.append('github_username', remoteUser.github_username);
+                                                // //userFormData.append('is_approved', false);
+                                                // userFormData.append('server_node_name', our_host_name);
+                                                // userFormData.append('remoteOpenapi', targetOpenapi.toString());
+                                                // userFormData.append('remoteInboxAPI', (_removeLastPartOfUrl(to_info_a_spec_user) + remoteUser.username + "/").toString());
+                                                // userFormData.append('remoteFollowAPI', targetOpenapi.toString());
 
-                                                    let userSearchPage = targetHost + "search/?q=" + remoteUser.name;
-                                                    let createUserURL = targetHost + "api/createLocalProjUser/";
-                                                    console.log("*" + createUserURL);
-                                                    fetch(createUserURL, {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                            'X-CSRFToken': getCSRFToken()
-                                                        },
-                                                        body: remoteUser
+                                                let userSearchPage = targetHost + "search/?q=" + remoteUser.username;
+                                                let createUserURL = targetHost + "api/createLocalProjUser/";
+                                                console.log("FETCH createUserURL-->" + createUserURL);
+                                                
+                                                
+                                                fetch(createUserURL, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRFToken': getCSRFToken()
+                                                    },
+                                                    body: JSON.stringify(userData)
+                                                    
+                                                })
+                                                    .then(response => {
+                                                        if (!response.ok) {
+                                                            throw new Error('Network response was not ok: ' + response.statusText);
+                                                        }
+                                                        else {
+                                                            alert("All remote user projections create on local server.");
+                                                        }
+                                                        return response.json();
                                                     })
-                                                        .then(response => {
-                                                            if (!response.ok) {
-                                                                throw new Error('Network response was not ok: ' + response.statusText);
-                                                            }
-                                                            else {
-                                                                alert("All remote user projections create on local server.");
-                                                            }
-                                                            return response;
-                                                        })
-                                                        .then(data => {
-                                                            console.log('User created:', data);
-                                                        })
-                                                        .catch(error => {
-                                                            console.error('There has been a problem with your fetch operation:', error);
-                                                        });
-                                                }
-                                            });
-                                        return response;
-                                    }
+                                                    .then(data => {
+                                                        console.log('User created:', data);
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('There has been a problem with your fetch operation:', error);
+                                                    });
+                                            }
+                                        });
+                                    return response;
                                 }
+                                
                             )
                         return response;
                     }

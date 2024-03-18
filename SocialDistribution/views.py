@@ -968,22 +968,6 @@ class ServerNodeList(generics.ListAPIView):
     serializer_class = OpenAPIServerNodeSerializer
 
 
-@api_view(['GET'])
-def getRemoteUsers(request, server_node_name):
-    server_node = get_object_or_404(ServerNode, name=server_node_name)
-    print(server_node)
-
-    try:
-        response = requests.get(server_node.userAPI, timeout=10)
-        response.raise_for_status()
-        users = response.json()
-        serializer = UserSerializer(users, many=True)
-
-        return Response(serializer.data)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 def getRemoteUserAPIS(request, username):
     remoteUser = get_object_or_404(User, username=username)
     urls = {
@@ -1009,6 +993,20 @@ def searchUserOPENAPI(request, server_node_name, remoteUsername):
 @api_view(['POST'])
 class CreateLocalProjUser(APIView):
     def post(self, request, format=None):
+        print(request)
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        bio = request.POST.get('bio')
+        server_node_name = request.POST.get('server_node_name')
+        remoteOpenapi = request.POST.get('remoteOpenapi')
+        remoteInboxAPI = request.POST.get('remoteInboxAPI')
+        remoteFollowAPI = request.POST.get('remoteFollowAPI')
+
+        print(username,email,bio)
+        # 检查是否已经存在具有相同节点和用户名组合的用户
+        if User.objects.filter(server_node_name=server_node_name, username=username).exists():
+            return Response({'error': 'User with the same node and username combination already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
