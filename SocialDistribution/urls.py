@@ -96,15 +96,6 @@ urlpatterns = [
     path("profile/<str:selfUsername>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
 ]
 
-
-
-# DRF API Routers
-router.register(f"api/users", UsersAPIView, basename='users')
-
-
-# Add routers
-urlpatterns.append(path('', include(router.urls)))
-
 """
 MESSAGE_TYPES = [
     ('FR', 'Follow Request'),

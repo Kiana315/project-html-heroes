@@ -1006,7 +1006,6 @@ def searchUserOPENAPI(request, server_node_name):
         return JsonResponse({'error': 'User not found'}, status=404)
 
 
-@api_view(['POST'])
 class CreateLocalProjUser(APIView):
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
