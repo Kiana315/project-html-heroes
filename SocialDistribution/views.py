@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.core.files.base import ContentFile
 import base64
 import requests
+import uuid
 
 # REST Pattern:
 from rest_framework import generics, status, viewsets
@@ -1002,30 +1003,43 @@ def searchUserOPENAPI(request, server_node_name, remoteUsername):
         return JsonResponse({'error': 'User not found'}, status=404)
 
 
-@api_view(['POST'])
+
 class CreateLocalProjUser(APIView):
     def post(self, request, format=None):
-        print(request)
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        bio = request.POST.get('bio')
-        server_node_name = request.POST.get('server_node_name')
-        remoteOpenapi = request.POST.get('remoteOpenapi')
-        remoteInboxAPI = request.POST.get('remoteInboxAPI')
-        remoteFollowAPI = request.POST.get('remoteFollowAPI')
+        print("request.data ---> ",request.data) 
+        base_username = request.data.get('username')
+        email = request.data.get('email')
+        bio = request.data.get('bio')
+        server_node_name = request.data.get('server_node_name')
+        remoteOpenapi = request.data.get('remoteOpenapi')
+        remoteInboxAPI = request.data.get('remoteInboxAPI')
+        remoteFollowAPI = request.data.get('remoteFollowAPI')
+        unique_username = f"{server_node_name}.{base_username}"
 
-        print(username,email,bio)
+        
+        print(unique_username)
         # 检查是否已经存在具有相同节点和用户名组合的用户
         if User.objects.filter(server_node_name=server_node_name, username=username).exists():
             return Response({'error': 'User with the same node and username combination already exists.'}, status=status.HTTP_400_BAD_REQUEST)
         
         serializer = UserSerializer(data=request.data)
+        print("serializer.is_valid():", serializer.is_valid())
+        print("serializer.errors:", serializer.errors)
+
         if serializer.is_valid():
+            
             user = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# def generate_unique_username(server_node_name, base_username):
+#     # Generate a unique identifier (UUID)
+#     unique_identifier = uuid.uuid4().hex[:6]  # Using the first 6 characters of the UUID
 
+#     # Combine server_node_name, base_username, and unique identifier
+#     unique_username = f"{server_node_name}.{base_username}.{unique_identifier}"
+
+#     return unique_username
 
 def remoteProfileView(request, selfUsername, server_node_name, remoteUsername):
     selfUser = get_object_or_404(User, username=selfUsername)

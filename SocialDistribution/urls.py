@@ -94,7 +94,7 @@ urlpatterns = [
     path("api/users/", UsersAPIView.as_view({'get': 'list'}), name=".lAPI_ALL_USER"),
     path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
     path('api/getRemoteUserOPENAPIS/<str:server_node_name>/<str:username>/', views.getRemoteUserAPIS, name='API_GETRemoteUserAPIS'),
-    path('api/createLocalProjUser/', CreateLocalProjUser, name='API_POSTLocalProjUser'),
+    path('api/createLocalProjUser/', CreateLocalProjUser.as_view(), name='API_POSTLocalProjUser'),
 ]
 
 """
