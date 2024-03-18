@@ -21,92 +21,45 @@
 <body>
 {% include 'navbar.html' %}
     
-
+<div class="button-container"></div>
 <div class="profile-container">
-    <div class="profile-header">
-        {% if user.avatar %}
+    <div class="profile-left">
+        <div class="profile-header">
+            
             <img
                     class="profile-avatar"
                     src="{{ user.avatar.url }}"
                     alt="Profile Picture"
             />
-        {% else %}
-            <img
-                    class="profile-avatar"
-                    src="../../static/images/default_avatar.png"
-                    alt="Profile Picture"
-            />
-        {% endif %}
-        <form
-                method="post"
-                enctype="multipart/form-data"
-                style="display: none"
-        >
-            {% csrf_token %}
-            <input
-                    type="file"
-                    name="avatar"
-                    id="avatarInput"
-                    accept="image/*"
-                    onchange="this.form.submit()"
-            />
-        </form>
-        <div id="profile-info" class="profile-info" style="text-align: center">
-            <div class="username" id="username">{{ user.username }}</div>
-            <div class="email" id="email">Email: {{ user.email }}</div>
-            <p class="bio-container" id="user-bio">{{ user.bio }}</p>
-              
+        
             
-        </div>
-        <div class="follow-container">
-            <a href="{% url 'PAGE_FollowersList' username=user.username %}">
-                <button id="follower-btn" class="top-button followers-button">Followers</button>
-            </a>
-            <a href="{% url 'PAGE_FollowingList' username=user.username %}">
-                <button id="following-btn" class="top-button following-button">Following</button>
-            </a>
-        </div>
-        <button id="follow-btn" data-username="{{ user.username }}">follow</button>
+            <div id="profile-info" class="profile-info" style="text-align: center">
+                <div class="username" id="username">{{ user.username }}</div>
+                <div class="email" id="email">Email: {{ user.email }}</div>
+                <p class="bio-container" id="user-bio">{{ user.bio }}</p>
+                
+                
+            </div>
+            <div class="follow-container">
+                <a href="{% url 'PAGE_FollowersList' username=user.username %}">
+                    <button id="follower-btn" class="top-button followers-button">Followers</button>
+                </a>
+                <a href="{% url 'PAGE_FollowingList' username=user.username %}">
+                    <button id="following-btn" class="top-button following-button">Following</button>
+                </a>
+            </div>
+            <button id="follow-btn" data-username="{{ user.username }}">Follow</button>
+            <button id="unfollow-btn" data-username="{{ user.username }}">Unfollow</button>
+            <div id="relation"></div>
 
+        </div>
+
+        
     </div>
-
     <div class="post-container">
-        <div class="recent-posts">
+        <div class="recent-posts" id="recent-posts" data-username="{{ user.username }}">
             <!-- This section should be populated with actual post data -->
-            {% for post in posts %}
-                <div class="post">
-                    {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="" width="120" height="120"/>
-                    {% endif %}
-                    <div class="post-info">
-                        <a href="{% url 'PAGE_postDetail' post_id=post.id %}" id="none"
-                        ><h3 class="post-title">{{ post.title }}</h3>
-                        </a>
-                        <p>{{ post.content |slice:":30" }}</p>
-
-                        <div class="post-actions">
-                            <button id="post-share" class="action">
-                                <ion-icon class="material-symbols-outlined" name="share-outline"></ion-icon>
-                                Share
-                            </button>
-                            <button id="post-comment" class="action">
-                                <ion-icon class="material-symbols-outlined" name="chatbox-ellipses-outline"></ion-icon>
-                                Comment
-                            </button>
-                            <button id="post-like" class="action">
-                                <ion-icon class="material-symbols-outlined" name="heart-outline"></ion-icon>
-                                Like
-                            </button>
-                        </div>
-
-                        <!-- <div class="interactions">
-                          <button class="top-button interaction-button">Like</button>
-                          <button class="top-button interaction-button">Comment</button>
-                          <button class="top-button interaction-button">Share</button>
-                        </div> -->
-                    </div>
-                </div>
-            {% endfor %}
+            
         </div>
     </div>
 </div>

@@ -18,7 +18,6 @@
 
 <body>
 
-
 {% include 'navbar.html' %}
 
 <div class="button-container">
@@ -27,117 +26,99 @@
         {% csrf_token %}
         <button type="submit" class="logout-button">Log Out</button>
     </form>
+    <form action="{% url 'PAGE_AddConnect' %}" method="get">
+        {% csrf_token %}
+        <button type="submit" id="ntn-button">Add Node Connection</button>
+    </form>
+    {% if request.user == user and request.user %}
+        <div>
+            <button><a href="{% url 'API_AuthorDraft' username=user.username %}" title="Post Draft">
+                <ion-icon name="file-tray-full-outline">Post Draft</ion-icon>
+            </a></button>
+        </div>
+    {% endif %}
 </div>
 <div class="profile-container">
     <div class="overlay" id="overlay" style="display: none;"></div>
-    <div class="profile-header">
-    
-        <button class="profile-edit-btn" id="profile-edit-btn" title="Edit Profile" > 
-            <ion-icon name="create-outline"></ion-icon></a>
-        </button>
-            
-    
-        <img
-                class="profile-avatar"
-                src="{{ user.avatar.url }}"
-                onclick="document.getElementById('avatarInput').click()"
-                alt="Profile Picture"
-        />
+    <div class="profile-left">
+
+        <div class="profile-header">
         
-        <form
-                method="post"
-                enctype="multipart/form-data"
-                style="display: none"
-                action="upload-avatar/"
-        >
-            {% csrf_token %}
-            <input
-                    type="file"
-                    name="avatar"
-                    id="avatarInput"
-                    accept="image/*"
-                    onchange="this.form.submit()"
+            <button class="profile-edit-btn" id="profile-edit-btn" title="Edit Profile" > 
+                <ion-icon name="create-outline"></ion-icon></a>
+            </button>
+                
+        
+            <img
+                    class="profile-avatar"
+                    src="{{ user.avatar.url }}"
+                    onclick="document.getElementById('avatarInput').click()"
+                    alt="Profile Picture"
             />
-        </form>
-        <div id="profile-info" class="profile-info" style="text-align: center"> 
-            <div class="username" id="username" >{{ user.username }}</div>
-            <input type="text" id="edit-username" onblur="handleUserNameBlur()" style="display: none">
-            <div class="email" id="email">Email: {{ user.email }}</div>
-            <p class="bio-container" id="user-bio">{{ user.bio }}</p>
-    
-            <form action="update-bio/" method="post" style="display: none;">
+            
+            <form
+                    method="post"
+                    enctype="multipart/form-data"
+                    style="display: none"
+                    action="upload-avatar/"
+            >
                 {% csrf_token %}
-                <textarea
-                        class="bio-container"
-                        id="edit-user-bio"
-                        name="bio"
-                        type="text"
-                >{{ user.bio }}</textarea>
-                <button class="saveButton" type="submit">Save</button>
+                <input
+                        type="file"
+                        name="avatar"
+                        id="avatarInput"
+                        accept="image/*"
+                        onchange="this.form.submit()"
+                />
             </form>
+            <div id="profile-info" class="profile-info" style="text-align: center"> 
+                <div class="username" id="username" >{{ user.username }}</div>
+                <input type="text" id="edit-username" onblur="handleUserNameBlur()" style="display: none">
+                <div class="email" id="email">Email: {{ user.email }}</div>
+                <div class="github" id="github">Github: {{ user.github_username }}</div>
+                <p class="bio-container" id="user-bio">{{ user.bio }}</p>
+                <form action="update-bio/" method="post" style="display: none;">
+                    {% csrf_token %}
+                    <textarea
+                            class="bio-container"
+                            id="edit-user-bio"
+                            name="bio"
+                            type="text"
+                    >{{ user.bio }}</textarea>
+                    <button class="saveButton" type="submit">Save</button>
+                </form>
+
+                <a href="{% url 'PAGE_LinkGithub' username=user.username %}">
+                    <button type="button" id="github-btn" class="github-button">GitHub</button>
+                </a>
+                
+            </div>
+            <div class="follow-container">
+                <a href="{% url 'PAGE_FollowersList' username=user.username %}">
+                    <button id="follower-btn" class="followers-button">Followers</button>
+                </a>
+                <a href="{% url 'PAGE_FollowingList' username=user.username %}">
+                    <button id="following-btn" class="following-button">Following</button>
+                </a>
+            </div>
+            
+            
+            <button id="follow-btn" data-username="{{ user.username }}" style="display: none;">follow</button>
+            <button id="unfollow-btn" data-username="{{ user.username }}" style="display: none;">Unfollow</button>
+
             
         </div>
-        <div class="follow-container">
-            <a href="{% url 'PAGE_FollowersList' username=user.username %}">
-                <button id="follower-btn" class="followers-button">Followers</button>
-            </a>
-            <a href="{% url 'PAGE_FollowingList' username=user.username %}">
-                <button id="following-btn" class="following-button">Following</button>
-            </a>
+
+        <div class="friend-list" id="friendList" data-username="{{ user.username }}">
+            <!-- Load friend list     -->  
         </div>
-        {% if not user.username == request.user.username and not user.username in following_usernames %}
-            <button id="follow-btn" data-username="{{ user.username }}">follow</button>
-        {% endif %}
+        
     </div>
-
     <div class="post-container">
-        {% if request.user == user and request.user %}
-            <div>
-                <button><a href="{% url 'API_AuthorDraft' username=user.username %}" title="Post Draft">
-                    <ion-icon name="file-tray-full-outline">Post Draft</ion-icon>
-                </a></button>
-            </div>
-        {% endif %}
-        <div class="recent-posts">
+            
+        <div class="recent-posts" id="recent-posts" data-username="{{ user.username }}">
             <!-- This section should be populated with actual post data -->
-            {% for post in posts %}
-                <div class="post">
-                    {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="" width="120" height="120"/>
-                    {% endif %}
-                    <div class="post-info">
-                        <a href="{% url 'PAGE_postDetail' post_id=post.id %}" id="none"
-                        ><h3 class="post-title">{{ post.title }}</h3>
-                        </a>
-                        <p>{{ post.content |slice:":30" }}</p>
-
-                        <div class="post-actions">
-                            <button id="post-share" class="action">
-                                <ion-icon class="material-symbols-outlined" name="share-outline"></ion-icon>
-                                Share
-                            </button>
-                            <button id="post-comment" class="action">
-                                <ion-icon class="material-symbols-outlined" name="chatbox-ellipses-outline"></ion-icon>
-                                Comment
-                            </button>
-                            <button id="post-like" class="action">
-                                <ion-icon class="material-symbols-outlined" name="heart-outline"></ion-icon>
-                                {% if post.like_count %}
-                                    <span>{{ post.like_count }}</span>
-                                {% else %}
-                                    Like
-                                {% endif %}
-                            </button>
-                        </div>
-
-                        <!-- <div class="interactions">
-                          <button class="top-button interaction-button">Like</button>
-                          <button class="top-button interaction-button">Comment</button>
-                          <button class="top-button interaction-button">Share</button>
-                        </div> -->
-                    </div>
-                </div>
-            {% endfor %}
+            
         </div>
     </div>
 </div>

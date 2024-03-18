@@ -1,20 +1,36 @@
+import json
+
+import commonmark
+import requests
+import base64
+
+from django.utils import timezone
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db.models import Q
-
 
 
 class User(AbstractUser):
     # A text field used to store the user's personal profile.
     #   blank=True indicates that this field is optional
     #   and users can not fill in the introduction when registering
-    bio = models.TextField(blank=True)
-    username = models.CharField(max_length=150, unique=True)
+    bio = models.TextField(max_length=200, blank=True)
+    username = models.CharField(max_length=50, unique=True)
     email = models.EmailField()
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
+    github_username = models.CharField(max_length=50, blank=True)
+    recent_processed_activity = models.DateTimeField(null=True, blank=True)
+    is_approved = models.BooleanField(default=False)
+
+    server_node = models.ForeignKey('ServerNode', on_delete=models.SET_NULL, default=None, null=True)
+    server_node_name = models.CharField(max_length=30, blank=True, default="Local")
+    remoteOpenapi = models.URLField(blank=True, default="http://127.0.0.1:8000/openapi/")
+    remoteInboxAPI = models.URLField(blank=True, default=f"http://127.0.0.1:8000/api/msgs/create/")
+    remoteFollowAPI = models.URLField(blank=True, default=f"http://127.0.0.1:8000/api/user/<name>/following/{username}/")
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
@@ -32,10 +48,15 @@ class Post(models.Model):
         ('FRIENDS', 'Friends-Only'),
         ('PRIVATE', 'Private'),
     ]
+    CONTENT_TYPE_CHOICES = [
+        ('COMMONMARK', 'CommonMark'),
+        ('PLAIN', 'Plain Text'),
+    ]
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255)
-    content = models.TextField()
-    image = models.ImageField(upload_to='posts/images/', null=True, blank=True)
+    content = models.TextField(blank=True)
+    content_type = models.CharField(max_length=10, choices=CONTENT_TYPE_CHOICES, default='PLAIN')
+    image_data = models.TextField(blank=True, null=True)
     visibility = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default='PUBLIC')
     date_posted = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -43,6 +64,17 @@ class Post(models.Model):
     shared_post = models.ForeignKey('self', on_delete=models.CASCADE, related_name='shared_posts', null=True, blank=True)
     ordering = ['-date_posted']
 
+    def content_as_html(self):
+        return commonmark.commonmark(self.content)
+
+    def add_image(self, image_base64):
+        if self.image_data:
+            images = json.loads(self.image_data)
+        else:
+            images = []
+        images.append(image_base64)
+        self.image_data = json.dumps(images)
+        self.save()
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment', default=99999)
@@ -64,6 +96,12 @@ class Like(models.Model):
 class Following(models.Model):
     user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
     following = models.ForeignKey(User, related_name='reverse_following', on_delete=models.CASCADE)
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Approval'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected'),   
+    ]
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='PENDING')
     date_followed = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ('user', 'following',)
@@ -99,4 +137,75 @@ class Friend(models.Model):
             Follower.objects.filter(user=user1, follower=user2).delete()
             Follower.objects.filter(user=user2, follower=user1).delete()
         else:
-            raise ValidationError("Cannot create a friendship with oneself or duplicate friendships.")
+            raise ValidationError("Cannot create a friendship")
+    @classmethod
+    def delete_friendship_for_user1(cls, user1, user2):
+        if user1 != user2 and cls.objects.filter(user1=user1, user2=user2).exists():
+            Friend.objects.filter(user1=user1, user2=user2).delete()
+            Friend.objects.filter(user1=user2, user2=user1).delete()
+            Following.objects.create(user=user2, following=user1)
+            Follower.objects.create(user=user1, follower=user2)
+        else:
+            raise ValidationError("Cannot delete a friendship")
+
+
+class MessageSuper(models.Model):
+    MESSAGE_TYPES = [
+        ('FR', 'Follow Request'),
+        ('LK', 'Like'),
+        ('CM', 'Comment'),
+        ('NP', 'New Post Reminder'),
+        ('SU', 'New Sign Up')
+    ]
+    post = models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True, related_name='messages')
+    owner = models.ForeignKey(User, related_name='messages', on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    message_type = models.CharField(max_length=2, choices=MESSAGE_TYPES)
+    content = models.CharField(max_length=50)
+    origin = models.CharField(max_length=10, db_column='origin')
+    class Meta:
+        ordering = ['-date']
+    @classmethod
+    def get_messages_of_type_for_user(cls, user, message_type):
+        return cls.objects.filter(owner=user, message_type=message_type)
+
+class SignUpSettings(models.Model):
+    is_signup_enabled = models.BooleanField(default=True)
+
+class GithubActivity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=100)
+    created_at = models.DateTimeField()
+
+def process_github_activity(user):
+    github_activity = fetch_github_activity(user)
+    for activity in github_activity:
+        activity_type = activity.get('type')
+        created_at = activity.get('created_at')
+        if user.recent_processed_activity is None or created_at > user.recent_processed_activity:
+            GithubActivity.objects.create(user=user, activity_type=activity_type, created_at=created_at)
+            Post.objects.create(
+                author=user,
+                title=f"GitHub Activity",
+                content=f"{activity_type} activity on GitHub at {created_at}",
+                visibility='PUBLIC'
+            )
+    user.recent_processed_activity = timezone.now()
+    user.save()
+
+def fetch_github_activity(user):
+    if user.github_username:
+        github_url = f"https://api.github.com/users/{user.github_username}/events/public"
+        response = requests.get(github_url)
+        if response.status_code == 200:
+            return response.json()
+    return []
+
+
+class ServerNode(models.Model):
+    name = models.CharField(max_length=64, unique=True, default="Remote")
+    host = models.URLField(unique=True, default="Remote")
+    userAPI = models.URLField(unique=True, default="Remote")
+    messageAPI = models.URLField(unique=True, default="Remote")
+    def __str__(self):
+        return self.name

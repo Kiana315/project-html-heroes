@@ -10,17 +10,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const commentButton = document.getElementById('comment-button');
     const commentForm = document.getElementById('comment-form');
     const submitCommentButton = document.getElementById('submit-comment');
+    const cancelCommentButton = document.getElementById('cancel-comment');
     const commentInput = document.getElementById('comment-input');
     const shareButton = document.getElementById('share-button');
     var shareModal = document.getElementById('shareModal');
-    // var closeSpan = document.getElementsByClassName('close_share');
     var confirmShare = document.getElementById('confirmShare');
     var shareText = document.getElementById('shareText');
+    var postContent = document.getElementById('postContent');
 
     checkLikeStatusAndUpdateIcon(postId);
 
     if (moreOptionsButton) {
         moreOptionsButton.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' 
+            });
             if (optionsContainer.style.display === 'none') {
                 optionsContainer.style.display = 'block';
             } else {
@@ -61,12 +66,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (commentButton) {
         fetchComments();
         commentButton.addEventListener('click', function () {
-            commentForm.style.display = 'block'; // Show the comment form
+            if (commentForm.style.display === 'block' || commentForm.style.display === '') {
+                commentForm.style.display = 'none'; // Hide the comment form
+            } else {
+                commentForm.style.display = 'block'; // Show the comment form
+            }
         });
 
         // Event listener for submitting a comment
         submitCommentButton.addEventListener('click', function () {
             const commentText = commentInput.value.trim();
+
+            commentInput.style.height = 'initial';
 
             if (commentText === '') {
                 alert('Please enter a comment.');
@@ -91,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     fetchComments();
                     commentInput.value = ''; // Clear the input field
                     commentForm.style.display = 'none'; // Hide the comment form again
+                    
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -98,7 +110,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert(error.message);
                 });
         });
+
+        // cancelCommentButton.addEventListener('click', function() {
+        //     commentInput.value = ''; // Clear <textarea> 
+        //     commentInput.style.height = 'initial';
+        // });
+        cancelCommentButton.addEventListener('click', function() {
+            commentInput.value = ''; // Clear <textarea>
+            const commentForm = document.getElementById('comment-form');
+            if (commentForm.style.display !== 'none') {
+                commentForm.style.display = 'none'; // Hide the comment form
+            } else {
+                commentForm.style.display = 'flex'; // Re-display the comment form if needed
+            }
+        });        
     }
+
+    
 
     if (shareButton) {
         shareButton.addEventListener('click', function () {
@@ -150,6 +178,8 @@ document.addEventListener('DOMContentLoaded', function () {
         shareModal.style.display = "none";
         shareText.value = '';
     }
+
+    if (!postContent){showImage();}
 
 
 });
@@ -246,30 +276,28 @@ function renderComments(comments) {
 
     comments.forEach(comment => {
         // Create Content Container
-        const commentElement = document.createElement('div');
-        commentElement.classList.add('comment');
 
-        const avatarElement = document.createElement('img');
-        avatarElement.src = comment.commenter_avatar_url;
-        avatarElement.alt = 'User Avatar';
-        avatarElement.classList.add('comment-avatar');
+        const dateCommented = new Date(comment.date_commented);
+        const formattedDate = `${dateCommented.getFullYear()}-${dateCommented.getMonth() + 1}-${dateCommented.getDate()}`;
+        
+        const commentHTML = `
+            <div class="comment">
+                <div class="comment-avatar">
+                    <img src="${comment.commenter_avatar_url}" alt="User Avatar">
+                </div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <div class="comment-user-name">${comment.commenter_username}</div>
+                        <div class="comment-time">${formattedDate}</div>
+                    </div> 
+                        <p class="comment-text">${comment.comment_text}</p>
+                
+                </div>  
+            </div>
+        `;
 
-        // add username
-        const commenterNameElement = document.createElement('h5');
-        commenterNameElement.textContent = comment.commenter_username;
-        commenterNameElement.classList.add('commenter-name');
-
-        // add comment text
-        const commentTextElement = document.createElement('p');
-        commentTextElement.textContent = comment.comment_text;
-        commentTextElement.classList.add('comment-text');
-
-        // append username, comment text, and
-        commentElement.appendChild(avatarElement);
-        commentElement.appendChild(commenterNameElement);
-        commentElement.appendChild(commentTextElement);
-
-        commentsContainer.appendChild(commentElement);
+        commentsContainer.innerHTML += commentHTML;
+        
     });
 }
 
@@ -312,6 +340,7 @@ function showNotification(message) {
 }
 
 function closeShareModal() {
+    const shareModal = document.getElementById('shareModal');
     shareModal.style.display = 'none';
 }
 
@@ -355,67 +384,7 @@ function EditPost() {
     modal.style.display = 'block'
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    // Get elements
-    const modal = document.getElementById("editModal");
-    const form = document.getElementById("editForm");
-    const postId = document.getElementById("postId").innerText;
 
-    // Click the x to close the pop-up window
-    document.getElementsByClassName("close")[0].onclick = function () {
-        modal.style.display = "none";
-    }
-    // Close pop-up window when clicking outside window
-    window.onclick = function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    }
-    form.onsubmit = function (event) {
-        event.preventDefault();   //Prevent form default submission behavior
-
-        // Create FormData Obj
-        var formData = new FormData(form);
-        var isDraft = event.submitter.innerText === "Save Draft"
-        if (isDraft) {
-            formData.append("is_draft", "true")
-        }
-
-        // Send AJAX request to server
-        fetch(`/api/posts/${postId}/`, {
-            method: 'PUT',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')   //Get CSRF token
-            },
-            credentials: 'same-origin'   // For CSRF token verification
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    emptyPost()
-                    throw new Error('Something went wrong');
-                }
-            })
-            .then(data => {
-                // After posted
-                modal.style.display = "none";   //Close pop-up window
-                if (isDraft) {
-                    history.back();
-                } else {
-                    window.location = "/"
-                    window.onload = function () {
-                        window.reload()
-                    }
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                //Add error message
-            });
-    };
-});
 
 function sendPost() {
     var modal = document.getElementById('editModal')
@@ -455,4 +424,49 @@ function sendPost() {
             console.error('Error:', error);
             // Add error message
         });
+}
+
+function autoResizeTextarea() {
+    var textareas = document.querySelectorAll('#comment-input');
+
+    textareas.forEach(function(textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight-2+'px' ;
+        });
+    });
+}
+document.addEventListener('DOMContentLoaded', autoResizeTextarea);
+
+function showImage() {
+    const postContainer = document.querySelector('.post-container');
+    const postId = postContainer.getAttribute('data-post-id');
+    
+    fetch(`/api/posts/${postId}`) // Get image data from backend
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); 
+    })
+    .then(data => {
+        // process data
+        var imageDataString = data.image_data; // get image_data string
+        
+        var imageDataArray = imageDataString.split(",");
+        
+        for (var i = 1; i < imageDataArray.length; i += 2) {
+            var base64Data = imageDataArray[i]; // Extract Base64 encoded part
+            // Create img tag and display image
+            var img = document.createElement("img");
+            img.src = "data:image/jpeg;base64," + base64Data; // add "data:image/jpeg;base64," header
+            img.classList.add("post-image"); // add css style
+            
+            document.getElementById("imageContainer").appendChild(img);
+        }   
+        
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
 }
