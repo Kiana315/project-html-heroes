@@ -162,15 +162,11 @@ class FPsAPIView(generics.ListAPIView):
     def get(self, request, username):
         current_user = get_object_or_404(User, username=username)  # get current user
 
-        # Query the users followed by the current user
         user_following = User.objects.filter(reverse_following__user=current_user)
-        # Get query set of public posts from following users
         user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC', is_draft=False)
 
-        # Get query set of current user's friend list  
         friends = User.objects.filter(friends_set1__user1=current_user).values_list('friends_set1__user2', flat=True)
 
-        # Get query set of friends’ public and friends-only posts
         friend_posts = Post.objects.filter(
             Q(author__in=friends, visibility='PUBLIC') |
             Q(author__in=friends, visibility='FRIENDS'), is_draft=False
@@ -1086,3 +1082,16 @@ class RejectRemoteFollowRequestOPENAPIView(APIView):
         follow_request.status = 'REJECTED'
         follow_request.save()
         return Response({"message": "Follow request is rejected."}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+class PublicFriendsPostsListOPENView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        username = self.kwargs['username']
+        user = get_object_or_404(User, username=username)
+        return Post.objects.filter(
+            Q(author=user),
+            ~Q(visibility='PRIVATE')
+        ).order_by('-date_posted')

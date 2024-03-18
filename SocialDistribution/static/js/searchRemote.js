@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
             try {
-                //http://127.0.0.1:8000/openapi/search/Remote/aaaa/
                 const response = await fetch(`/openapi/search/${serverNode}/${searchQuery}/`);
                 if (!response.ok) {
                     alert("Remote user not found...")
@@ -45,8 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 const data = await response.json();
                 console.log(data);
-                //openapi/profile/<str:selfUsername>/<str:server_node_name>/<str:remoteUsername>/
-                //http://127.0.0.1:8000/openapi/profile/eden/Remote/aaaa/
                 fetch(`/openapi/profile/${currentUser}/${serverNode}/${searchQuery}/`)
                     .then(response => {
                         if (!response.ok) {

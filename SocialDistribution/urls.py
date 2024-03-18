@@ -86,6 +86,7 @@ urlpatterns = [
     path('openapi/search/<str:server_node_name>/<str:remoteUsername>/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
     path('openapi/message/<str:username>/', CreateMessageOPENAPIView.as_view(), name='OPENAPI_POSTUserMsg'),
     path("openapi/profile/<str:selfUsername>/<str:server_node_name>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
+    path('openapi/userposts/<str:username>/', PublicFriendsPostsListOPENView, name='OPENAPI_GETUserPosts'),
 
     path('openapi/accept-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', AcceptRemoteFollowRequestOPENAPIView, name='OPENAPI_AcceptFollowRequest'),
     path('openapi/reject-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', RejectRemoteFollowRequestOPENAPIView, name='OPENAPI_RejectFollowRequest'),

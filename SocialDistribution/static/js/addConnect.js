@@ -83,20 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                                         server_node_name: our_host_name,
                                                         remoteOpenapi: targetOpenapi.toString(),
                                                         remoteInboxAPI: (_removeLastPartOfUrl(to_info_a_spec_user) + remoteUser.username + "/").toString(),
-                                                        remoteFollowAPI: targetOpenapi.toString()
+                                                        remoteFollowAPI: (targetHost + `api/user/${remoteUser.username}/posts/`).toString()
                                                     };
                                                     console.log("userData:", userData);
 
-                                                    // let formData = new FormData();
-                                                    // formData.append('username', remoteUser.name);
-                                                    // //formData.append('email', remoteUser.email);
-                                                    // formData.append('bio', remoteUser.bio);
-                                                    // //formData.append('github_username', remoteUser.github_username);
-                                                    // //formData.append('is_approved', false);
-                                                    // formData.append('server_node_name', our_host_name);
-                                                    // formData.append('remoteOpenapi', targetOpenapi.toString());
-                                                    // formData.append('remoteInboxAPI', (_removeLastPartOfUrl(to_info_a_spec_user) + remoteUser.name + "/").toString());
-                                                    // formData.append('remoteFollowAPI', targetOpenapi.toString());
 
                                                     let userSearchPage = targetHost + "search/?q=" + remoteUser.name;
                                                     let createUserURL = targetHost + "api/createLocalProjUser/";
