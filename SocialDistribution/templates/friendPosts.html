@@ -10,53 +10,20 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/friendPosts.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/navbar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/postListContent.css' %}">
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/newPostModal.css' %}">
 </head>
 
 <body>
 
     {% include 'navbar.html' %}
 
-    
     {% include 'postListContent.html' %}
     
-<!-- <div class="post-container" id="post-container">
-     Posts will be dynamically loaded here via JavaScript 
-</div> -->
-
     {% if user.is_authenticated %}
-        <button id="floating-button">+</button>
+    <button id="floating-button">+</button>
     {% endif %}
 
-    <div id="newPostModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <form id="newPostForm">
-                <input id="titleInput" type="text" name="title" placeholder="Title">
-                <textarea id="contentInput" name="content" placeholder="Tell Something New..."></textarea>
-                
-                <div class="submit-container">
-                    <div class="left">
-                        <label for="imageUpload" class="upload-icon">
-                            <ion-icon name="image"></ion-icon>
-                        </label>
-                        <input type="file" id="imageUpload" name="image" style="display: none;">
-                    </div>
-                    <div class="right">
-                        <label for="visibility"></label>
-                        
-                        <select name="visibility" id="visibility">
-                            <option value="PUBLIC" selected>Public</option>
-                            <option value="FRIENDS">Friends-Only</option>
-                        </select>
-                        
-                        <button class="post-button" type="submit">Save Draft</button>
-                        <button class="post-button" type="submit">Post</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    {% include 'newPostModal.html' %}
 
 
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>

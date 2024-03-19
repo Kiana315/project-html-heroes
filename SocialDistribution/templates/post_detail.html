@@ -7,7 +7,7 @@
     <title>Post Page</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="stylesheet" href="{% static 'css/post_detail.css' %}">
-    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="{% static 'css/newPostModal.css' %}">
 </head>
 <body data-current-user="{{ request.user.username }}">
 <div id="notification" class="notification"></div>
@@ -24,7 +24,7 @@
         {% endif %}
     </div>
 
-    <div id="options-container" class="options-container" style="display: none;">
+    <div id="options-container" class="modify-options-container" style="display: none;">
         <button class="option-button" id="edit-btn">
             <ion-icon size="small" name="create-outline" style="margin-right: 8px;"></ion-icon>
             Edit
@@ -46,23 +46,36 @@
         {% endif %}
         <span class="user-name" id="userName" onclick="redirectProfile()">{{ post.author.username }}</span>
         <span class="post-date">{{ post.date_posted|date:"Y-m-d" }}</span>
+        {% if post.content_type == 'COMMONMARK'%}
+        <ion-icon name="logo-markdown" style="padding: 0 10px;"></ion-icon>
+        {% endif %}
+        {% if post.visibility == 'FRIENDS' %}
+        <ion-icon name="people" style="padding: 0 10px;"></ion-icon>
+        {% elif post.visibility == 'PRIVATE' %}
+        <ion-icon name="eye-off" style="padding: 0 10px;"></ion-icon>
+        {% endif %}
+
     </div>
     <h1 class="post-title" id="postTitle">{{ post.title }}</h1>
     <div class="scrollable-content">
         <span id="postId" style="display: none">{{ post.id }}</span>
-        <p class="post-content" id="postContent">{{ post.content|safe }}</p>
-        {% if post.image %}
-            <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
-        {% endif %}
-        {% if not post.is_draft %}
-            <div class="comments-section">
-                <h2>Comments:</h2>
-                <div id="comments-container"></div>
+        <!-- Load text content -->
+        {% if post.content %}
+            {% if post.content_type != 'COMMONMARK'%}
+            <div class="post-content" id="postContent">{{ post.content|safe }}</div>
+            {% else %}
+            <div class="post-content" id="postContent" >{{ post.content_as_html|safe }}</div>
+            {% endif %}
+        {% else %}
+            {% if post.image_data %}
+            <div class="image_container" id="imageContainer">
+                <!-- Load image content -->
             </div>
+            {% endif %}
         {% endif %}
-    </div>
-    <div class="post-actions">
-        {% if post.is_draft %}
+
+        <div class="post-actions">
+            {% if post.is_draft %}
             <button id="edit-button" class="action" onclick="EditPost()" type="button">
                 <span class="material-symbols-outlined">
                     <ion-icon name="create-outline">Edit</ion-icon>
@@ -77,27 +90,55 @@
                 <span class="material-symbols-outlined"><ion-icon name="send-outline">Send</ion-icon></span>
                 Post
             </button>
-        {% else %}
-            <button id="share-button" class="action">
-                <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
-                Share
-            </button>
-            <button id="comment-button" class="action">
-                <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
-                Comment
-            </button>
-            <div id="comment-form" class="comment-form" style="display: none;">
-                <textarea id="comment-input" placeholder="Add a comment..."></textarea>
-                <button id="submit-comment" class="action">Post Comment</button>
+            {% else %}
+                {% if post.visibility != 'PRIVATE' %}
+                    {% if post.visibility == 'PUBLIC' %}
+                    <button id="share-button" class="action">
+                        <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
+                        Share
+                    </button>
+                    {% endif %}
+                <button id="comment-button" class="action">
+                    <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
+                    Comment
+                </button>
+                
+                <button id="like-button" class="action">
+                    <ion-icon id="like-icon" size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>
+                    Like
+                    <span id="like-count">{{ likes_count }}</span>
+                </button>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- <div id="comment-form" class="comment-form" style="display: none;">
+            <textarea id="comment-input" placeholder="Add a comment..." rows="1"></textarea>
+            <button id="submit-comment" class="post-button">Comment</button>
+            <button id="cancel-comment" class="post-button">Cancel</button>
+        
+        </div> -->
+        <div id="comment-form" class="comment-form" style="display: none;">
+            <textarea id="comment-input" placeholder="Add a comment..." rows="1"></textarea>
+            <div class="comment-form-actions">
+                <button id="submit-comment" class="post-button">Comment</button>
+                <button id="cancel-comment" class="post-button">Cancel</button>
             </div>
-            <button id="like-button" class="action">
-                <ion-icon id="like-icon" size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>
-                Like
-                <span id="like-count">{{ likes_count }}</span>
-            </button>
+        </div>
+        
+        <!-- Load post comments -->
+        {% if not post.is_draft and post.visibility != 'PRIVATE' %}
+        <div class="comments-section">
+            <h2>Comments:</h2>
+            <div id="comments-container"></div>
+        </div>
         {% endif %}
     </div>
+    
+    
+    
 </div>
+
 
 <div id="shareModal" class="modal">
     <div class="modal-content">
@@ -113,25 +154,57 @@
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
         <form id="editForm">
-            <input id="titleInput" type="text" name="title" placeholder="Title">
+            <input class="title-input" id="titleInput" type="text" name="title" placeholder="Title">
             <textarea id="contentInput" name="content" placeholder="Tell Something New..."></textarea>
+
+            <div class="submit-container">
+                <div class="left">
+                    <input type="checkbox" id="content_type" name="content_type">
+                    <label for="content_type" style="font-size: 14px; margin-top: 10px;">Use CommonMark</label>
+
+                    <select name="visibility" id="visibility">
+                        <option value="PUBLIC" selected>Public</option>
+                        <option value="FRIENDS">Friends-Only</option>
+                        <option value="PRIVATE">Private</option>
+                    </select>
+                </div>
+                <div class="right">
+                    <button class="post-button" type="submit">Save Draft</button>
+                    <button class="post-button" type="submit">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editImageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <form id="editImageForm" enctype="multipart/form-data">
+            <input class="title-input" id="titleInput2" type="text" name="title" placeholder="Title">
+            <!-- Preview image -->
+            <div class="preview-contaienr" id="imagePreviewContainer">
+                <!-- Preview images -->
+            </div>
 
             <div class="submit-container">
                 <div class="left">
                     <label for="imageUpload" class="upload-icon">
                         <ion-icon name="image"></ion-icon>
                     </label>
-                    <input type="file" id="imageUpload" name="image" style="display: none;">
-                </div>
-                <div class="right">
-                    <label for="visibility"></label>
-
+                    <!-- Upload image -->
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
                     <select name="visibility" id="visibility">
                         <option value="PUBLIC" selected>Public</option>
                         <option value="FRIENDS">Friends-Only</option>
+                        <option value="PRIVATE">Private</option>
                     </select>
+                </div>
+                
+                <div class="right">
+                    
                     <button class="post-button" type="submit">Save Draft</button>
-                    <button class="post-button" type="submit">Post Changes</button>
+                    <button class="post-button" type="submit">Save Changes</button>
                 </div>
             </div>
         </form>
@@ -140,7 +213,7 @@
 
 <script type="text/javascript">
     const currentPostTitle = "{{ post.title }}";
-    const currentPostContent = "{{ post.content }}";
+    // const currentPostContent = `{{ post.content }}`;
 </script>
 
 <script src="{% static 'js/common.js' %}"></script>

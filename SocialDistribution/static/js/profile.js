@@ -1,6 +1,6 @@
-function editUserName() {
+function editUserName(){
     let el = document.getElementById("username");
-    
+
     el.style.display = 'none';
 
     let input = document.getElementById("edit-username");
@@ -12,7 +12,6 @@ function editUserName() {
 
 
 function handleUserNameBlur() {
-    
     let el = document.getElementById("edit-username");
     let formData = new FormData();
     formData.append("username", el.value)
@@ -43,7 +42,8 @@ function handleUserNameBlur() {
                 spanElement.setAttribute("id", "update-username-error")
                 parentElement.insertBefore(spanElement, el.nextSibling)
                 el.focus();
-            } else {
+            }
+            else {
                 el.style.display = 'none'
                 let username = document.getElementById("username");
                 username.innerText = el.value
@@ -59,18 +59,57 @@ function handleUserNameBlur() {
         });
 }
 
-
 document.addEventListener('DOMContentLoaded', function() {
+    /*   data = {
+            'user1_follows_user2': user1_follows_user2,
+            'user2_follows_user1': user2_follows_user1,
+            'user1_followed_by_user2': user1_followed_by_user2,
+            'user2_followed_by_user1': user2_followed_by_user1,
+            'already_friend': user1_makeFriend_user2 and user2_makeFriend_user1,
+            'mutual_follow': user1_follows_user2 and user2_follows_user1 and user1_followed_by_user2 and user2_followed_by_user1,
+        }*/
+
     const selfUsername = _getURLSelfUsername();
     const targetUsername = _getURLTargetUsername();
-
-
     const followButton = document.getElementById('follow-btn');
+    const unfollowButton = document.getElementById('unfollow-btn');
+    const relationInstruction = document.getElementById('relation');
+
+    followButton.style.display = "none";
+    unfollowButton.style.display = "none";
+
+    fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
+        .then(relationResponse => {
+            if (!relationResponse.ok) {
+                throw new Error('Network response was not ok.');
+            }
+            return relationResponse.json();
+        })
+        .then(relations => {
+            if (relations["already_friend"]) {
+                relationInstruction.textContent = `- ${targetUsername} Is Your Friend -`;
+                followButton.style.display = "none";
+                unfollowButton.style.display = "inline";
+            }
+            else if (relations["user1_follows_user2"] && relations["user2_followed_by_user1"]) {
+                relationInstruction.textContent = `- You Are Following ${targetUsername} -`;
+                followButton.style.display = "none";
+                unfollowButton.style.display = "inline";
+            }
+            else if (relations["user2_follows_user1"] && relations["user1_followed_by_user2"]) {
+                relationInstruction.textContent = `- ${targetUsername} Is Your Follower -`;
+                followButton.style.display = "inline";
+                unfollowButton.style.display = "none";
+            }
+            else {
+                relationInstruction.textContent = `- Hi, I'm ${targetUsername}, Nice To Meet U -`;
+                followButton.style.display = "inline";
+                unfollowButton.style.display = "none";
+            }
+        })
+
     if (followButton) {
         followButton.addEventListener('click', function() {
-            const selfUsername = _getURLSelfUsername();
-            const targetUsername = _getURLTargetUsername();
-
             // Todo - Check if they are already friends, if not then continue the follow process:
             let areFriends = true;
             fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
@@ -97,9 +136,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(response => {
                                 if (response.ok) {
                                     followButton.style.display = 'none';
+                                    unfollowButton.style.display = 'inline';
 
                                     // Todo - For `USER_TARGET`, set `USER_SELF` as a follower of `USER_TARGET`:
-                                    fetch(`/api/user/${targetUsername}/following/${selfUsername}/`, {
+                                    fetch(`/api/user/${selfUsername}/following/${targetUsername}/`, {
                                         method: 'POST',
                                         headers: {
                                             'X-CSRFToken': getCookie('csrftoken'),
@@ -108,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     })
                                         .then(response => {
                                             if (response.ok) {
-                                                alert("Follow Success!");
+                                                alert("Follow request sent successfully!");
                                                 // Todo - For BOTH, if the two are following each other and being followed by each other,
                                                 //  then activate the “friend mechanism”, remove their following & follower relations but
                                                 //  keep a friend relation between them:
@@ -142,7 +182,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                             }
                                         })
                                         .catch(error => console.error('Error:', error));
-                                } else {
+                                }
+                                else {
                                     alert("Already Followed.");
                                 }
                             })
@@ -154,6 +195,181 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+
+    // Todo - Unfollow Logics:
+    //  1. Only self follow other    >>      delete 1->2 follow-ship;
+    //  2. we are friend            >>       delete 1<->2 friend-ship，add 2->1 follow-ship;
+    if (unfollowButton) {
+        unfollowButton.addEventListener('click', function() {
+            alert("fuck");
+            fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
+                .then(relationResponse => {
+                    if (!relationResponse.ok) {
+                        throw new Error('Network response was not ok.');
+                    }
+                    return relationResponse.json();
+                })
+                .then(relations => {
+                    if (relations["user1_follows_user2"] && relations["user2_followed_by_user1"]) {
+                        fetch(`/api/user/${selfUsername}/unfollowerOf/${targetUsername}/`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok.');
+                                }
+                                return response.json();
+                            })
+                            .then(relations => {
+                                fetch(`/api/user/${targetUsername}/unfollowing/${selfUsername}/`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRFToken': getCookie('csrftoken'),
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Network response was not ok.');
+                                        }
+                                        else {
+                                            alert("Unfollow Successfully.");
+                                            unfollowButton.style.display = 'none';
+                                            followButton.style.display = 'inline';
+                                        }
+                                        return response.json();
+                                    })
+                            })
+                    }
+                    else if (relations["already_friend"]) {
+                        fetch(`/api/user/${selfUsername}/unfriend/${targetUsername}/`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok.');
+                                }
+                                else {
+                                    alert(`Unfollow Successfully, ${targetUsername} Is Still Following You.`);
+                                    unfollowButton.style.display = 'none';
+                                    followButton.style.display = 'inline';
+                                }
+                                return response.json();
+                            })
+
+                    }
+                })
+
+        });
+    }
+
+});
+
+// Load recent posts for the user
+document.addEventListener('DOMContentLoaded', () => {
+    const recentPostsContainer = document.getElementById('recent-posts');
+    const username = recentPostsContainer.getAttribute('data-username');
+
+    fetch(`/api/user/${username}/posts`)
+        .then(response => response.json())
+        .then(data => {
+            // console.log(data);
+            if (Array.isArray(data.posts)) {
+                data.posts.forEach(post => {
+                    let postElement = document.createElement('div');
+                    postElement.className = 'post';
+
+                    const postLink = document.createElement('a');
+                    postLink.href = `/posts/${post.id}`;
+                    postLink.className = 'post-link';
+
+                    const datePosted = new Date(post.date_posted);
+                    const formattedDate = `${datePosted.getFullYear()}-${datePosted.getMonth() + 1}-${datePosted.getDate()}`;
+
+                    const contentHTML = `
+                        <div class="content">
+                        ${post.image ? `<img src="${post.image}" alt="" width="120" height="120"/>` : ''}
+                            <div class="post-title">${post.title}
+                            <div class="corner-icon">
+                                ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown" padding: 0 10px; position: relative; margin-left: auto;></ion-icon>' : ''}
+                                ${post.visibility === 'FRIENDS' ? '<ion-icon name="people" style="padding: 0 10px; position: relative; margin-left: auto;"></ion-icon>' : ''}
+                                ${post.visibility === 'PRIVATE' ? '<ion-icon name="eye-off" style="padding: 0 10px; position: relative; margin-left: auto;"></ion-icon>' : ''}
+                            </div>
+                            </div>
+                            <div class="post-time">${formattedDate}</div>
+                            <p class="post-content">${post.content}</p>
+                        </div>
+                    `;
+                    
+                    postLink.innerHTML = contentHTML;
+                    postElement.appendChild(postLink);
+                    recentPostsContainer.appendChild(postElement);
+
+                });
+            }
+            else {
+                console.error('Error: Expected an array of posts');
+                recentPostsContainer.innerHTML = '<p>Error loading posts.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching posts:', error);
+            recentPostsContainer.innerHTML = '<p>Error loading posts.</p>';
+        });
+});
+
+
+// Load friend list
+document.addEventListener('DOMContentLoaded', () => {
+    const friendListContainer = document.getElementById('friendList');
+    const username = friendListContainer.getAttribute('data-username'); 
+
+    fetch(`/api/user/${username}/friends/`)
+        .then(response => response.json())
+        .then(friendships => {
+            // console.log(friendships.length);
+            if (friendships.length === 0) {
+                friendListContainer.style.display = 'none'; 
+                return;
+            }
+
+            friendships.forEach(friendship => {
+
+                let friend;
+                if (friendship.user1.username === username){
+                    friend = friendship.user2;
+                } else {
+                    return;
+                }
+                console.log(friend);
+                
+                let friendElement = document.createElement('div');
+                friendElement.className = 'friend-info';
+
+                friendElement.innerHTML = `
+                <div class="friend-avatar">
+                    <img src="${friend.avatar}" alt="Friend Avatar">
+                </div>
+                <div class="friend-name">
+                    <a href="/profile/${username}/${friend.username}">${friend.username}</a> 
+                </div>
+                `;
+
+                friendListContainer.appendChild(friendElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching friends:', error);
+            friendListContainer.innerHTML = '<p>Error loading friends.</p>';
+        });
 });
 
 
@@ -174,7 +390,7 @@ function _getRelationAnalysis(relationResponse) {
 }
 
 
-function getCookie(name) {
+function getCookie(name){
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
