@@ -67,6 +67,7 @@ urlpatterns = [
     path("api/nps/", NPsAPIView.as_view(), name="API_NPs"),                                                                                 # POST NewPosts                     --> Test Success
     path('api/posts/<int:post_id>/', PostOperationAPIView.as_view(), name='API_PDetail'),                                                   # GET/PUT/DELETE PostsOperations
     path("api/posts/<int:post_id>/comments/", CommentAPIView.as_view(), name='API_PComms'),                                                 # GET/POST CommentList/NewComment   --> Test Success
+    path('api/posts/<int:post_id>/comments/<int:comment_id>/delete/', CommentDeleteAPIView.as_view(), name='comment-delete'),                                               
     path("api/posts/<int:post_id>/likes/", LikeAPIView.as_view(), name='API_PLikes'),                                                       # GET/POST LikeList/NewLike         --> Test Success
     path('api/posts/<int:post_id>/check-like/', check_like_status, name='check_like_status'),
     path('api/posts/<int:post_id>/share/', SharePostView.as_view(), name='share_post'),

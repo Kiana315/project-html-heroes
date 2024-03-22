@@ -57,15 +57,22 @@ class UserSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     commenter_username = serializers.CharField(source='commenter.username', read_only=True)
     commenter_avatar_url = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'commenter', 'commenter_username', 'commenter_avatar_url', 'date_commented', 'comment_text']
+        fields = ['id', 'post', 'commenter', 'commenter_username', 'commenter_avatar_url', 'date_commented',
+                  'comment_text','can_delete']
 
     def get_commenter_avatar_url(self, obj):
         request = self.context.get('request')
         if obj.commenter.avatar and hasattr(obj.commenter.avatar, 'url'):
             return request.build_absolute_uri(obj.commenter.avatar.url)
         return request.build_absolute_uri(static('images/post-bg.jpg'))
+
+    def get_can_delete(self, obj):
+        request = self.context.get('request')
+        return obj.commenter == request.user or obj.post.author == request.user
 
 
 class LikeSerializer(serializers.ModelSerializer):

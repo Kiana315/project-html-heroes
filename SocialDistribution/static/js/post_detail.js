@@ -220,6 +220,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+document.getElementById('comments-container').addEventListener('click', function(event) {
+    function findDeleteButton(target) {
+        while (target != null && target !== this) {
+            if (target.classList.contains('comment-delete-btn')) {
+                return target;
+            }
+            target = target.parentElement;
+        }
+        return null;
+    }
+
+    const deleteBtn = findDeleteButton(event.target);
+    if (deleteBtn) {
+        const commentId = deleteBtn.getAttribute('data-comment-id');
+        const postContainer = document.querySelector('.post-container');
+        const postId = postContainer.getAttribute('data-post-id');
+        deleteComment(postId, commentId);
+    }
+});
+
 function checkLikeStatusAndUpdateIcon(postId) {
     fetch(`/api/posts/${postId}/check-like/`)
         .then(response => response.json())
@@ -315,9 +335,14 @@ function renderComments(comments) {
 
         const dateCommented = new Date(comment.date_commented);
         const formattedDate = `${dateCommented.getFullYear()}-${dateCommented.getMonth() + 1}-${dateCommented.getDate()}`;
+
+        const deleteButtonHTML = comment.can_delete ? 
+            `<button class="comment-delete-btn" data-comment-id="${comment.id}">
+                <ion-icon name="trash-outline"></ion-icon>
+            </button>` : '';
         
         const commentHTML = `
-            <div class="comment">
+            <div class="comment" data-comment-id="${comment.id}">  
                 <div class="comment-avatar">
                     <img src="${comment.commenter_avatar_url}" alt="User Avatar">
                 </div>
@@ -325,6 +350,7 @@ function renderComments(comments) {
                     <div class="comment-header">
                         <div class="comment-user-name">${comment.commenter_username}</div>
                         <div class="comment-time">${formattedDate}</div>
+                        ${deleteButtonHTML}
                     </div> 
                         <p class="comment-text">${comment.comment_text}</p>
                 
@@ -337,6 +363,33 @@ function renderComments(comments) {
     });
 }
 
+function deleteComment(postId, commentId) {
+    fetch(`/api/posts/${postId}/comments/${commentId}/delete/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to delete the comment.');
+        }
+        if (response.status === 204) {
+            return null;
+        } else {
+            return response.json(); 
+        }
+    })
+    .then(() => {
+        alert('Comment deleted successfully.');
+        // after deleting, fetch comments.
+        fetchComments();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error deleting comment.');
+    });
+}
 
 function deletePost(button) {
     const postId = button.getAttribute('data-post-id');

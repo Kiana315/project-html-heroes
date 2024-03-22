@@ -254,6 +254,16 @@ body  {
 
 }
 
+.comment-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.comment-delete-btn ion-icon {
+    font-size: 20px; 
+}
+
 #comment-form {
     /* position: sticky; */
     position:absolute;

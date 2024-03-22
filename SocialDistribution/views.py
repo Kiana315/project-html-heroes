@@ -432,6 +432,22 @@ class CommentAPIView(generics.ListCreateAPIView):
         context.update({'request': self.request})
         return context
 
+class CommentDeleteAPIView(generics.DestroyAPIView):
+    queryset = Comment.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_object(self):
+        comment_id = self.kwargs['comment_id']
+        comment = get_object_or_404(Comment, pk=comment_id)
+
+        # check if the user is the commenter or author
+        print(comment.commenter, comment.post.author, "评论，作者")
+        if comment.commenter == self.request.user or comment.post.author == self.request.user:
+            return comment
+        else:
+            # if not, raise error
+            raise PermissionDenied('You do not have permission to delete this comment.')
+
 
 class LikeAPIView(generics.ListCreateAPIView):
     """ [GET/POST] Get The LikeList For A Spec-post; Create A Like For A Spec-post """
