@@ -240,6 +240,11 @@ document.getElementById('comments-container').addEventListener('click', function
     }
 });
 
+function goBackAndRefresh() {
+    sessionStorage.setItem('refreshOnBack', 'true');
+    history.back();
+}
+
 function checkLikeStatusAndUpdateIcon(postId) {
     fetch(`/api/posts/${postId}/check-like/`)
         .then(response => response.json())

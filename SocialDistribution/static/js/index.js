@@ -149,7 +149,12 @@ export function createRemotePostBlocks_enjoy(remotePosts) {
     });
 }
 
-
+window.addEventListener('pageshow', function(event) {
+    if (sessionStorage.getItem('refreshOnBack') === 'true') {
+        sessionStorage.removeItem('refreshOnBack');
+        window.location.reload();
+    }
+});
 
 function createImagesHTML(imageDataString) {
     if (!imageDataString) return '';

@@ -71,6 +71,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         .catch(error => console.error('Error:', error));
 });
 
+window.addEventListener('pageshow', function(event) {
+    if (sessionStorage.getItem('refreshOnBack') === 'true') {
+        sessionStorage.removeItem('refreshOnBack');
+        window.location.reload();
+    }
+});
+
 function _getURLUsername() {
     const pathSections = window.location.pathname.split('/');
     return pathSections[2];
