@@ -49,11 +49,6 @@ class UserSerializer(serializers.ModelSerializer):
             'github_username',
             'recent_processed_activity',
             'is_approved',
-            'server_node',
-            'server_node_name',
-            'remoteOpenapi',
-            'remoteInboxAPI',
-            'remoteFollowAPI',
         ]
     def get_avatar_url(self, obj):
         return obj.avatar_url if obj.avatar else None

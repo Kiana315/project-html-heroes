@@ -1,4 +1,6 @@
-# Traditional Pattern:
+# django Pattern:
+from urllib import request
+from django.contrib.auth.hashers import check_password
 from django.http import HttpResponseForbidden
 from functools import wraps
 from django.contrib.auth.decorators import login_required
@@ -133,9 +135,65 @@ class PostDetailView(DetailView):
             return super().render_to_response(context, **response_kwargs)
 
 
-class IndexView(TemplateView):
-    """ * [GET] Get The Home/PP Page """
+def indexView(request):
+    # CCC
+    """ * [GET] Get The Home Page """
+    remote_posts = []
+    try:
+        hosts = Host.objects.filter(allowed=True)
+        print("hosts", hosts)
+        for host in hosts:
+            if host.name == "SELF" and host.allowed:
+                continue
+            if host.name == "enjoy":
+                users_endpoint = host.host + 'authors/'
+                users_response = requests.get(users_endpoint, timeout=10)
+                print("users_endpoint", users_endpoint)
+                print("users_response", users_response)
+                if users_response.status_code == 200:
+                    print("users_response", users_response)
+                    print("users_response.json().get()", users_response.json().get("items"))
+                    for user in users_response.json().get("items"):
+                        print("\nauthors", user)
+                        # GET remote `posts` for each user:
+                        posts_endpoint = f"{user.get('id')}/posts/"
+                        print("user.get('id')", user.get('id'))
+                        print("posts_endpoint", posts_endpoint)
+                        posts_response = requests.get(posts_endpoint, timeout=10)
+                        if posts_response.status_code == 200:
+                            posts = remove_bool_none_values(posts_response.json())
+                            print("\n>> post", posts)
+                            remote_posts.extend(posts)
+            else:
+                # Authorization Message Header:
+                credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
+                auth_headers = {'Authorization': f'Basic {credentials}'}
+                print("auth_headers", auth_headers)
+
+                authenticate_host(credentials)
+
+                # GET remote `users`:
+                users_endpoint = host.host + 'users/'
+                users_response = requests.get(users_endpoint, headers=auth_headers, timeout=10)
+                print("users_endpoint", users_endpoint)
+                print("users_response", users_response)
+                if users_response.status_code == 200:
+                    for user in users_response.json():
+                        print("\nuser", user)
+                        # GET remote `posts` for each user:
+                        posts_endpoint = f"{users_endpoint}{user.get('username')}/posts/"
+                        print("user.get('username')", user.get('username'))
+                        print("posts_endpoint", posts_endpoint)
+                        posts_response = requests.get(posts_endpoint, headers=auth_headers, timeout=10)
+                        if posts_response.status_code == 200:
+                            posts = remove_bool_none_values(posts_response.json().get('posts'))
+                            print("\n>> post", posts)
+                            remote_posts.extend(posts)
+    except:
+        pass
     template_name = "index.html"
+    print("\n** posts", remote_posts)
+    return render(request, template_name, {'posts': remote_posts})
 
 
 class FriendPostsView(TemplateView):
@@ -153,7 +211,6 @@ class PPsAPIView(generics.ListAPIView):
     serializer_class = PostSerializer
 
     def get_queryset(self):
-        # Get all public posts，sorted by publication time in descending order
         return Post.objects.filter(visibility='PUBLIC', is_draft=False).order_by('-date_posted')
 
 
@@ -296,7 +353,33 @@ class PostOperationAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         post_id = self.kwargs.get('post_id')
-        return get_object_or_404(Post, pk=post_id)
+        post = get_object_or_404(Post, pk=post_id)
+        user = self.request.user  # get current user
+
+        # Check if the post is public
+        if post.visibility == 'PUBLIC':
+            return post
+        # If the post is friends-only, check if they are friends
+        elif post.visibility == 'FRIENDS':
+            friends = User.objects.filter(
+                Q(friends_set1__user2=post.author) |
+                Q(friends_set2__user1=post.author)
+            ).distinct()
+
+            if user.is_authenticated and (user in friends or user == post.author):
+                return post
+            else:
+                raise PermissionDenied(detail="You do not have permission to view this post.")
+        # If the post is private
+        elif post.visibility == 'PRIVATE':
+            if user == post.author:
+                return post
+            else:
+                raise PermissionDenied(detail="This post is private.")
+
+        raise PermissionDenied(detail="You do not have permission to view this post.")
+
+        # return get_object_or_404(Post, pk=post_id)
 
 
 class CommentAPIView(generics.ListCreateAPIView):
@@ -353,7 +436,6 @@ class CommentAPIView(generics.ListCreateAPIView):
 class LikeAPIView(generics.ListCreateAPIView):
     """ [GET/POST] Get The LikeList For A Spec-post; Create A Like For A Spec-post """
     serializer_class = LikeSerializer
-
     # def get_queryset(self):
     #     return get_list_or_404(Like, post_id=self.kwargs['post_id'])
 
@@ -399,27 +481,40 @@ class SharePostView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, post_id):
-        original_post = get_object_or_404(Post, pk=post_id)
-        original_author_username = original_post.author.username
+        user_comment = request.data.get('text', '')
+        current_user_username = request.user.username
 
-        profile_url = reverse('PAGE_Profile', kwargs={'username': original_author_username})
+        original_post = get_object_or_404(Post, pk=post_id)
+        print(original_post)
+
+        original_author_username = original_post.author.username
+        original_post_url = reverse('PAGE_postDetail', kwargs={'post_id': original_post.id})
 
         if original_post.visibility != 'PUBLIC':
             raise PermissionDenied('This post cannot be shared as it is not public.')
 
         if original_post.shared_post is None:
-            mention_link = f'<a href="{profile_url}">@{original_author_username}</a>'
-            content_with_mention = f"{mention_link}: {original_post.content}"
+            content_with_mention = (
+                f"<a href=\"javascript:void(0);\" onclick=\"userLinkProfile('{request.user.username}');\">@{request.user.username}</a>: {user_comment} //"
+                f"<a href=\"javascript:void(0);\" onclick=\"userLinkProfile('{original_post.author.username}');\">@{original_post.author.username}</a>: {original_post.content} "
+                f"(View original post: <a href=\"{original_post_url}\">here</a>)"
+            )
             repost_title = f"Repost: {original_post.title}"
         else:
-            content_with_mention = original_post.content
+            content_with_mention = (
+                f"<a href=\"javascript:void(0);\" onclick=\"userLinkProfile('{request.user.username}');\">@{request.user.username}</a>: {user_comment} //"
+                f"{original_post.content}"
+            )
             repost_title = original_post.title
+
+        image_data = original_post.image_data
 
         new_post = Post.objects.create(
             author=request.user,
             title=repost_title,
             content=content_with_mention,
-            image_data=original_post.image_data,
+            image_data=image_data,
+            visibility=original_post.visibility,
             shared_post=original_post,
             # Add other necessary fields...
         )
@@ -447,20 +542,6 @@ class SharePostView(APIView):
                 )
 
         return Response({'success': True, 'post_id': new_post.pk}, status=status.HTTP_201_CREATED)
-
-        # elif original_post.visibility == 'FRIENDS':
-        #     # Send the post notification to all friends
-        # friends = User.objects.filter(
-        #     Q(friends_set1__user2=original_post.author) | Q(friends_set2__user1=original_post.author)
-        # ).distinct()
-        # for friend in friends:
-        #     MessageSuper.objects.create(
-        #         owner=friend,
-        #         message_type='NP',  # 'NP' for new post
-        #         content=shared_content,
-        #         origin=request.user.username,
-        #         post=original_post
-        #     )
 
 
 """
@@ -501,7 +582,11 @@ def update_bio(request, username):
     if request.method == 'POST':
         form = UpdateBioForm(request.POST, instance=request.user)
         if form.is_valid():
-            form.save()
+            bio_content = form.cleaned_data.get('bio')
+            if bio_content.strip() == '':
+                form.instance.bio = None
+            else:
+                form.save()
 
     return redirect("PAGE_Profile", username=username)
 
@@ -726,7 +811,6 @@ class CreateFollowingAPIView(APIView):
 
 class AcceptFollowRequestAPIView(APIView):
     def post(self, request, origin_username):
-        print("accept 调用")
         # get current user
         target_user = request.user
         # get request user
@@ -1003,10 +1087,9 @@ def searchUserOPENAPI(request, server_node_name, remoteUsername):
         return JsonResponse({'error': 'User not found'}, status=404)
 
 
-
 class CreateLocalProjUser(APIView):
     def post(self, request, format=None):
-        print("request.data ---> ",request.data) 
+        print("request.data ---> ", request.data)
         base_username = request.data.get('username')
         email = request.data.get('email')
         bio = request.data.get('bio')
@@ -1016,7 +1099,6 @@ class CreateLocalProjUser(APIView):
         remoteFollowAPI = request.data.get('remoteFollowAPI')
         unique_username = f"{server_node_name}.{base_username}"
 
-        
         print(unique_username)
         # 检查是否已经存在具有相同节点和用户名组合的用户
         if User.objects.filter(server_node_name=server_node_name, username=username).exists():
@@ -1027,7 +1109,6 @@ class CreateLocalProjUser(APIView):
         print("serializer.errors:", serializer.errors)
 
         if serializer.is_valid():
-            
             user = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1102,6 +1183,7 @@ class RejectRemoteFollowRequestOPENAPIView(APIView):
 class PublicFriendsPostsListOPENView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
+
     def get_queryset(self):
         username = self.kwargs['username']
         user = get_object_or_404(User, username=username)
@@ -1109,3 +1191,81 @@ class PublicFriendsPostsListOPENView(generics.ListAPIView):
             Q(author=user),
             ~Q(visibility='PRIVATE')
         ).order_by('-date_posted')
+
+
+class UsersOpenEndPt(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def list(self, request, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            parts = auth_header.split(' ', 1)
+            if len(parts) == 2 and parts[0].lower() == 'basic':
+                print("A")
+                if authenticate_host(parts[1]):
+                    print("B")
+                    return super().list(request, *args, **kwargs)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UserPostsOpenEndPt(APIView):
+    def get(self, request, username):
+        auth_header = request.headers.get('Authorization')
+        print("auth_header", auth_header)
+        if auth_header:
+            parts = auth_header.split(' ', 1)
+            print("parts", parts)
+            print("len(parts)", len(parts))
+            print("parts[0].lower()", parts[0].lower())
+            if len(parts) == 2 and parts[0].lower() == 'basic':
+                print("C")
+                print("authenticate_host(parts[1])", authenticate_host(parts[1]))
+                if authenticate_host(parts[1]):
+                    print("D")
+                    target_user = get_object_or_404(User, username=username)
+                    posts = Post.objects.filter(author=target_user, is_draft=False).order_by('-date_posted')
+                    user_serializer = UserSerializer(target_user)
+                    posts_serializer = PostSerializer(posts, many=True)
+                    print("user", user_serializer.data)
+                    print("posts", posts_serializer.data)
+                    return Response({
+                        'user': user_serializer.data,
+                        'posts': posts_serializer.data
+                    })
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+""" HELPER FUNC """
+def authenticate_host(encoded_credentials):
+    try:
+        decoded_bytes = base64.b64decode(encoded_credentials)
+        decoded_credentials = decoded_bytes.decode('utf-8')
+        username, password = decoded_credentials.split(':', 1)
+        print(">> username", username)
+        print(">> password", password)
+        hosts = Host.objects.filter(name="SELF")
+        for host in hosts:
+            if host.name != "SELF" and host.allowed:
+                continue
+            print("host.username", host.username, "/ username", username)
+            print("host.password", host.password, "/ password", password)
+            if host.username == username and host.password == password:
+                return True
+        return False
+    except (ValueError, TypeError, IndexError):
+        return False
+
+
+def remove_unwanted_values(data):
+    if isinstance(data, dict):
+        return {k: remove_unwanted_values(v) for k, v in data.items() if v is not None and not isinstance(v, bool)}
+    elif isinstance(data, list):
+        return [remove_unwanted_values(item) for item in data]
+    else:
+        return data
+
+def remove_bool_none_values(posts):
+    return [remove_unwanted_values(post) for post in posts]
+
+

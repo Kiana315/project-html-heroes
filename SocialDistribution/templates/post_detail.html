@@ -46,13 +46,13 @@
         {% endif %}
         <span class="user-name" id="userName" onclick="redirectProfile()">{{ post.author.username }}</span>
         <span class="post-date">{{ post.date_posted|date:"Y-m-d" }}</span>
-        {% if post.content_type == 'COMMONMARK'%}
-        <ion-icon name="logo-markdown" style="padding: 0 10px;"></ion-icon>
+        {% if post.content_type == 'COMMONMARK' %}
+            <ion-icon name="logo-markdown" style="padding: 0 10px;"></ion-icon>
         {% endif %}
         {% if post.visibility == 'FRIENDS' %}
-        <ion-icon name="people" style="padding: 0 10px;"></ion-icon>
+            <ion-icon name="people" style="padding: 0 10px;"></ion-icon>
         {% elif post.visibility == 'PRIVATE' %}
-        <ion-icon name="eye-off" style="padding: 0 10px;"></ion-icon>
+            <ion-icon name="eye-off" style="padding: 0 10px;"></ion-icon>
         {% endif %}
 
     </div>
@@ -60,54 +60,57 @@
     <div class="scrollable-content">
         <span id="postId" style="display: none">{{ post.id }}</span>
         <!-- Load text content -->
-        {% if post.content %}
-            {% if post.content_type != 'COMMONMARK'%}
-            <div class="post-content" id="postContent">{{ post.content|safe }}</div>
-            {% else %}
-            <div class="post-content" id="postContent" >{{ post.content_as_html|safe }}</div>
+
+        <div class="post-content" id="postContent">
+            {% if post.content %}
+                {% if post.content_type != 'COMMONMARK'%}
+                    {{ post.content|safe }}
+                {% else %}
+                    {{ post.content_as_html|safe }}
+                {% endif %}
             {% endif %}
-        {% else %}
-            {% if post.image_data %}
-            <div class="image_container" id="imageContainer">
-                <!-- Load image content -->
-            </div>
-            {% endif %}
-        {% endif %}
+        </div>
+        {% if post.image_data %}
+        <div class="image_container" id="imageContainer">
+            <!-- Load image content -->
+        </div>
+        {% endif %}        
 
         <div class="post-actions">
             {% if post.is_draft %}
-            <button id="edit-button" class="action" onclick="EditPost()" type="button">
+                <button id="edit-button" class="action" onclick="EditPost()" type="button">
                 <span class="material-symbols-outlined">
                     <ion-icon name="create-outline">Edit</ion-icon>
                 </span>
-                Edit
-            </button>
-            <button id="delete-button" class="action" onclick="deletePost(this)" data-post-id="{{ post.id }}">
-                <span class="material-symbols-outlined"><ion-icon name="trash-outline">Delete</ion-icon></span>
-                Delete
-            </button>
-            <button id="send-button" class="action" onclick="sendPost()">
-                <span class="material-symbols-outlined"><ion-icon name="send-outline">Send</ion-icon></span>
-                Post
-            </button>
+                    Edit
+                </button>
+                <button id="delete-button" class="action" onclick="deletePost(this)" data-post-id="{{ post.id }}">
+                    <span class="material-symbols-outlined"><ion-icon name="trash-outline">Delete</ion-icon></span>
+                    Delete
+                </button>
+                <button id="send-button" class="action" onclick="sendPost()">
+                    <span class="material-symbols-outlined"><ion-icon name="send-outline">Send</ion-icon></span>
+                    Post
+                </button>
             {% else %}
                 {% if post.visibility != 'PRIVATE' %}
                     {% if post.visibility == 'PUBLIC' %}
-                    <button id="share-button" class="action">
-                        <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
-                        Share
-                    </button>
+                        <button id="share-button" class="action">
+                            <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
+                            Share
+                        </button>
                     {% endif %}
-                <button id="comment-button" class="action">
-                    <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
-                    Comment
-                </button>
-                
-                <button id="like-button" class="action">
-                    <ion-icon id="like-icon" size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>
-                    Like
-                    <span id="like-count">{{ likes_count }}</span>
-                </button>
+                    <button id="comment-button" class="action">
+                        <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;"></ion-icon>
+                        Comment
+                    </button>
+
+                    <button id="like-button" class="action">
+                        <ion-icon id="like-icon" size="small" name="heart-outline"
+                                  style="margin-right: 8px;"></ion-icon>
+                        Like
+                        <span id="like-count">{{ likes_count }}</span>
+                    </button>
                 {% endif %}
             {% endif %}
         </div>
@@ -125,27 +128,26 @@
                 <button id="cancel-comment" class="post-button">Cancel</button>
             </div>
         </div>
-        
+
         <!-- Load post comments -->
         {% if not post.is_draft and post.visibility != 'PRIVATE' %}
-        <div class="comments-section">
-            <h2>Comments:</h2>
-            <div id="comments-container"></div>
-        </div>
+            <div class="comments-section">
+                <h2>Comments:</h2>
+                <div id="comments-container"></div>
+            </div>
         {% endif %}
     </div>
-    
-    
-    
+
+
 </div>
 
 
 <div id="shareModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="height: 200px">
         <span class="close" onclick="closeShareModal()">&times;</span>
-        <h2>Share This Post</h2>
-        <textarea id="shareText" placeholder="Add your thoughts to this post..."></textarea>
-        <button id="confirmShare">Share</button>
+        <h2 style="margin: 0">Share This Post</h2>
+        <textarea style="height:100px" id="shareText" placeholder="Add your thoughts to this post..."></textarea>
+        <button id="confirmShare" class="share-button">Share</button>
     </div>
 </div>
 
@@ -200,9 +202,9 @@
                         <option value="PRIVATE">Private</option>
                     </select>
                 </div>
-                
+
                 <div class="right">
-                    
+
                     <button class="post-button" type="submit">Save Draft</button>
                     <button class="post-button" type="submit">Save Changes</button>
                 </div>

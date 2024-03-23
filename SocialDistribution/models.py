@@ -4,6 +4,8 @@ import commonmark
 import requests
 import base64
 
+import pytz
+from datetime import datetime
 from django.utils import timezone
 from django.db import models
 from django.conf import settings
@@ -25,12 +27,6 @@ class User(AbstractUser):
     github_username = models.CharField(max_length=50, blank=True)
     recent_processed_activity = models.DateTimeField(null=True, blank=True)
     is_approved = models.BooleanField(default=False)
-
-    server_node = models.ForeignKey('ServerNode', on_delete=models.SET_NULL, default=None, null=True)
-    server_node_name = models.CharField(max_length=30, blank=True, default="Local")
-    remoteOpenapi = models.URLField(blank=True, default="http://127.0.0.1:8000/openapi/")
-    remoteInboxAPI = models.URLField(blank=True, default=f"http://127.0.0.1:8000/api/msgs/create/")
-    remoteFollowAPI = models.URLField(blank=True, default=f"http://127.0.0.1:8000/api/user/<name>/following/{username}/")
 
     def is_friend(self, other_user):
         return Friend.objects.filter(
@@ -181,7 +177,7 @@ def process_github_activity(user):
     github_activity = fetch_github_activity(user)
     for activity in github_activity:
         activity_type = activity.get('type')
-        created_at = activity.get('created_at')
+        created_at = datetime.strptime(activity.get('created_at'), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc)
         if user.recent_processed_activity is None or created_at > user.recent_processed_activity:
             GithubActivity.objects.create(user=user, activity_type=activity_type, created_at=created_at)
             Post.objects.create(
@@ -207,5 +203,15 @@ class ServerNode(models.Model):
     host = models.URLField(unique=True, default="Remote")
     userAPI = models.URLField(unique=True, default="Remote")
     messageAPI = models.URLField(unique=True, default="Remote")
+    def __str__(self):
+        return self.name
+
+
+class Host(models.Model):
+    allowed = models.BooleanField(default=True)
+    host = models.URLField(max_length=250, blank=True)
+    name = models.CharField(max_length=200)
+    username = models.CharField(max_length=50)
+    password = models.CharField(max_length=50)
     def __str__(self):
         return self.name

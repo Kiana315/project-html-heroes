@@ -1,5 +1,6 @@
 'use strict';
 
+import {formatDate} from "./common.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/pps/')
@@ -15,8 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 postLink.className = 'post-link';
 
                 const datePosted = new Date(post.date_posted);
-                const formattedDate = `${datePosted.getFullYear()}-${datePosted.getMonth() + 1}-${datePosted.getDate()}`;
-
+                const formattedDate = formatDate(datePosted)
+                
                 const userInfoHTML = `
                     <div class="user-info">
                         <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
@@ -32,9 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="content">
                         <div class="title">${post.title}</div>
                         <p class="post-content">${post.content}</p>
+                        ${createImagesHTML(post.image_data)}
                     </div>
                 `;
-
+                // <img src="${post.image_data}>
                 const interactionHTML = `
                     <div class="interact-container">
                         <!-- <button id="share-${post.id}" type="button" data-post-id="${post.id}">
@@ -67,6 +69,102 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => console.error('Error:', error));
 })
+
+export function createRemotePostBlocks_self(remotePosts) {
+    console.log("@ remotePosts", remotePosts);
+    const postContainer = document.getElementById('post-container');
+    remotePosts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'post';
+
+        const postLink = document.createElement('a');
+        postLink.href = `/posts/remote/${post.author}/${post.id}`;
+        postLink.className = 'post-link';
+
+        const datePosted = new Date(post.date_posted);
+        const formattedDate = formatDate(datePosted);
+
+        const userInfoHTML = `
+            <div class="user-info">
+                <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
+                <div class="username">${post.username || 'Unknown User'}</div>
+                <div class="post-time">${formattedDate}</div>
+                <div class="corner-icon">
+                    ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
+                </div>
+            </div>
+        `;
+
+        const contentHTML = `
+            <div class="content">
+                <div class="title">${post.title}</div>
+                <p class="post-content">${post.content}</p>
+                ${createImagesHTML(post.image_data)}
+            </div>
+        `;
+
+        postLink.innerHTML = userInfoHTML + contentHTML;
+        postElement.appendChild(postLink);
+        postContainer.appendChild(postElement);
+    });
+}
+
+
+export function createRemotePostBlocks_enjoy(remotePosts) {
+    console.log("@ remotePosts", remotePosts);
+    const postContainer = document.getElementById('post-container');
+    remotePosts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'post';
+
+        const postLink = document.createElement('a');
+        postLink.href = `/posts/remote/${post.author.displayName}/${post.user}`;
+        postLink.className = 'post-link';
+
+        const datePosted = new Date(post.published);
+        const formattedDate = formatDate(datePosted);
+
+        const userInfoHTML = `
+            <div class="user-info">
+                <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
+                <div class="username">${post.author.displayName || 'Unknown User'}</div>
+                <div class="post-time">${formattedDate}</div>
+                <div class="corner-icon">
+                    ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
+                </div>
+            </div>
+        `;
+
+        const contentHTML = `
+            <div class="content">
+                <div class="title">${post.title}</div>
+                <p class="post-content">${post.content}</p>
+                ${createImagesHTML(post.image_data)}
+            </div>
+        `;
+
+        postLink.innerHTML = userInfoHTML + contentHTML;
+        postElement.appendChild(postLink);
+        postContainer.appendChild(postElement);
+    });
+}
+
+
+
+function createImagesHTML(imageDataString) {
+    if (!imageDataString) return '';
+
+    const imageDataArray = imageDataString.split(","); 
+    let imagesHTML = '';
+
+    for (let i = 1; i < imageDataArray.length; i += 2) {
+        let base64Data = imageDataArray[i];
+        if (base64Data.trim()) {
+            imagesHTML += `<img src="data:image/jpeg;base64,${base64Data}" class="post-image" style="max-width: 100%; height: auto;">`;
+        }
+    }
+    return imagesHTML;
+}
 
 function getCookie(name) {
     let cookieValue = null;

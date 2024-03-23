@@ -10,3 +10,4 @@ djangorestframework~=3.14.0
 gunicorn
 commonmark
 requests
+django-background-tasks

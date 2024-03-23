@@ -27,6 +27,27 @@ body  {
     text-align: center;
 }
 
+.return-button {
+    position: fixed;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
+    bottom: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.return-button:hover {
+    background-color: #45a049;
+}
 
 .post-container {
     position: relative;
@@ -384,6 +405,21 @@ body  {
 #confirmShare {
     margin-top: 10px;
     float: right;
+}
+
+.share-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.share-button:hover {
+    background-color: #0056b3;
 }
 
 .title-input {

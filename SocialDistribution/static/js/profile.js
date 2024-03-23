@@ -1,3 +1,7 @@
+'use strict';
+
+import {formatDate} from "./common.js";
+
 function editUserName(){
     let el = document.getElementById("username");
 
@@ -292,7 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     postLink.className = 'post-link';
 
                     const datePosted = new Date(post.date_posted);
-                    const formattedDate = `${datePosted.getFullYear()}-${datePosted.getMonth() + 1}-${datePosted.getDate()}`;
+                    console.log(datePosted)
+                    const formattedDate = formatDate(datePosted);
 
                     const contentHTML = `
                         <div class="content">
@@ -306,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div class="post-time">${formattedDate}</div>
                             <p class="post-content">${post.content}</p>
+                            ${createImagesHTML(post.image_data)}
                         </div>
                     `;
                     
@@ -387,6 +393,21 @@ function _getRelationAnalysis(relationResponse) {
     relationResponse = relationResponse.json()
     console.log('Relationship data:', relationResponse);
     return relationResponse.get("mutual_follow")
+}
+
+function createImagesHTML(imageDataString) {
+    if (!imageDataString) return '';
+
+    const imageDataArray = imageDataString.split(","); 
+    let imagesHTML = '';
+
+    for (let i = 1; i < imageDataArray.length; i += 2) {
+        let base64Data = imageDataArray[i];
+        if (base64Data.trim()) {
+            imagesHTML += `<img src="data:image/jpeg;base64,${base64Data}" class="post-image" style="max-width: 100%; height: auto;">`;
+        }
+    }
+    return imagesHTML;
 }
 
 

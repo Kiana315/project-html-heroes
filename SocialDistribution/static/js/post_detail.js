@@ -18,6 +18,43 @@ document.addEventListener('DOMContentLoaded', function () {
     var shareText = document.getElementById('shareText');
     var postContent = document.getElementById('postContent');
 
+    fetch(`/api/posts/${postId}`)
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 403) {
+                showError("Sorry, you do not have permission to view this post.");
+                if (postContainer) { // make sure post container exists
+                    postContainer.style.display = 'none';
+                }
+                postContent.textContent = "Sorry, you do not have permission to view this post.";
+                postContent.style.display = 'block';
+                
+                if (likeButton) likeButton.style.visibility = 'hidden';
+                if (commentButton) commentButton.style.visibility = 'hidden';
+                if (shareButton) shareButton.style.visibility = 'hidden';
+
+                const returnButton = document.createElement('button');
+                returnButton.textContent = 'Return';
+                returnButton.classList.add('return-button');
+
+                returnButton.addEventListener('click', function() {
+                    window.history.back();
+                });
+                document.body.appendChild(returnButton);
+
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+
     checkLikeStatusAndUpdateIcon(postId);
 
     if (moreOptionsButton) {
@@ -178,9 +215,8 @@ document.addEventListener('DOMContentLoaded', function () {
         shareModal.style.display = "none";
         shareText.value = '';
     }
-
-    if (!postContent){showImage();}
-
+    showImage();    
+    // if (!postContent){showImage();}
 
 });
 
@@ -339,6 +375,14 @@ function showNotification(message) {
     }, 3000);
 }
 
+function showError(message) {
+    console.log('showNotification called with message:', message);
+    var notification = document.getElementById('notification');
+    console.log(notification);
+    notification.textContent = message;
+    notification.style.display = 'block';
+}
+
 function closeShareModal() {
     const shareModal = document.getElementById('shareModal');
     shareModal.style.display = 'none';
@@ -352,6 +396,12 @@ function redirectProfile() {
         window.location.reload();
     }
 }
+
+function userLinkProfile(targetUsername) {
+    var currentUser = document.body.getAttribute('data-current-user');
+    window.location.href = `/profile/${currentUser}/${targetUsername}`;
+}
+
 
 function getCookie(name) {
     let cookieValue = null;

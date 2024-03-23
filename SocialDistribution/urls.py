@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
-from django.urls import path, include
+from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from . import views
@@ -12,7 +12,7 @@ router = SimpleRouter()
 
 urlpatterns = [
     # Basic PAGE View Settings:
-    path("", IndexView.as_view(), name="PAGE_Home"),
+    path("", views.indexView, name="PAGE_Home"),
     path('admin/', admin.site.urls, name="PAGE_Admin"),
     path("login/", LoginView.as_view(), name="PAGE_Login"),
     path("addConnect/", AddConnectView.as_view(), name="PAGE_AddConnect"),
@@ -80,22 +80,33 @@ urlpatterns = [
     path('api/msgs/deleteType/<str:type>/', DeleteTypeOfMessageAPIView.as_view(), name='API_DELETEMsgType'),                                # DELETE TypeMessageForUser         -->
     path('api/msgs/deleteID/<int:ID>/', DeleteIDOfMessageAPIView.as_view(), name='API_DELETEMsgID'),
 
-
-    # OpenAPI System:
-    path('openapi/', OpenAPIView.as_view({'post': 'create', 'get': 'list', }), name='OPENAPI_AddConnect'),
-    path('openapi/search/<str:server_node_name>/<str:remoteUsername>/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
-    path('openapi/message/<str:username>/', CreateMessageOPENAPIView.as_view(), name='OPENAPI_POSTUserMsg'),
-    path("openapi/profile/<str:selfUsername>/<str:server_node_name>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
-    path('openapi/userposts/<str:username>/', PublicFriendsPostsListOPENView, name='OPENAPI_GETUserPosts'),
-
-    path('openapi/accept-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', AcceptRemoteFollowRequestOPENAPIView, name='OPENAPI_AcceptFollowRequest'),
-    path('openapi/reject-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', RejectRemoteFollowRequestOPENAPIView, name='OPENAPI_RejectFollowRequest'),
-
-    path("api/users/", UsersAPIView.as_view({'get': 'list'}), name=".lAPI_ALL_USER"),
-    path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
-    path('api/getRemoteUserOPENAPIS/<str:server_node_name>/<str:username>/', views.getRemoteUserAPIS, name='API_GETRemoteUserAPIS'),
-    path('api/createLocalProjUser/', CreateLocalProjUser.as_view(), name='API_POSTLocalProjUser'),
+    # New NTN System:
+    path("users/", UsersOpenEndPt.as_view({'get': 'list'}), name="OPEN_GETUsersList"),
+    path('users/<str:username>/posts/', UserPostsOpenEndPt.as_view(), name='OPEN_GETUserPostsList'),
+    path("api/users/", UsersAPIView.as_view({'get': 'list'}), name="API_ALL_USER"),
 ]
+
+# OpenAPI System:
+"""
+path('openapi/', OpenAPIView.as_view({'post': 'create', 'get': 'list', }), name='OPENAPI_AddConnect'),
+path('openapi/search/<str:server_node_name>/<str:remoteUsername>/', views.searchUserOPENAPI, name='OPENAPI_SearchUser'),
+path('openapi/message/<str:username>/', CreateMessageOPENAPIView.as_view(), name='OPENAPI_POSTUserMsg'),
+path("openapi/profile/<str:selfUsername>/<str:server_node_name>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
+path('openapi/userposts/<str:username>/', PublicFriendsPostsListOPENView, name='OPENAPI_GETUserPosts'),
+
+path('openapi/accept-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', AcceptRemoteFollowRequestOPENAPIView, name='OPENAPI_AcceptFollowRequest'),
+path('openapi/reject-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', RejectRemoteFollowRequestOPENAPIView, name='OPENAPI_RejectFollowRequest'),
+
+
+path('api/servernodes/', ServerNodeList.as_view(), name='nodeList'),
+path('api/getRemoteUserOPENAPIS/<str:server_node_name>/<str:username>/', views.getRemoteUserAPIS, name='API_GETRemoteUserAPIS'),
+path('api/createLocalProjUser/', CreateLocalProjUser.as_view(), name='API_POSTLocalProjUser'),
+"""
+
+# Don't delete ensure debug mode media file can use
+from django.conf.urls.static import static  # noqa
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 """
 MESSAGE_TYPES = [

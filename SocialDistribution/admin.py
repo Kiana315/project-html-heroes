@@ -14,18 +14,13 @@ class UserAdmin(admin.ModelAdmin):
         'recent_processed_activity',
         'is_approved',
         'avatar_url',
-        'server_node_name',
-        'remoteOpenapi',
-        'remoteInboxAPI',
-        'remoteFollowAPI',
     )
     search_fields = (
         'username',
         'email',
         'github_username',
-        'server_node_name',
     )
-    list_filter = ('is_approved', 'server_node_name',)
+    list_filter = ('is_approved',)
     ordering = ('-date_joined',)
 
 
@@ -100,6 +95,11 @@ class ServerNodeAdmin(admin.ModelAdmin):
     readonly_fields = ('host_link',)
 
 
+class HostAdmin(admin.ModelAdmin):
+    list_display = ('allowed', 'host', 'name', 'username', 'password')
+    list_filter = ('allowed',)
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
@@ -111,5 +111,6 @@ admin.site.register(MessageSuper, MessageAdmin)
 admin.site.register(SignUpSettings, SignUpAdmin)
 admin.site.register(GithubActivity, ActivityAdmin)
 admin.site.register(ServerNode, ServerNodeAdmin)
+admin.site.register(Host, HostAdmin)
 
 
