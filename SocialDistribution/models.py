@@ -136,11 +136,34 @@ class Friend(models.Model):
             raise ValidationError("Cannot create a friendship")
     @classmethod
     def delete_friendship_for_user1(cls, user1, user2):
+        # if user1 != user2 and cls.objects.filter(user1=user1, user2=user2).exists():
+        #     Friend.objects.filter(user1=user1, user2=user2).delete()
+        #     Friend.objects.filter(user1=user2, user2=user1).delete()
+        #     Following.objects.create(user=user2, following=user1)
+        #     Follower.objects.create(user=user1, follower=user2)
+        # else:
+        #     raise ValidationError("Cannot delete a friendship")
+
+        
         if user1 != user2 and cls.objects.filter(user1=user1, user2=user2).exists():
-            Friend.objects.filter(user1=user1, user2=user2).delete()
-            Friend.objects.filter(user1=user2, user2=user1).delete()
-            Following.objects.create(user=user2, following=user1)
-            Follower.objects.create(user=user1, follower=user2)
+            cls.objects.filter(user1=user1, user2=user2).delete()
+            cls.objects.filter(user1=user2, user2=user1).delete()
+
+            # Create following relationship
+            following_relation, created = Following.objects.get_or_create(
+                user=user2, 
+                following=user1,
+                defaults={'status': 'ACCEPTED'}
+            )
+            if not created:
+                following_relation.status = 'ACCEPTED'
+                following_relation.save()
+
+            # Create follower relationship
+            follower_relation, created = Follower.objects.get_or_create(
+                user=user1,
+                follower=user2,
+            )
         else:
             raise ValidationError("Cannot delete a friendship")
 

@@ -767,7 +767,7 @@ class CreateFollowerAPIView(APIView):
 
         if self_user != target_user:
             try:
-                Follower.objects.create(user=target_user, follower=self_user)
+                # Follower.objects.create(user=target_user, follower=self_user)
                 return Response(status=status.HTTP_201_CREATED)
             except IntegrityError:
                 return Response({"detail": "Already followed by this user."}, status=status.HTTP_400_BAD_REQUEST)
@@ -820,7 +820,15 @@ class CreateFollowingAPIView(APIView):
                     # Optional: Allow retrying a previously rejected request
                     following.status = 'PENDING'
                     following.save()
-                    return Response({"message": "Follow request resent."}, status=status.HTTP_200_OK)
+                    message_content = f'{self_user.username} wants to follow you.'
+                    MessageSuper.objects.create(
+                    owner=target_user,
+                    message_type='FR',  # Follow Request
+                    content=message_content,
+                    origin=self_user.username,
+                    )
+                    return Response({"message": "Follow request sent."}, status=status.HTTP_201_CREATED)
+                    # return Response({"message": "Follow request resent."}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -835,6 +843,12 @@ class AcceptFollowRequestAPIView(APIView):
         follow_request = get_object_or_404(Following, user=origin_user, following=target_user, status='PENDING')
         follow_request.status = 'ACCEPTED'
         follow_request.save()
+
+        Follower.objects.create(user=follow_request.following, follower=follow_request.user)
+        if Following.objects.filter(user=target_user, following=origin_user, status='ACCEPTED').exists():
+            # check if they are following each other
+            Friend.create_friendship(origin_user, target_user)
+
         return Response({"message": "Follow request accepted."}, status=status.HTTP_200_OK)
 
 
@@ -919,6 +933,8 @@ def deleteFriendshipAPIView(request, selfUsername, targetUsername):
         return JsonResponse({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return JsonResponse({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
 class AnalyzeRelationAPIView(APIView):

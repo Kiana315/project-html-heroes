@@ -139,8 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         })
                             .then(response => {
                                 if (response.ok) {
-                                    followButton.style.display = 'none';
-                                    unfollowButton.style.display = 'inline';
+                                    // followButton.style.display = 'none';
+                                    // unfollowButton.style.display = 'inline';
 
                                     // Todo - For `USER_TARGET`, set `USER_SELF` as a follower of `USER_TARGET`:
                                     fetch(`/api/user/${selfUsername}/following/${targetUsername}/`, {
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //  2. we are friend            >>       delete 1<->2 friend-ship，add 2->1 follow-ship;
     if (unfollowButton) {
         unfollowButton.addEventListener('click', function() {
-            alert("fuck");
+            alert("Cry");
             fetch(`/api/user/${selfUsername}/anyRelations/${targetUsername}/`)
                 .then(relationResponse => {
                     if (!relationResponse.ok) {
