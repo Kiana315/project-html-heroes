@@ -6,9 +6,21 @@ from rest_framework.routers import SimpleRouter
 from . import views
 from .views import *
 
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+
 app_name = "SocialDistribution"
 
 router = SimpleRouter()
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="404 HTML Heros API",   # 名称
+        default_version="version v0.0.1",   # 版本
+        description="no description",  # 项目描述
+    ),
+    public=True,
+)
 
 urlpatterns = [
     # Basic PAGE View Settings:
@@ -93,6 +105,9 @@ urlpatterns = [
     path('reject-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', RejectRemoteFollowRequestOPENAPIView, name='OPEN_RejectFollowRequest'),
 
     path("api/users/", UsersAPIView.as_view({'get': 'list'}), name="API_ALL_USER"),
+
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
 # OpenAPI System:

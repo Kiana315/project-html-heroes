@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'drf_yasg', 
     'django.contrib.staticfiles',
     'SocialDistribution',
     'rest_framework',
