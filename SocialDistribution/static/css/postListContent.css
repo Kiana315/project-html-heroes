@@ -139,3 +139,6 @@
     justify-content: center; 
     display: flex;
 }
+.interact-container button:hover {
+    background-color: rgba(144, 143, 143, 0.5);
+}

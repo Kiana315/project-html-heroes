@@ -249,9 +249,9 @@ def indexView(request):
                         if posts_response.status_code == 200:
                             posts = remove_bool_none_values(posts_response.json().get('posts'))
                             print("\n>> post", posts)
-                            remote_posts["hero"].extend(posts)
-    except:
-        pass
+                            remote_posts.extend(posts)
+    except Exception as e:
+        print("Error:", e)
     template_name = "index.html"
     print("\n** posts", remote_posts)
     return render(request, template_name, {'posts': remote_posts})
@@ -282,8 +282,8 @@ class FPsAPIView(generics.ListAPIView):
         current_user = get_object_or_404(User, username=username)  # get current user
 
         user_following = User.objects.filter(reverse_following__user=current_user)
-        user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC', is_draft=False)
-
+        user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC', is_draft=False) 
+        
         friends = User.objects.filter(friends_set1__user1=current_user).values_list('friends_set1__user2', flat=True)
 
         friend_posts = Post.objects.filter(
@@ -297,6 +297,18 @@ class FPsAPIView(generics.ListAPIView):
             Q(author=current_user, visibility='FRIENDS'), is_draft=False
         )
 
+        all_proj_users = get_object_or_404(ProjUser)
+        print(all_proj_users)
+        # for proj_user in all_proj_users:
+        #     if (proj_user.has_follower(current_user)):
+        #         posts_endpoint = f"{user.get('id')}/posts/"
+        #         print("user.get('id')", user.get('id'))
+        #         print("posts_endpoint", posts_endpoint)
+        #         posts_response = requests.get(posts_endpoint, timeout=10)
+        #         if posts_response.status_code == 200:
+        #             posts = remove_bool_none_values(posts_response.json())
+        #             print("\n>> post", posts)
+            
         # Merge query sets and remove duplicates
         posts = user_following_posts | friend_posts | user_posts
         posts = posts.distinct().order_by('-date_posted')
