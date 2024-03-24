@@ -247,6 +247,7 @@ class ProjUser(models.Model):
     profile = models.URLField(max_length=250, blank=True)
     remotePosts = models.URLField(max_length=250, blank=True)
     remoteInbox = models.URLField(max_length=250, blank=True)
+    requesters = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='requestings', blank=True)
     followers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='followings', blank=True)
     def __str__(self):
         return self.host + self.username

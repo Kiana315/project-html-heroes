@@ -100,6 +100,7 @@ urlpatterns = [
     path('users/<str:username>/posts/', UserPostsOpenEndPt.as_view(), name='OPEN_GETUserPostsList'),
     path("remoteprofile/<str:server_node_name>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
 
+    path('api/requesting/<str:proj_username>/<str:requester_username>/', followRequesting, name='API_PostRequesting'),
     path('remote-check-follower/<str:nodename>/<str:username>/', CheckFollowerView.as_view(), name='API_CheckFollower'),
     path('accept-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', AcceptRemoteFollowRequestOPENAPIView, name='OPEN_AcceptFollowRequest'),
     path('reject-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', RejectRemoteFollowRequestOPENAPIView, name='OPEN_RejectFollowRequest'),

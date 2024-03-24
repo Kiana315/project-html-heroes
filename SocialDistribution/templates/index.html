@@ -31,11 +31,11 @@
 <script src="{% static 'js/search.js' %}"></script>
 <script type="module">
     import {
-        createRemotePostBlocks_self,
+        createRemotePostBlocks_hero,
         createRemotePostBlocks_enjoy
     } from '{% static 'js/index.js' %}';
     var remotePosts = {{ posts|safe }};
-    //createRemotePostBlocks_self(remotePosts);
+    //createRemotePostBlocks_hero(remotePosts);
     createRemotePostBlocks_enjoy(remotePosts);
 setInterval(() => {
     //createRemotePostBlocks_self(remotePosts);

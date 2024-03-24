@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error:', error));
 })
 
-export function createRemotePostBlocks_self(remotePosts) {
+export function createRemotePostBlocks_hero(remotePosts) {
     console.log("@ remotePosts", remotePosts);
     const postContainer = document.getElementById('post-container');
     remotePosts.forEach(post => {
@@ -78,7 +78,7 @@ export function createRemotePostBlocks_self(remotePosts) {
         postElement.className = 'post';
 
         const postLink = document.createElement('a');
-        postLink.href = `/posts/remote/${post.author}/${post.id}`;
+        postLink.href = `/remoteprofile/hero/${post.author}`;
         postLink.className = 'post-link';
 
         const datePosted = new Date(post.date_posted);
@@ -118,7 +118,7 @@ export function createRemotePostBlocks_enjoy(remotePosts) {
         postElement.className = 'post';
 
         const postLink = document.createElement('a');
-        postLink.href = `/posts/remote/${post.author.displayName}/${post.user}`;
+        postLink.href = `/remoteprofile/enjoy/${post.author.displayName}/`;
         postLink.className = 'post-link';
 
         const datePosted = new Date(post.published);
