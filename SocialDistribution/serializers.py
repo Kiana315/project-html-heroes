@@ -28,7 +28,7 @@ class PostSerializer(serializers.ModelSerializer):
         return Like.objects.filter(post=obj).count()
 
     def get_comment_count(self, obj):
-        return Like.objects.filter(post=obj).count()
+        return Comment.objects.filter(post=obj).count()
     
     def get_is_shared(self, obj):
         return obj.shared_post is not None

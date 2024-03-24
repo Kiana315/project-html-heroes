@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 // Append userInfoHTML, contentHTML, and interactionHTML to postLink instead of postElement
-                postLink.innerHTML = userInfoHTML + contentHTML + interactionHTML;
+                postLink.innerHTML = userInfoHTML + contentHTML;
                 postElement.appendChild(postLink);
-                // postElement.innerHTML += interactionHTML;
+                postElement.innerHTML += interactionHTML;
                 postContainer.appendChild(postElement);
 
             });
