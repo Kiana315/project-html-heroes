@@ -164,7 +164,7 @@ def indexView(request):
                             hostname=host.name,
                             username=username,
                             profile=f"remoteprofile/{host.name}/{username}/",
-                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox/",
+                            remoteInbox=f"{host.host}authors/{user.get('id')}/inbox/",
                             remotePosts=f"{user.get('id')}/posts/"
                         )
                         if created:
@@ -1297,27 +1297,32 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
         proj_user.add_requester(requester_username)
         remoteInbox = proj_user.remoteInbox
 
-        FRAcceptURL = f'/accept-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/'
-        FRRejectURL = f'/reject-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/'
+        FRAcceptURL = request.build_absolute_uri(f'/accept-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
+        FRRejectURL = request.build_absolute_uri(f'/reject-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
         requestBody = {
             'click_to_accept_the_remote_follow_request': FRAcceptURL,
             'click_to_reject_the_remote_follow_request': FRRejectURL
         }
 
-        if remoteNodename == "200OK":
+        # Todo - Sent FR to spec-user's inbox at server `enjoy`:
+        if remoteNodename == "enjoy":
+            print(remoteNodename)
+            response = requests.post(remoteInbox, json=requestBody)
+            response.raise_for_status()
+
+        # Todo - Sent FR to spec-user's inbox at server `200OK`:
+        elif remoteNodename == "200OK":
             print(remoteNodename)
             headers = {'username': host.username, 'password': host.password}
             response = requests.post(remoteInbox, json=requestBody, headers=headers)
             response.raise_for_status()
-        elif remoteNodename == "enjoy":
-            print(remoteNodename)
-            response = requests.post(remoteInbox, json=requestBody)
-            response.raise_for_status()
+
+        # Todo - Sent FR to spec-user's inbox at server `hero` (other server):
         else:
             print(remoteNodename)
-            credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
-            headers = {'Authorization': f'Basic {credentials}'}
-            response = requests.post(remoteInbox, json=requestBody, headers=headers)
+            # credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
+            # headers = {'Authorization': f'Basic {credentials}'}
+            response = requests.post(remoteInbox, json=requestBody)
             response.raise_for_status()
         return Response({"message": f"User {requester_username} has been added to the requester list of {proj_username}."}, status=status.HTTP_200_OK)
     except Exception as e:
