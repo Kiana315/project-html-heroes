@@ -162,7 +162,7 @@ export function createRemotePostBlocks_2_hero(remotePosts) {
         postElement.className = 'post';
 
         const postLink = document.createElement('a');
-        postLink.href = `/remoteprofile/hero/${post.author}`;
+        postLink.href = `/remoteprofile/hero/${post.username}`;
         postLink.className = 'post-link';
 
         const datePosted = new Date(post.date_posted);
