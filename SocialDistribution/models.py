@@ -239,7 +239,6 @@ class Host(models.Model):
     def __str__(self):
         return self.name
 
-
 class ProjUser(models.Model):
     host = models.URLField(max_length=250, blank=True)
     hostname = models.CharField(max_length=200)
@@ -247,8 +246,48 @@ class ProjUser(models.Model):
     profile = models.URLField(max_length=250, blank=True)
     remotePosts = models.URLField(max_length=250, blank=True)
     remoteInbox = models.URLField(max_length=250, blank=True)
-    requesters = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='requestings', blank=True)
-    followers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='followings', blank=True)
-    def __str__(self):
-        return self.host + self.username
+    requesters = models.TextField(default='[]', blank=True)
+    followers = models.TextField(default='[]', blank=True)
+
+    @property
+    def requesters_list(self):
+        return json.loads(self.requesters)
+
+    @property
+    def followers_list(self):
+        return json.loads(self.followers)
+
+    def has_requester(self, username):
+        return username in self.requesters_list
+
+    def add_requester(self, username):
+        requesters = self.requesters_list
+        if username not in requesters:
+            requesters.append(username)
+            self.requesters = json.dumps(requesters)
+            self.save()
+
+    def remove_requester(self, username):
+        requesters = self.requesters_list
+        if username in requesters:
+            requesters.remove(username)
+            self.requesters = json.dumps(requesters)
+            self.save()
+
+    def has_follower(self, username):
+        return username in self.followers_list
+
+    def add_follower(self, username):
+        followers = self.followers_list
+        if username not in followers:
+            followers.append(username)
+            self.followers = json.dumps(followers)
+            self.save()
+
+    def remove_follower(self, username):
+        followers = self.followers_list
+        if username in followers:
+            followers.remove(username)
+            self.followers = json.dumps(followers)
+            self.save()
 

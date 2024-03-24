@@ -1174,16 +1174,6 @@ def _checkRelation(username1, username2):
 
 
 @api_view(['GET'])
-class AcceptRemoteFollowRequestOPENAPIView(APIView):
-    def get(self, request, nodename, localUsername, remoteUsername, format=None):
-        localUser = get_object_or_404(User, username=localUsername)
-        remoteUser = get_object_or_404(ProjUser, username=remoteUsername, server_node_name=nodename)
-
-        #follow_request = get_object_or_404(Following, user=localUser, following=remoteUser, status='PENDING')
-        return Response({"message": "Follow request is accepted."}, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
 class PublicFriendsPostsListOPENView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
@@ -1242,12 +1232,12 @@ class UserPostsOpenEndPt(APIView):
 
 class CheckFollowerView(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request, nodename, username, format=None):
+    def get(self, request, remoteNodename, user_username, proj_username):
         try:
-            proj_user = ProjUser.objects.get(hostname=nodename, username=username)
+            proj_user = ProjUser.objects.get(hostname=remoteNodename, username=proj_username)
+            is_follower = proj_user.has_follower(user_username)
         except ProjUser.DoesNotExist:
-            raise Http404
-        is_follower = request.user in proj_user.followers.all()
+            raise Http404("Project user does not exist")
         return Response({'is_follower': is_follower})
 
 
@@ -1255,13 +1245,10 @@ class CheckFollowerView(APIView):
 @api_view(['GET'])
 def followRequesting(request, remoteNodename, requester_username, proj_username):
     try:
-        proj_user = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
         host = get_object_or_404(Host, name=remoteNodename)
-        requester_user = get_object_or_404(User, username=requester_username)
-
-        proj_user.requesters.add(requester_user)
-        proj_user.save()
-        address = proj_user.remoteInbox
+        proj_user = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
+        proj_user.add_requester(requester_username)
+        remoteInbox = proj_user.remoteInbox
 
         FRAcceptURL = f'/accept-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/'
         FRRejectURL = f'/reject-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/'
@@ -1271,16 +1258,19 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
         }
 
         if remoteNodename == "200OK":
+            print(remoteNodename)
             headers = {'username': host.username, 'password': host.password}
-            response = requests.post(address, json=requestBody, headers=headers)
+            response = requests.post(remoteInbox, json=requestBody, headers=headers)
             response.raise_for_status()
         elif remoteNodename == "enjoy":
-            response = requests.post(address, json=requestBody)
+            print(remoteNodename)
+            response = requests.post(remoteInbox, json=requestBody)
             response.raise_for_status()
         else:
+            print(remoteNodename)
             credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
             headers = {'Authorization': f'Basic {credentials}'}
-            response = requests.post(address, json=requestBody, headers=headers)
+            response = requests.post(remoteInbox, json=requestBody, headers=headers)
             response.raise_for_status()
         return Response({"message": f"User {requester_username} has been added to the requester list of {proj_username}."}, status=status.HTTP_200_OK)
     except Exception as e:
@@ -1288,12 +1278,11 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
 
 
 @require_http_methods(["GET"])
-def remove_requester(request, remoteNodename, user_username, proj_username):
+def remove_follower(request, remoteNodename, user_username, proj_username):
     try:
         proj_user = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
-        user_to_remove = get_object_or_404(User, username=user_username)
-        if user_to_remove in proj_user.requesters.all():
-            proj_user.requesters.remove(user_to_remove)
+        if proj_user.has_follower(user_username):
+            proj_user.remove_follower(user_username)
             return JsonResponse(
                 {"message": f"User {user_username} has been removed from the requester list of {proj_username}."}, status=200)
         else:
@@ -1305,34 +1294,26 @@ def remove_requester(request, remoteNodename, user_username, proj_username):
 
 
 @api_view(['GET'])
-class AcceptRemoteFollowRequestOPENAPIView(APIView):
-    def get(self, request, nodename, localUsername, remoteUsername, format=None):
-        try:
-            localUser = get_object_or_404(User, username=localUsername)
-            remoteUser = get_object_or_404(ProjUser, username=remoteUsername, hostname=nodename)
-            if localUser in remoteUser.requesters.all():
-                remoteUser.requesters.remove(localUser)
-            remoteUser.followers.add(localUser)
-            remoteUser.save()
-            return Response({"message": "Follow request is accepted."}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+def acceptRemoteFollowRequest(request, remoteNodename, user_username, proj_username):
+    try:
+        proj_User = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
+        if proj_User.has_requester(user_username):
+            proj_User.remove_requester(user_username)
+        proj_User.add_follower(user_username)
+        return Response({"message": "Follow request is accepted."}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
-class RejectRemoteFollowRequestOPENAPIView(APIView):
-    def get(self, request, nodename, localUsername, remoteUsername, format=None):
-        try:
-            localUser = get_object_or_404(User, username=localUsername)
-            remoteUser = get_object_or_404(ProjUser, username=remoteUsername, hostname=nodename)
-            if localUser in remoteUser.requesters.all():
-                remoteUser.requesters.remove(localUser)
-            remoteUser.followers.add(localUser)
-            remoteUser.save()
-            return Response({"message": "Follow request is rejected, please try later."}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+def rejectRemoteFollowRequest(request, remoteNodename, user_username, proj_username):
+    try:
+        proj_User = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
+        if proj_User.has_requester(user_username):
+            proj_User.remove_requester(user_username)
+        return Response({"message": "Follow request is rejected, please try again later."}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 

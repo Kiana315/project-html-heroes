@@ -101,10 +101,17 @@ class HostAdmin(admin.ModelAdmin):
 
 
 class ProjUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'host', 'profile', 'remotePosts', 'remoteInbox', 'followers_count')
-    def followers_count(self, obj):
-        return obj.followers.count()
-    followers_count.short_description = 'Followers Count'
+    list_display = ('username', 'hostname', 'host', 'profile')
+    search_fields = ('username', 'hostname')
+    readonly_fields = ('requesters', 'followers')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ProjUserAdmin, self).get_form(request, obj, **kwargs)
+        if 'requesters' in form.base_fields:
+            form.base_fields['requesters'].help_text = "Enter a valid JSON array of usernames."
+        if 'followers' in form.base_fields:
+            form.base_fields['followers'].help_text = "Enter a valid JSON array of usernames."
+        return form
 
 
 admin.site.register(User, UserAdmin)

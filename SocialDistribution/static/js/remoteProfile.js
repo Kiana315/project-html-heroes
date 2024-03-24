@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // todo
     followButton.style.display = "none";
     unfollowButton.style.display = "none";
-    fetch(`/remote-check-follower/${remoteNodename}/${remoteUsername}/`)
+    fetch(`/remotecheckfollower/${remoteNodename}/${selfUsername}/${remoteUsername}/`)
         .then(relationResponse => {
             if (!relationResponse.ok) {
                 alert("Error in checking relationship.")
@@ -78,7 +78,7 @@ function getCookie(name) {
 
 
 function sendFollowRequest(remoteNodename, requesterUsername, projUsername) {
-    const url = `/followrequesting/${remoteNodename}/${requesterUsername}/${projUsername}/`;
+    const url = `/followrequesting/${encodeURIComponent(remoteNodename)}/${encodeURIComponent(requesterUsername)}/${encodeURIComponent(projUsername)}/`;
 
     fetch(url)
         .then(response => {
@@ -98,13 +98,14 @@ function sendFollowRequest(remoteNodename, requesterUsername, projUsername) {
 }
 
 function unfollowRequesting(remoteNodename, userUsername, projUsername) {
-    const url = `/unfollowrequesting/${encodeURIComponent(remoteNodename)}/${encodeURIComponent(userUsername)}/${encodeURIComponent(projUsername)}/`;
+    const url = `/unfllowrequesting/${encodeURIComponent(remoteNodename)}/${encodeURIComponent(userUsername)}/${encodeURIComponent(projUsername)}/`;
+
     fetch(url)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
-            alert("You are no longer following.")
+            alert("You are no longer following.");
             return response.json();
         })
         .then(data => {
@@ -114,4 +115,3 @@ function unfollowRequesting(remoteNodename, userUsername, projUsername) {
             console.error('There has been a problem with your fetch operation:', error);
         });
 }
-

@@ -127,10 +127,29 @@ class OpenAPIServerNodeSerializer(serializers.ModelSerializer):
 
 
 class ProjUserSerializer(serializers.ModelSerializer):
-    followers_count = serializers.SerializerMethodField()
+    requesters = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
+
     class Meta:
         model = ProjUser
-        fields = ['id', 'host', 'username', 'profile', 'remotePosts', 'remoteInbox', 'followers_count']
-    def get_followers_count(self, obj):
-        return obj.followers.count()
+        fields = [
+            'id', 'host', 'hostname', 'username', 'profile',
+            'remotePosts', 'remoteInbox', 'requesters', 'followers'
+        ]
+
+    def get_requesters(self, obj):
+        return json.loads(obj.requesters)
+
+    def get_followers(self, obj):
+        return json.loads(obj.followers)
+
+    def validate_requesters(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Requesters must be a list.")
+        return json.dumps(value)
+
+    def validate_followers(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Followers must be a list.")
+        return json.dumps(value)
 

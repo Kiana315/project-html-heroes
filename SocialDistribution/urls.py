@@ -101,10 +101,10 @@ urlpatterns = [
     path("remoteprofile/<str:server_node_name>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
 
     path('followrequesting/<str:remoteNodename>/<str:requester_username>/<str:proj_username>/', followRequesting, name='API_PostRequesting'),
-    path('unfllowrequesting/<str:remoteNodename>/<str:user_username>/<str:proj_username>/', remove_requester, name='remove_requester'),
-    path('remote-check-follower/<str:nodename>/<str:username>/', CheckFollowerView.as_view(), name='API_CheckFollower'),
-    path('accept-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', AcceptRemoteFollowRequestOPENAPIView, name='OPEN_AcceptFollowRequest'),
-    path('reject-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', RejectRemoteFollowRequestOPENAPIView, name='OPEN_RejectFollowRequest'),
+    path('unfllowrequesting/<str:remoteNodename>/<str:user_username>/<str:proj_username>/', remove_follower, name='remove_follower'),
+    path('remotecheckfollower/<str:remoteNodename>/<str:user_username>/<str:proj_username>/', CheckFollowerView.as_view(), name='API_CheckFollower'),
+    path('accept-remote-follow/<str:remoteNodename>/<str:user_username>/<str:proj_username>/', acceptRemoteFollowRequest, name='OPEN_AcceptFollowRequest'),
+    path('reject-remote-follow/<str:remoteNodename>/<str:user_username>/<str:proj_username>/', rejectRemoteFollowRequest, name='OPEN_RejectFollowRequest'),
 
     path("api/users/", UsersAPIView.as_view({'get': 'list'}), name="API_ALL_USER"),
 
