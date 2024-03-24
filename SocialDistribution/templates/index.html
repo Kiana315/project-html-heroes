@@ -33,7 +33,7 @@
     import {
         createRemotePostBlocks_hero,
         createRemotePostBlocks_enjoy
-    } from '{% static 'js/index.js' %}';
+    } from `{% static 'js/index.js' %}`;
     var remotePosts = {{ posts|safe }};
     //createRemotePostBlocks_hero(remotePosts);
     createRemotePostBlocks_enjoy(remotePosts);
