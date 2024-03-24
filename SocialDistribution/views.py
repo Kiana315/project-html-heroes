@@ -164,7 +164,7 @@ def indexView(request):
                             hostname=host.name,
                             username=username,
                             profile=f"remoteprofile/{host.name}/{username}/",
-                            remoteInbox=f"",
+                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox",
                             remotePosts=f"{user.get('id')}/posts/"
                         )
                         if created:
@@ -198,8 +198,8 @@ def indexView(request):
                             hostname=host.name,
                             username=username,
                             profile=f"remoteprofile/{host.name}/{username}/",
-                            remoteInbox=f"",
-                            remotePosts=f"{user.get('id')}/posts/"
+                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox",
+                            remotePosts=f"{host.host}authors/{user.get('id')}/posts/"
                         )
                         if created:
                             print("! ProjUser Created:", proj_user)
@@ -220,7 +220,6 @@ def indexView(request):
                 credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
                 auth_headers = {'Authorization': f'Basic {credentials}'}
                 print("auth_headers", auth_headers)
-
                 authenticate_host(credentials)
 
                 # GET remote `users`:
@@ -235,8 +234,9 @@ def indexView(request):
                             host=host.host,
                             hostname=host.name,
                             username=username,
-                            profile=f"remoteprofile/{host.name}/{username}/",
-                            remoteInbox=f"api/msgs/create/",
+                            profile=f"remoteprofile/hero/{username}/",
+                            remoteInbox=f"{host.host}api/msgs/create/",
+                            remotePosts=f"{users_endpoint}{user.get('username')}/posts/"
                         )
                         if created:
                             print("! ProjUser Created:", proj_user)
