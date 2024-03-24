@@ -6,6 +6,7 @@ from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import Http404, HttpResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import render, redirect, get_list_or_404, get_object_or_404
 from django.contrib.auth import login, authenticate, get_user_model
 from django.contrib.auth.models import User
@@ -249,7 +250,7 @@ def indexView(request):
                         if posts_response.status_code == 200:
                             posts = remove_bool_none_values(posts_response.json().get('posts'))
                             print("\n>> post", posts)
-                            remote_posts.extend(posts)
+                            remote_posts["hero"].extend(posts)
     except Exception as e:
         print("Error:", e)
     template_name = "index.html"
@@ -1291,42 +1292,56 @@ class CheckFollowerView(APIView):
 #VVV
 @api_view(['GET'])
 def followRequesting(request, remoteNodename, requester_username, proj_username):
-    try:
-        host = get_object_or_404(Host, name=remoteNodename)
-        proj_user = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
-        proj_user.add_requester(requester_username)
-        remoteInbox = proj_user.remoteInbox
+    host = get_object_or_404(Host, name=remoteNodename)
+    proj_user = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
+    proj_user.add_requester(requester_username)
+    remoteInbox = proj_user.remoteInbox
 
-        FRAcceptURL = request.build_absolute_uri(f'/accept-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
-        FRRejectURL = request.build_absolute_uri(f'/reject-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
-        requestBody = {
-            'click_to_accept_the_remote_follow_request': FRAcceptURL,
-            'click_to_reject_the_remote_follow_request': FRRejectURL
+    FRAcceptURL = request.build_absolute_uri(f'/accept-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
+    FRRejectURL = request.build_absolute_uri(f'/reject-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
+    requestContent_accept = f'click_to_accept_[{FRAcceptURL}]'
+    requestContent_reject = f'click_to_reject_[{FRRejectURL}]'
+
+    # Todo - Sent FR to spec-user's inbox at server `enjoy`:
+    if remoteNodename == "enjoy":
+        print(remoteNodename)
+        print(remoteInbox)
+        response = requests.post(remoteInbox, json=None)
+        response.raise_for_status()
+
+    # Todo - Sent FR to spec-user's inbox at server `200OK`:
+    elif remoteNodename == "200OK":
+        print(remoteNodename)
+        print(remoteInbox)
+        headers = {'username': host.username, 'password': host.password}
+        response = requests.post(remoteInbox, json=None, headers=headers)
+        response.raise_for_status()
+
+    # Todo - Sent FR to spec-user's inbox at server `hero` (other server):
+    else:
+        print(remoteNodename)
+        print(remoteInbox)
+        csrf_token = get_token(request)
+        headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrf_token,
         }
-
-        # Todo - Sent FR to spec-user's inbox at server `enjoy`:
-        if remoteNodename == "enjoy":
-            print(remoteNodename)
-            response = requests.post(remoteInbox, json=requestBody)
+        body = {
+            "message_type": "FR",
+            "owner": proj_username,
+            "origin": f"{requester_username} from Server `HTML HEROES`",
+            "content": f"{requester_username} from Server `HTML HEROES` wants to follow you remotely, you may accept it by clicking {requestContent_accept}, or reject it by clicking {requestContent_reject}.",
+        }
+        response = requests.post(remoteInbox, json=body, headers=headers)
+        try:
             response.raise_for_status()
-
-        # Todo - Sent FR to spec-user's inbox at server `200OK`:
-        elif remoteNodename == "200OK":
-            print(remoteNodename)
-            headers = {'username': host.username, 'password': host.password}
-            response = requests.post(remoteInbox, json=requestBody, headers=headers)
-            response.raise_for_status()
-
-        # Todo - Sent FR to spec-user's inbox at server `hero` (other server):
-        else:
-            print(remoteNodename)
-            # credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
-            # headers = {'Authorization': f'Basic {credentials}'}
-            response = requests.post(remoteInbox, json=requestBody)
-            response.raise_for_status()
-        return Response({"message": f"User {requester_username} has been added to the requester list of {proj_username}."}, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({"error": str(e)})
+            data = response.json()
+            print('Message created successfully:', data)
+            return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
+        except requests.exceptions.HTTPError as e:
+            error = response.json()
+            print('Failed to create message:', response.status_code, response.reason, error)
+            return Response({"error": "Failed to create message.", "details": error}, status=response.status_code)
 
 
 @require_http_methods(["GET"])

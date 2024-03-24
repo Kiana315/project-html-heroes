@@ -31,7 +31,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='PAGE_Logout'),
     path("signup/", signupView, name="PAGE_Signup"),
     path("friendPosts/<str:username>/", approved_user_required(FriendPostsView.as_view()), name="PAGE_FriendPosts"),
-    path("inbox/<str:username>/", approved_user_required(InboxView.as_view()), name="PAGE_Inbox"),
+    path("inbox/<str:username>/", InboxView.as_view(), name="PAGE_Inbox"),
     path("posts/<int:post_id>/", approved_user_required(PostDetailView.as_view()), name="PAGE_postDetail"),
 
 

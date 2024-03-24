@@ -180,8 +180,8 @@ class MessageSuper(models.Model):
     owner = models.ForeignKey(User, related_name='messages', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     message_type = models.CharField(max_length=2, choices=MESSAGE_TYPES)
-    content = models.CharField(max_length=50)
-    origin = models.CharField(max_length=10, db_column='origin')
+    content = models.CharField(max_length=500)
+    origin = models.CharField(max_length=50, db_column='origin')
     class Meta:
         ordering = ['-date']
     @classmethod
