@@ -164,7 +164,7 @@ def indexView(request):
                             hostname=host.name,
                             username=username,
                             profile=f"remoteprofile/{host.name}/{username}/",
-                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox",
+                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox/",
                             remotePosts=f"{user.get('id')}/posts/"
                         )
                         if created:
@@ -198,7 +198,7 @@ def indexView(request):
                             hostname=host.name,
                             username=username,
                             profile=f"remoteprofile/{host.name}/{username}/",
-                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox",
+                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox/",
                             remotePosts=f"{host.host}authors/{user.get('id')}/posts/"
                         )
                         if created:
