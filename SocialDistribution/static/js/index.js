@@ -94,6 +94,7 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
                 <div class="post-time">${formattedDate}</div>
                 <div class="corner-icon">
                     ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
+                    <ion-icon name="earth"></ion-icon>
                 </div>
             </div>
         `;
@@ -107,26 +108,26 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
         `;
 
         const interactionHTML = `
-                    <div class="interact-container">
-                        <!-- <button id="share-${post.id}" type="button" data-post-id="${post.id}">
-                            <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
-                            Share <span class="share-count">${post.share_count}</span>
-                        </button> -->
-                        <button id="comment-${post.id}" type="button" data-post-id="${post.id}">
-                            <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
-                            </ion-icon>
-                                ${post.comment_count > 0 ? '' : 'Comment'} 
-                                <span class="comment-count">${post.comment_count > 0 ? post.comment_count : ''}
-                            </span>
-                        </button>
-                        <button id="like-${post.id}" type="button" data-post-id="${post.id}"> 
-                            <ion-icon size="small" name="heart-outline" style="margin-right: 8px;">
-                            </ion-icon>
-                                    ${post.likes_count > 0 ? '' : 'Like'}
-                                <span class="like-count">${post.likes_count > 0 ? post.likes_count : ''}</span>
-                        </button>
-                    </div>
-                `;
+            <div class="interact-container">
+                <!-- <button id="share-${post.id}" type="button" data-post-id="${post.id}">
+                    <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
+                    Share <span class="share-count">${post.share_count}</span>
+                </button> -->
+                <button id="comment-${post.id}" type="button" data-post-id="${post.id}">
+                    <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
+                    </ion-icon>
+                        ${post.comment_count > 0 ? '' : 'Comment'} 
+                        <span class="comment-count">${post.comment_count > 0 ? post.comment_count : ''}
+                    </span>
+                </button>
+                <button id="like-${post.id}" type="button" data-post-id="${post.id}"> 
+                    <ion-icon size="small" name="heart-outline" style="margin-right: 8px;">
+                    </ion-icon>
+                            ${post.likes_count > 0 ? '' : 'Like'}
+                        <span class="like-count">${post.likes_count > 0 ? post.likes_count : ''}</span>
+                </button>
+            </div>
+        `;
 
             postLink.innerHTML = userInfoHTML + contentHTML;
             postElement.appendChild(postLink);
@@ -158,6 +159,7 @@ export function createRemotePostBlocks_1_200OK(remotePosts) {
                 <div class="post-time">${formattedDate}</div>
                 <div class="corner-icon">
                     ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
+                    <ion-icon name="earth"></ion-icon>
                 </div>
             </div>
         `;
@@ -198,6 +200,7 @@ export function createRemotePostBlocks_2_hero(remotePosts) {
                 <div class="post-time">${formattedDate}</div>
                 <div class="corner-icon">
                     ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
+                    <ion-icon name="earth"></ion-icon>
                 </div>
             </div>
         `;
@@ -215,8 +218,6 @@ export function createRemotePostBlocks_2_hero(remotePosts) {
         postContainer.appendChild(postElement);
     });
 }
-
-
 
 
 
