@@ -126,3 +126,11 @@ class OpenAPIServerNodeSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'host', 'userAPI', 'messageAPI']
 
 
+class ProjUserSerializer(serializers.ModelSerializer):
+    followers_count = serializers.SerializerMethodField()
+    class Meta:
+        model = ProjUser
+        fields = ['id', 'host', 'username', 'profile', 'remotePosts', 'remoteInbox', 'followers_count']
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+

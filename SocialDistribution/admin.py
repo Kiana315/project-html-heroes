@@ -100,6 +100,13 @@ class HostAdmin(admin.ModelAdmin):
     list_filter = ('allowed',)
 
 
+class ProjUserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'host', 'profile', 'remotePosts', 'remoteInbox', 'followers_count')
+    def followers_count(self, obj):
+        return obj.followers.count()
+    followers_count.short_description = 'Followers Count'
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Comment, CommentAdmin)
@@ -112,5 +119,6 @@ admin.site.register(SignUpSettings, SignUpAdmin)
 admin.site.register(GithubActivity, ActivityAdmin)
 admin.site.register(ServerNode, ServerNodeAdmin)
 admin.site.register(Host, HostAdmin)
+admin.site.register(ProjUser, ProjUserAdmin)
 
 

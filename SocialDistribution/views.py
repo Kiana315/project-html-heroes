@@ -143,8 +143,12 @@ def indexView(request):
         hosts = Host.objects.filter(allowed=True)
         print("hosts", hosts)
         for host in hosts:
+
+            # Todo - If self open channel, ignore;
             if host.name == "SELF" and host.allowed:
                 continue
+
+            # Todo - If account channel from team `enjoy`:
             if host.name == "enjoy":
                 users_endpoint = host.host + 'authors/'
                 users_response = requests.get(users_endpoint, timeout=10)
@@ -154,6 +158,17 @@ def indexView(request):
                     print("users_response", users_response)
                     print("users_response.json().get()", users_response.json().get("items"))
                     for user in users_response.json().get("items"):
+                        username = user.get("displayName")
+                        proj_user, created = ProjUser.objects.get_or_create(
+                            host=host.host,
+                            hostname=host.name,
+                            username=username,
+                            profile=f"remoteprofile/{host.name}/{username}/",
+                            remoteInbox=f"",
+                            remotePosts=f"{user.get('id')}/posts/"
+                        )
+                        if created:
+                            print("! ProjUser Created:", proj_user)
                         print("\nauthors", user)
                         # GET remote `posts` for each user:
                         posts_endpoint = f"{user.get('id')}/posts/"
@@ -164,6 +179,7 @@ def indexView(request):
                             posts = remove_bool_none_values(posts_response.json())
                             print("\n>> post", posts)
                             remote_posts.extend(posts)
+            # Todo - If account channel from team `heros` (other sever):
             else:
                 # Authorization Message Header:
                 credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
@@ -179,6 +195,16 @@ def indexView(request):
                 print("users_response", users_response)
                 if users_response.status_code == 200:
                     for user in users_response.json():
+                        username = user.get("username")
+                        proj_user, created = ProjUser.objects.get_or_create(
+                            host=host.host,
+                            hostname=host.name,
+                            username=username,
+                            profile=f"remoteprofile/{host.name}/{username}/",
+                            remoteInbox=f"api/msgs/create/",
+                        )
+                        if created:
+                            print("! ProjUser Created:", proj_user)
                         print("\nuser", user)
                         # GET remote `posts` for each user:
                         posts_endpoint = f"{users_endpoint}{user.get('username')}/posts/"
@@ -979,8 +1005,7 @@ class UserMessagesAPIView(ListAPIView):
 
 
 class CreateMessageAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
+    #permission_classes = [IsAuthenticated]
     def post(self, request, format=None):
         serializer = MessageSuperSerializer(data=request.data)
         if serializer.is_valid():
@@ -1145,22 +1170,10 @@ class CreateLocalProjUser(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# def generate_unique_username(server_node_name, base_username):
-#     # Generate a unique identifier (UUID)
-#     unique_identifier = uuid.uuid4().hex[:6]  # Using the first 6 characters of the UUID
 
-#     # Combine server_node_name, base_username, and unique identifier
-#     unique_username = f"{server_node_name}.{base_username}.{unique_identifier}"
-
-#     return unique_username
-
-def remoteProfileView(request, selfUsername, server_node_name, remoteUsername):
-    selfUser = get_object_or_404(User, username=selfUsername)
-    remoteUser = get_object_or_404(User, username=remoteUsername)
-    context = {
-        'user': remoteUser,
-        'posts': Post.objects.filter(author=remoteUser).order_by('-date_posted')
-    }
+def remoteProfileView(request, server_node_name, remoteUsername):
+    remoteUser = get_object_or_404(ProjUser, username=remoteUsername)
+    context = {'user': remoteUser, }
     return render(request, 'remoteProfile.html', context)
 
 
@@ -1268,6 +1281,17 @@ class UserPostsOpenEndPt(APIView):
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
+class CheckFollowerView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, nodename, username, format=None):
+        try:
+            proj_user = ProjUser.objects.get(hostname=nodename, username=username)
+        except ProjUser.DoesNotExist:
+            raise Http404
+        is_follower = request.user in proj_user.followers.all()
+        return Response({'is_follower': is_follower})
+
+
 """ HELPER FUNC """
 def authenticate_host(encoded_credentials):
     try:
@@ -1300,4 +1324,8 @@ def remove_unwanted_values(data):
 def remove_bool_none_values(posts):
     return [remove_unwanted_values(post) for post in posts]
 
+class GetSelfUsername(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        return Response({'username': request.user.username})

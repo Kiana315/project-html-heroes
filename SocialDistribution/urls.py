@@ -45,6 +45,8 @@ urlpatterns = [
 
     path('api/follow-requests/accept/<str:origin_username>/', AcceptFollowRequestAPIView.as_view(), name='accept-follow-request'),
     path('api/follow-requests/reject/<str:origin_username>/', RejectFollowRequestAPIView.as_view(), name='reject-follow-request'),
+    path('api/get-self-username/', GetSelfUsername.as_view(), name='get-self-username'),
+
 
     # Identity API System:
     path("api/user/<str:username>/", UserAPIView.as_view(), name="API_USER"),                                                               # GET Self User/Profile Info        --> Test Success
@@ -84,6 +86,12 @@ urlpatterns = [
     # New NTN System:
     path("users/", UsersOpenEndPt.as_view({'get': 'list'}), name="OPEN_GETUsersList"),
     path('users/<str:username>/posts/', UserPostsOpenEndPt.as_view(), name='OPEN_GETUserPostsList'),
+    path("remoteprofile/<str:server_node_name>/<str:remoteUsername>/", approved_user_required(remoteProfileView), name="PAGE_RemoteProfile"),
+
+    path('remote-check-follower/<str:nodename>/<str:username>/', CheckFollowerView.as_view(), name='API_CheckFollower'),
+    path('accept-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', AcceptRemoteFollowRequestOPENAPIView, name='OPEN_AcceptFollowRequest'),
+    path('reject-remote-follow/<str:nodename>/<str:localUsername>/<str:remoteUsername>/', RejectRemoteFollowRequestOPENAPIView, name='OPEN_RejectFollowRequest'),
+
     path("api/users/", UsersAPIView.as_view({'get': 'list'}), name="API_ALL_USER"),
 ]
 

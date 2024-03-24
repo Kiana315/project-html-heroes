@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@{{ username }} - Profile (Remote)</title>
+    <title> Profile (Remote)</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link
             rel="stylesheet"
@@ -29,32 +29,20 @@
             
             <div id="profile-info" class="profile-info" style="text-align: center">
                 <div class="username" id="username">{{ user.username }}</div>
-                <div class="email" id="email">Email: {{ user.email }}</div>
-                <p class="bio-container" id="user-bio">{{ user.bio }}</p>
-                
-                
+                <div class="email" id="email">- Remote User from Server @{{ user.hostname }} - </div>
+                <br>
+                <div class="email" id="email">| {{ user.host }} |</div>
+
             </div>
             <div class="follow-container">
-                <a href="{% url 'PAGE_FollowersList' username=user.username %}">
-                    <button id="follower-btn" class="top-button followers-button">Followers</button>
-                </a>
-                <a href="{% url 'PAGE_FollowingList' username=user.username %}">
-                    <button id="following-btn" class="top-button following-button">Following</button>
-                </a>
+                <button id="follow-btn" data-username="{{ user.username }}">Follow</button>
+                <button id="unfollow-btn" data-username="{{ user.username }}">Unfollow</button>
             </div>
-            <button id="follow-btn" data-username="{{ user.username }}">Follow</button>
-            <button id="unfollow-btn" data-username="{{ user.username }}">Unfollow</button>
             <div id="relation"></div>
 
         </div>
 
         
-    </div>
-    <div class="post-container">
-        <div class="recent-posts" id="recent-posts" data-username="{{ user.username }}">
-            <!-- This section should be populated with actual post data -->
-            
-        </div>
     </div>
 </div>
 

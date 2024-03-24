@@ -35,6 +35,7 @@
         createRemotePostBlocks_enjoy
     } from '{% static 'js/index.js' %}';
     var remotePosts = {{ posts|safe }};
+    //createRemotePostBlocks_self(remotePosts);
     createRemotePostBlocks_enjoy(remotePosts);
 setInterval(() => {
     //createRemotePostBlocks_self(remotePosts);
