@@ -31,16 +31,14 @@
 <script src="{% static 'js/search.js' %}"></script>
 <script type="module">
     import {
-        createRemotePostBlocks_hero,
-        createRemotePostBlocks_enjoy
+        createRemotePostBlocks_0_enjoy,
+        createRemotePostBlocks_1_200OK,
+        createRemotePostBlocks_2_hero
     } from '{% static 'js/index.js' %}';
     var remotePosts = {{ posts|safe }};
-    //createRemotePostBlocks_hero(remotePosts);
-    createRemotePostBlocks_enjoy(remotePosts);
-setInterval(() => {
-    //createRemotePostBlocks_self(remotePosts);
-    createRemotePostBlocks_enjoy(remotePosts)
-}, 300000); 
+    createRemotePostBlocks_0_enjoy(remotePosts["enjoy"]);
+    createRemotePostBlocks_1_200OK(remotePosts["200OK"]);
+    createRemotePostBlocks_2_hero(remotePosts["hero"])
 </script>
 </body>
 

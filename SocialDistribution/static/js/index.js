@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 // Append userInfoHTML, contentHTML, and interactionHTML to postLink instead of postElement
-                postLink.innerHTML = userInfoHTML + contentHTML;
+                postLink.innerHTML = userInfoHTML + contentHTML + interactionHTML;
                 postElement.appendChild(postLink);
-                postElement.innerHTML += interactionHTML;
+                // postElement.innerHTML += interactionHTML;
                 postContainer.appendChild(postElement);
 
             });
@@ -70,7 +70,91 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error:', error));
 })
 
-export function createRemotePostBlocks_hero(remotePosts) {
+
+// TODO: fitting design
+
+export function createRemotePostBlocks_0_enjoy(remotePosts) {
+    console.log("@ remotePosts", remotePosts);
+    const postContainer = document.getElementById('post-container');
+    remotePosts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'post';
+
+        const postLink = document.createElement('a');
+        postLink.href = `/remoteprofile/enjoy/${post.author.displayName}/`;
+        postLink.className = 'post-link';
+
+        const datePosted = new Date(post.published);
+        const formattedDate = formatDate(datePosted);
+
+        const userInfoHTML = `
+            <div class="user-info">
+                <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
+                <div class="username">${post.author.displayName || 'Unknown User'}</div>
+                <div class="post-time">${formattedDate}</div>
+                <div class="corner-icon">
+                    ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
+                </div>
+            </div>
+        `;
+
+        const contentHTML = `
+            <div class="content">
+                <div class="title">${post.title}</div>
+                <p class="post-content">${post.content}</p>
+                ${createImagesHTML(post.image_data)}
+            </div>
+        `;
+
+        postLink.innerHTML = userInfoHTML + contentHTML;
+        postElement.appendChild(postLink);
+        postContainer.appendChild(postElement);
+    });
+}
+
+
+export function createRemotePostBlocks_1_200OK(remotePosts) {
+    console.log("@ remotePosts", remotePosts);
+    const postContainer = document.getElementById('post-container');
+    remotePosts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'post';
+
+        const postLink = document.createElement('a');
+        console.log("post", post)
+        postLink.href = `/remoteprofile/200OK/${post.author.displayName}/`;
+        postLink.className = 'post-link';
+
+        const datePosted = new Date(post.published);
+        const formattedDate = formatDate(datePosted);
+
+        const userInfoHTML = `
+            <div class="user-info">
+                <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
+                <div class="username">${post.author.displayName || 'Unknown User'}</div>
+                <div class="post-time">${formattedDate}</div>
+                <div class="corner-icon">
+                    ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
+                </div>
+            </div>
+        `;
+
+        const contentHTML = `
+            <div class="content">
+                <div class="title">${post.title}</div>
+                <p class="post-content">${post.content}</p>
+                ${createImagesHTML(post.image_data)}
+            </div>
+        `;
+
+        postLink.innerHTML = userInfoHTML + contentHTML;
+        postElement.appendChild(postLink);
+        postContainer.appendChild(postElement);
+    });
+}
+
+
+export function createRemotePostBlocks_2_hero(remotePosts) {
     console.log("@ remotePosts", remotePosts);
     const postContainer = document.getElementById('post-container');
     remotePosts.forEach(post => {
@@ -110,44 +194,8 @@ export function createRemotePostBlocks_hero(remotePosts) {
 }
 
 
-export function createRemotePostBlocks_enjoy(remotePosts) {
-    console.log("@ remotePosts", remotePosts);
-    const postContainer = document.getElementById('post-container');
-    remotePosts.forEach(post => {
-        const postElement = document.createElement('div');
-        postElement.className = 'post';
 
-        const postLink = document.createElement('a');
-        postLink.href = `/remoteprofile/enjoy/${post.author.displayName}/`;
-        postLink.className = 'post-link';
 
-        const datePosted = new Date(post.published);
-        const formattedDate = formatDate(datePosted);
-
-        const userInfoHTML = `
-            <div class="user-info">
-                <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
-                <div class="username">${post.author.displayName || 'Unknown User'}</div>
-                <div class="post-time">${formattedDate}</div>
-                <div class="corner-icon">
-                    ${post.content_type === 'COMMONMARK' ? '<ion-icon name="logo-markdown"></ion-icon>' : ''}
-                </div>
-            </div>
-        `;
-
-        const contentHTML = `
-            <div class="content">
-                <div class="title">${post.title}</div>
-                <p class="post-content">${post.content}</p>
-                ${createImagesHTML(post.image_data)}
-            </div>
-        `;
-
-        postLink.innerHTML = userInfoHTML + contentHTML;
-        postElement.appendChild(postLink);
-        postContainer.appendChild(postElement);
-    });
-}
 
 window.addEventListener('pageshow', function(event) {
     if (sessionStorage.getItem('refreshOnBack') === 'true') {

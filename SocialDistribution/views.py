@@ -138,7 +138,7 @@ class PostDetailView(DetailView):
 def indexView(request):
     # CCC
     """ * [GET] Get The Home Page """
-    remote_posts = []
+    remote_posts = {"enjoy": [], "200OK": [], "hero": []}
     try:
         hosts = Host.objects.filter(allowed=True)
         print("hosts", hosts)
@@ -148,7 +148,7 @@ def indexView(request):
             if host.name == "SELF" and host.allowed:
                 continue
 
-            # Todo - If account channel from team `enjoy`:
+            # Todo - If account channel from team `enjoy` [0]:
             if host.name == "enjoy":
                 users_endpoint = host.host + 'authors/'
                 users_response = requests.get(users_endpoint, timeout=10)
@@ -178,8 +178,43 @@ def indexView(request):
                         if posts_response.status_code == 200:
                             posts = remove_bool_none_values(posts_response.json())
                             print("\n>> post", posts)
-                            remote_posts.extend(posts)
-            # Todo - If account channel from team `heros` (other sever):
+                            remote_posts["enjoy"].extend(posts)
+
+            # Todo - If account channel from team `200OK` [1]:
+            elif host.name == "200OK":
+                auth_headers = {'username': f'{host.username}',
+                                'password': f'{host.password}'}
+                users_endpoint = host.host + 'authors/'
+                users_response = requests.get(users_endpoint, headers=auth_headers, timeout=10)
+                print("users_endpoint", users_endpoint)
+                print("users_response", users_response)
+                if users_response.status_code == 200:
+                    print("users_response", users_response)
+                    print("users_response.json().get()", users_response.json().get("items"))
+                    for user in users_response.json().get("items"):
+                        username = user.get("displayName")
+                        proj_user, created = ProjUser.objects.get_or_create(
+                            host=host.host,
+                            hostname=host.name,
+                            username=username,
+                            profile=f"remoteprofile/{host.name}/{username}/",
+                            remoteInbox=f"",
+                            remotePosts=f"{user.get('id')}/posts/"
+                        )
+                        if created:
+                            print("! ProjUser Created:", proj_user)
+                        print("\nauthors", user)
+                        # GET remote `posts` for each user:
+                        posts_endpoint = f"{user.get('id')}/posts/"
+                        print("user.get('id')", user.get('id'))
+                        print("posts_endpoint", posts_endpoint)
+                        posts_response = requests.get(posts_endpoint, timeout=10)
+                        if posts_response.status_code == 200:
+                            posts = remove_bool_none_values(posts_response.json().get("items"))
+                            print("\n>> post", posts)
+                            remote_posts["200OK"].extend(posts)
+
+            # Todo - If account channel from team `heros` (other sever) [2]:
             else:
                 # Authorization Message Header:
                 credentials = base64.b64encode(f'{host.username}:{host.password}'.encode('utf-8')).decode('utf-8')
@@ -214,7 +249,7 @@ def indexView(request):
                         if posts_response.status_code == 200:
                             posts = remove_bool_none_values(posts_response.json().get('posts'))
                             print("\n>> post", posts)
-                            remote_posts.extend(posts)
+                            remote_posts["hero"].extend(posts)
     except:
         pass
     template_name = "index.html"
