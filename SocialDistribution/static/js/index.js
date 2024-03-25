@@ -3,6 +3,11 @@
 import {formatDate} from "./common.js";
 
 document.addEventListener('DOMContentLoaded', () => {
+    const commentModal = document.getElementById('comment-modal');
+    const commentInput = document.getElementById('comment-text');
+    const submitCommentButton = document.getElementById('submit-comment');
+    const cancelCommentButton = document.getElementById('cancel-comment');
+
     fetch('/api/pps/')
         .then(response => response.json())
         .then(posts => {
@@ -60,14 +65,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 // Append userInfoHTML, contentHTML, and interactionHTML to postLink instead of postElement
+                // postLink.innerHTML = userInfoHTML + contentHTML + interactionHTML;
                 postLink.innerHTML = userInfoHTML + contentHTML + interactionHTML;
                 postElement.appendChild(postLink);
                 // postElement.innerHTML += interactionHTML;
                 postContainer.appendChild(postElement);
 
+
+                const commentButton = postElement.querySelector(`button[data-post-id="${post.id}"]`);
+                if (commentButton) {
+                    commentButton.addEventListener('click', function() {
+                        event.preventDefault();
+                        // display the input box
+                        commentModal.style.display = 'block';
+                        submitCommentButton.setAttribute('data-post-id', post.id);
+                    });
+                }
+
             });
         })
         .catch(error => console.error('Error:', error));
+
+    cancelCommentButton.addEventListener('click', () => {
+        commentModal.style.display = 'none';
+        commentInput.value = ''; // clear the input box
+    });
+
+    submitCommentButton.addEventListener('click', () => {
+        const postId = submitCommentButton.getAttribute('data-post-id');
+        const commentText = commentInput.value.trim();
+        if (commentText === '') {
+            alert('Please enter a comment.');
+            return;
+        }
+
+        fetch(`/api/posts/${postId}/comments/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({comment_text: commentText})
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(() => {
+            document.getElementById('comment-modal').style.display = 'none';
+            document.getElementById('comment-text').value = ''; // clear the input box
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error posting comment.');
+        });
+        commentModal.style.display = 'none';
+        commentInput.value = '';
+    });
+
 })
 
 
