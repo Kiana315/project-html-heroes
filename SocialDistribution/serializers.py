@@ -18,7 +18,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 'author', 'username', 'title', 'content', 'image_data', 'content_type', 'visibility',
+            'id', 'author', 'username', 'uuid', 'title', 'content', 'image_data', 'content_type', 'visibility',
             'date_posted', 'last_modified', 'likes_count', 'avatar', 'is_draft',
             'is_shared', 'shared_post_id', 'shared_post_title', 'comment_count'
         ]
@@ -134,7 +134,7 @@ class ProjUserSerializer(serializers.ModelSerializer):
         model = ProjUser
         fields = [
             'id', 'host', 'hostname', 'username', 'profile',
-            'remotePosts', 'remoteInbox', 'requesters', 'followers'
+            'remotePosts', 'remoteInbox', 'otherURL', 'requesters', 'followers'
         ]
 
     def get_requesters(self, obj):

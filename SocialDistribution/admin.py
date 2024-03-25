@@ -9,6 +9,7 @@ class UserAdmin(admin.ModelAdmin):
         'username',
         'email',
         'date_joined',
+        'uuid',
         'bio',
         'github_username',
         'recent_processed_activity',
@@ -16,6 +17,7 @@ class UserAdmin(admin.ModelAdmin):
         'avatar_url',
     )
     search_fields = (
+        'uuid',
         'username',
         'email',
         'github_username',

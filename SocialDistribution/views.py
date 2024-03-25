@@ -24,6 +24,7 @@ import base64
 import requests
 import uuid
 
+from requests.auth import HTTPBasicAuth
 # REST Pattern:
 from rest_framework import generics, status, viewsets
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -199,8 +200,8 @@ def indexView(request):
                             hostname=host.name,
                             username=username,
                             profile=f"remoteprofile/{host.name}/{username}/",
-                            remoteInbox=f"{host.host}service/authors/{user.get('id')}/inbox/",
-                            remotePosts=f"{host.host}authors/{user.get('id')}/posts/"
+                            remoteInbox=f"{user.get('id')}/inbox",
+                            remotePosts=f"{user.get('id')}/posts/"
                         )
                         if created:
                             print("! ProjUser Created:", proj_user)
@@ -282,6 +283,7 @@ def FriendPostsView(request, username):
     print(remote_posts)
     return render(request, template_name, {'posts': remote_posts})
 
+
 class AddConnectView(TemplateView):
     """ * [GET] Get The AddConnect Page """
     template_name = "addConnect.html"
@@ -305,8 +307,8 @@ class FPsAPIView(generics.ListAPIView):
 
         # Get posts from users that the current user follows
         user_following = User.objects.filter(reverse_following__user=current_user)
-        user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC', is_draft=False) 
-        
+        user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC', is_draft=False)
+
         # Get posts from friends of the current user
         friends = User.objects.filter(friends_set1__user1=current_user).values_list('friends_set1__user2', flat=True)
         friend_posts = Post.objects.filter(
@@ -319,7 +321,7 @@ class FPsAPIView(generics.ListAPIView):
             Q(author=current_user, visibility='PUBLIC') |
             Q(author=current_user, visibility='FRIENDS'), is_draft=False
         )
- 
+
         # Combine and order posts
         posts = user_following_posts | friend_posts | user_posts
         posts = posts.distinct().order_by('-date_posted')
@@ -515,6 +517,7 @@ class CommentAPIView(generics.ListCreateAPIView):
         context.update({'request': self.request})
         return context
 
+
 class CommentDeleteAPIView(generics.DestroyAPIView):
     queryset = Comment.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -535,6 +538,7 @@ class CommentDeleteAPIView(generics.DestroyAPIView):
 class LikeAPIView(generics.ListCreateAPIView):
     """ [GET/POST] Get The LikeList For A Spec-post; Create A Like For A Spec-post """
     serializer_class = LikeSerializer
+
     # def get_queryset(self):
     #     return get_list_or_404(Like, post_id=self.kwargs['post_id'])
 
@@ -905,10 +909,10 @@ class CreateFollowingAPIView(APIView):
                     following.save()
                     message_content = f'{self_user.username} wants to follow you.'
                     MessageSuper.objects.create(
-                    owner=target_user,
-                    message_type='FR',  # Follow Request
-                    content=message_content,
-                    origin=self_user.username,
+                        owner=target_user,
+                        message_type='FR',  # Follow Request
+                        content=message_content,
+                        origin=self_user.username,
                     )
                     return Response({"message": "Follow request sent."}, status=status.HTTP_201_CREATED)
                     # return Response({"message": "Follow request resent."}, status=status.HTTP_200_OK)
@@ -1018,8 +1022,6 @@ def deleteFriendshipAPIView(request, selfUsername, targetUsername):
         return JsonResponse({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
 class AnalyzeRelationAPIView(APIView):
     """ [GET] Get The Relationship Between Two Users """
 
@@ -1062,7 +1064,7 @@ class UserMessagesAPIView(ListAPIView):
 
 
 class CreateMessageAPIView(APIView):
-    #permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     def post(self, request, format=None):
         serializer = MessageSuperSerializer(data=request.data)
         if serializer.is_valid():
@@ -1289,6 +1291,7 @@ class UserPostsOpenEndPt(APIView):
 
 class CheckFollowerView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request, remoteNodename, user_username, proj_username):
         try:
             proj_user = ProjUser.objects.get(hostname=remoteNodename, username=proj_username)
@@ -1298,7 +1301,7 @@ class CheckFollowerView(APIView):
         return Response({'is_follower': is_follower})
 
 
-#VVV
+# VVV
 @api_view(['GET'])
 def followRequesting(request, remoteNodename, requester_username, proj_username):
     host = get_object_or_404(Host, name=remoteNodename)
@@ -1307,8 +1310,10 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
     proj_user.add_requester(requester_username)
     remoteInbox = proj_user.remoteInbox
 
-    FRAcceptURL = request.build_absolute_uri(f'/accept-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
-    FRRejectURL = request.build_absolute_uri(f'/reject-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
+    FRAcceptURL = request.build_absolute_uri(
+        f'/accept-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
+    FRRejectURL = request.build_absolute_uri(
+        f'/reject-remote-follow/{remoteNodename}/{requester_username}/{proj_username}/')
     requestContent_accept = f'click_to_accept_[{FRAcceptURL}]'
     requestContent_reject = f'click_to_reject_[{FRRejectURL}]'
 
@@ -1331,40 +1336,64 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
     elif remoteNodename == "200OK":
         print(remoteNodename)
         print(remoteInbox)
-        headers = {'username': host.username, 'password': host.password}
+        headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': get_token(request)
+        }
+        print(f"CHECK-01: {request.get_host()}/api/users/{requester_username}")
+        print(f"CHECK-02: {request.get_host()}")
 
         body = {
             "type": "Follow",
             "summary": f"Remote following request from {requester_username} at {remoteNodename}",
             "actor": {
                 "type": "author",
-                "id": f"{request.get_host()}api/users/{requester_username}/",
-                "url": f"{request.get_host()}api/users/{requester_username}/",
+                "id": f"{request.get_host()}/api/users/{user.uuid}/",
+                "url": f"{request.get_host()}/api/users/{user.uuid}/",
                 "host": request.get_host(),
                 "displayName": requester_username,
                 "github": FRAcceptURL,
-                "profileImage": FRRejectURL,
-            }
+                "profileImage": FRRejectURL
+            },
         }
-        response = requests.post(remoteInbox, json=body, headers=headers)
+
+        response = requests.post(
+            remoteInbox,
+            json=body,
+            headers=headers,
+            auth=HTTPBasicAuth(host.username, host.password)
+        )
+
+        print('Response status code:', response.status_code)
+        print('Response text:', response.text)
+
         try:
-            response.raise_for_status()
-            data = response.json()
-            print('Message created successfully:', data)
-            return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
-        except requests.exceptions.HTTPError as e:
-            error = response.json()
-            print('Failed to create message:', response.status_code, response.reason, error)
-            return Response({"error": "Failed to create message.", "details": error}, status=response.status_code)
+            if response.status_code == 200:
+                data = response.json()
+                print('Message created successfully:', data)
+                return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
+            else:
+                try:
+                    error = response.json()
+                    print('Failed to create message:', response.status_code, response.reason, error)
+                    return Response({"error": "Failed to create message.", "details": error},
+                                    status=response.status_code)
+                except ValueError:
+                    print('Failed to create message:', response.status_code, response.reason, response.text)
+                    return Response({"error": "Failed to create message.", "details": response.text},
+                                    status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            print('Request failed:', e)
+            return Response({"error": "Request failed.", "details": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # Todo - Sent FR to spec-user's inbox at server `hero` (other server):
     else:
         print(remoteNodename)
         print(remoteInbox)
-        csrf_token = get_token(request)
         headers = {
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrf_token,
+            'X-CSRFToken': get_token(request),
         }
         body = {
             "message_type": "FR",
@@ -1375,14 +1404,24 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
 
         response = requests.post(remoteInbox, json=body, headers=headers)
         try:
-            response.raise_for_status()
-            data = response.json()
-            print('Message created successfully:', data)
-            return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
-        except requests.exceptions.HTTPError as e:
-            error = response.json()
-            print('Failed to create message:', response.status_code, response.reason, error)
-            return Response({"error": "Failed to create message.", "details": error}, status=response.status_code)
+            if response.status_code == 200:
+                data = response.json()
+                print('Message created successfully:', data)
+                return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
+            else:
+                try:
+                    error = response.json()
+                    print('Failed to create message:', response.status_code, response.reason, error)
+                    return Response({"error": "Failed to create message.", "details": error},
+                                    status=response.status_code)
+                except ValueError:
+                    print('Failed to create message:', response.status_code, response.reason, response.text)
+                    return Response({"error": "Failed to create message.", "details": response.text},
+                                    status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            print('Request failed:', e)
+            return Response({"error": "Request failed.", "details": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @require_http_methods(["GET"])
@@ -1392,9 +1431,11 @@ def remove_follower(request, remoteNodename, user_username, proj_username):
         if proj_user.has_follower(user_username):
             proj_user.remove_follower(user_username)
             return JsonResponse(
-                {"message": f"User {user_username} has been removed from the requester list of {proj_username}."}, status=200)
+                {"message": f"User {user_username} has been removed from the requester list of {proj_username}."},
+                status=200)
         else:
-            return JsonResponse({"error": f"User {user_username} is not in the requester list of {proj_username}."}, status=404)
+            return JsonResponse({"error": f"User {user_username} is not in the requester list of {proj_username}."},
+                                status=404)
     except Http404:
         return JsonResponse({"error": "User or ProjUser not found."}, status=404)
     except Exception as e:
@@ -1423,18 +1464,68 @@ def rejectRemoteFollowRequest(request, remoteNodename, user_username, proj_usern
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @require_POST
 def remoteComment(request, post_id):
-    # 获取评论内容
     comment_text = request.POST.get('comment_text')
+    if remoteNodename == "enjoy":
+        pass
+    elif remoteNodename == "200OK":
+        print(remoteNodename)
+        print(remoteInbox)
+        headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': get_token(request)
+        }
+        print(f"CHECK-01: {request.get_host()}/api/users/{requester_username}")
+        print(f"CHECK-02: {request.get_host()}")
 
-    # 这里需要添加逻辑来处理评论内容，例如保存评论到数据库等
-    # 这里的代码仅作为示例
-    if comment_text:
-        # 保存评论到数据库或其他操作
-        return JsonResponse({'success': True, 'message': 'Comment added successfully.'})
+        body = {
+            "type": "Follow",
+            "summary": f"Remote following request from {requester_username} at {remoteNodename}",
+            "actor": {
+                "type": "author",
+                "id": f"{request.get_host()}/api/users/{requester_username}",
+                "url": f"{request.get_host()}/api/users/{requester_username}",
+                "host": request.get_host(),
+                "displayName": requester_username,
+                "github": FRAcceptURL,
+                "profileImage": FRRejectURL
+            }
+        }
+
+        response = requests.post(
+            remoteInbox,
+            json=body,
+            headers=headers,
+            auth=HTTPBasicAuth(host.username, host.password)
+        )
+
+        print('Response status code:', response.status_code)
+        print('Response text:', response.text)
+
+        try:
+            if response.status_code == 200:
+                data = response.json()
+                print('Message created successfully:', data)
+                return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
+            else:
+                try:
+                    error = response.json()
+                    print('Failed to create message:', response.status_code, response.reason, error)
+                    return Response({"error": "Failed to create message.", "details": error},
+                                    status=response.status_code)
+                except ValueError:
+                    print('Failed to create message:', response.status_code, response.reason, response.text)
+                    return Response({"error": "Failed to create message.", "details": response.text},
+                                    status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            print('Request failed:', e)
+            return Response({"error": "Request failed.", "details": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
-        return JsonResponse({'success': False, 'message': 'Comment text is required.'}, status=400)
+        pass
+
 
 @require_POST
 def remoteLike(request, post_id):
@@ -1451,6 +1542,8 @@ def remoteLike(request, post_id):
 
 
 """ HELPER FUNC """
+
+
 def authenticate_host(encoded_credentials):
     try:
         decoded_bytes = base64.b64decode(encoded_credentials)
