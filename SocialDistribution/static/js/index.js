@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const datePosted = new Date(post.date_posted);
                 const formattedDate = formatDate(datePosted)
+
+                checkLikeStatusAndUpdateIcon(post.id);
                 
                 const userInfoHTML = `
                     <div class="user-info">
@@ -71,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // postElement.innerHTML += interactionHTML;
                 postContainer.appendChild(postElement);
 
-
+                // comment listener
                 const commentButton = postElement.querySelector(`button[data-post-id="${post.id}"]`);
                 if (commentButton) {
                     commentButton.addEventListener('click', function() {
@@ -79,6 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         // display the input box
                         commentModal.style.display = 'block';
                         submitCommentButton.setAttribute('data-post-id', post.id);
+                    });
+                }
+
+                // like listener
+                const likeButton = postElement.querySelector(`button[id="like-${post.id}"]`);
+                if (likeButton) {
+                    likeButton.addEventListener('click', function(event) {
+                        event.preventDefault(); 
+                        toggleLike(post.id); // like function
                     });
                 }
 
@@ -125,8 +136,90 @@ document.addEventListener('DOMContentLoaded', () => {
         commentInput.value = '';
     });
 
+    function toggleLike(postId) {
+        console.log('Like button clicked for post:', postId);
+        fetch(`/api/posts/${postId}/likes/`, {
+            method: 'POST', 
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'), // Get CSRF token
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            checkLikeStatusAndUpdateIcon(postId);
+            fetchLikes(postId);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+    
+    function updateLikeIcon(postId, isLiked) {
+        console.log("hongxin")
+        const likeButton = document.getElementById(`like-${postId}`);
+        const likeIcon = likeButton.querySelector('ion-icon');
+    
+        if (isLiked) {
+            likeIcon.setAttribute('name', 'heart');
+            likeIcon.style.color = 'red'; // set to red
+            console.log("liked")
+        } else {
+            likeIcon.setAttribute('name', 'heart-outline');
+            likeIcon.style.color = '';
+            console.log("didn't like")
+        }
+    }
+    
+    function checkLikeStatusAndUpdateIcon(postId) {
+        fetch(`/api/posts/${postId}/check-like/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'), // Get CSRF token
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            updateLikeIcon(postId, data.has_liked); // Update icon based on like status
+        })
+        .catch(error => console.error('Error checking like status:', error));
+    }
+    
 })
 
+function fetchLikes(postId) {
+    fetch(`/api/posts/${postId}/likes/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            updateLikesDisplay(data.length, postId);
+        })
+        .catch(error => {
+            console.error('Error fetching likes:', error);
+        });
+}
+
+function updateLikesDisplay(likesCount, postId) {
+    const likeButton = document.getElementById(`like-${postId}`);
+    const likeCountElement = likeButton.querySelector('.like-count');
+    if (likeCountElement) {
+        // Update the display of like amounts
+        likeButton.innerHTML = `<ion-icon size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>` + 
+        (likesCount > 0 ? `<span class="like-count">${likesCount}</span>` : '');
+    } else {
+        console.error('Like count span not found inside button for post:', postId);
+    }
+}
 
 // TODO: fitting design
 
