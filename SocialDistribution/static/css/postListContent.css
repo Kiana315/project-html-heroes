@@ -106,6 +106,9 @@
     text-overflow: ellipsis;
 }
 
+.remote-post-content {
+    display: -webkit-box;
+}
 
 .username {
     margin: 0 10px;

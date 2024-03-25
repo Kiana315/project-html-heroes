@@ -178,7 +178,7 @@ def indexView(request):
                         posts_response = requests.get(posts_endpoint, timeout=10)
                         if posts_response.status_code == 200:
                             posts = remove_bool_none_values(posts_response.json())
-                            print("\n>> post", posts)
+                            # print("\n>> post", posts)
                             remote_posts["enjoy"].extend(posts)
 
             # Todo - If account channel from team `200OK` [1]:
@@ -212,7 +212,7 @@ def indexView(request):
                         posts_response = requests.get(posts_endpoint, timeout=10)
                         if posts_response.status_code == 200:
                             posts = remove_bool_none_values(posts_response.json().get("items"))
-                            print("\n>> post", posts)
+                            # print("\n>> post", posts)
                             remote_posts["200OK"].extend(posts)
 
             # Todo - If account channel from team `heros` (other sever) [2]:
@@ -249,19 +249,38 @@ def indexView(request):
                         posts_response = requests.get(posts_endpoint, headers=auth_headers, timeout=10)
                         if posts_response.status_code == 200:
                             posts = remove_bool_none_values(posts_response.json().get('posts'))
-                            print("\n>> post", posts)
+                            # print("\n>> post", posts)
                             remote_posts["hero"].extend(posts)
     except Exception as e:
         print("Error:", e)
     template_name = "index.html"
-    print("\n** posts", remote_posts)
+    # print("\n** posts", remote_posts)
+
     return render(request, template_name, {'posts': remote_posts})
 
 
-class FriendPostsView(TemplateView):
+def FriendPostsView(request, username):
     """ * [GET] Get The FP Page """
     template_name = "friendPosts.html"
+    current_user = get_object_or_404(User, username=username)
+    all_proj_users = ProjUser.objects.all()
 
+    remote_posts = {"enjoy": []}
+
+    for proj_user in all_proj_users:
+        # print( proj_user.followers_list, "has_follower", current_user, proj_user.has_follower(current_user))
+        if (proj_user.has_follower(username)):
+            print("**following:", proj_user.username)
+            posts_endpoint = proj_user.remotePosts
+
+            print("posts_endpoint", posts_endpoint)
+            posts_response = requests.get(posts_endpoint, timeout=10)
+            if posts_response.status_code == 200:
+                posts = remove_bool_none_values(posts_response.json())
+                print("\n>> post", posts)
+                remote_posts["enjoy"].extend(posts)
+    print(remote_posts)
+    return render(request, template_name, {'posts': remote_posts})
 
 class AddConnectView(TemplateView):
     """ * [GET] Get The AddConnect Page """
@@ -278,15 +297,18 @@ class PPsAPIView(generics.ListAPIView):
 
 class FPsAPIView(generics.ListAPIView):
     """ [GET] Get The Username-based Friend Posts """
+    serializer_class = PostSerializer
 
-    def get(self, request, username):
+    def get_queryset(self):
+        username = self.kwargs['username']
         current_user = get_object_or_404(User, username=username)  # get current user
 
+        # Get posts from users that the current user follows
         user_following = User.objects.filter(reverse_following__user=current_user)
         user_following_posts = Post.objects.filter(author__in=user_following, visibility='PUBLIC', is_draft=False) 
         
+        # Get posts from friends of the current user
         friends = User.objects.filter(friends_set1__user1=current_user).values_list('friends_set1__user2', flat=True)
-
         friend_posts = Post.objects.filter(
             Q(author__in=friends, visibility='PUBLIC') |
             Q(author__in=friends, visibility='FRIENDS'), is_draft=False
@@ -297,25 +319,12 @@ class FPsAPIView(generics.ListAPIView):
             Q(author=current_user, visibility='PUBLIC') |
             Q(author=current_user, visibility='FRIENDS'), is_draft=False
         )
-
-        all_proj_users = get_object_or_404(ProjUser)
-        print(all_proj_users)
-        # for proj_user in all_proj_users:
-        #     if (proj_user.has_follower(current_user)):
-        #         posts_endpoint = f"{user.get('id')}/posts/"
-        #         print("user.get('id')", user.get('id'))
-        #         print("posts_endpoint", posts_endpoint)
-        #         posts_response = requests.get(posts_endpoint, timeout=10)
-        #         if posts_response.status_code == 200:
-        #             posts = remove_bool_none_values(posts_response.json())
-        #             print("\n>> post", posts)
-            
-        # Merge query sets and remove duplicates
+ 
+        # Combine and order posts
         posts = user_following_posts | friend_posts | user_posts
         posts = posts.distinct().order_by('-date_posted')
 
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
+        return posts
 
 
 class NPsAPIView(generics.CreateAPIView):
@@ -1293,6 +1302,7 @@ class CheckFollowerView(APIView):
 @api_view(['GET'])
 def followRequesting(request, remoteNodename, requester_username, proj_username):
     host = get_object_or_404(Host, name=remoteNodename)
+    user = get_object_or_404(User, username=requester_username)
     proj_user = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
     proj_user.add_requester(requester_username)
     remoteInbox = proj_user.remoteInbox
@@ -1314,6 +1324,21 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
         print(remoteNodename)
         print(remoteInbox)
         headers = {'username': host.username, 'password': host.password}
+
+        body = {
+            "type": "Follow",
+            "summary": f"Remote following request from {requester_username} at {remoteNodename}",
+            "actor": {
+                "type": "author",
+                "id": "",
+                "url": "",
+                "host": "",
+                "displayName": requester_username,
+                "github": "",
+                "profileImage": ""
+            }
+        }
+
         response = requests.post(remoteInbox, json=None, headers=headers)
         response.raise_for_status()
 
@@ -1332,6 +1357,7 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
             "origin": f"{requester_username} from Server `HTML HEROES`",
             "content": f"{requester_username} from Server `HTML HEROES` wants to follow you remotely, you may accept it by clicking {requestContent_accept}, or reject it by clicking {requestContent_reject}.",
         }
+
         response = requests.post(remoteInbox, json=body, headers=headers)
         try:
             response.raise_for_status()
