@@ -1317,7 +1317,15 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
         print(remoteNodename)
         print(remoteInbox)
         response = requests.post(remoteInbox, json=None)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+            data = response.json()
+            print('Message created successfully:', data)
+            return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
+        except requests.exceptions.HTTPError as e:
+            error = response.json()
+            print('Failed to create message:', response.status_code, response.reason, error)
+            return Response({"error": "Failed to create message.", "details": error}, status=response.status_code)
 
     # Todo - Sent FR to spec-user's inbox at server `200OK`:
     elif remoteNodename == "200OK":
@@ -1330,17 +1338,24 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
             "summary": f"Remote following request from {requester_username} at {remoteNodename}",
             "actor": {
                 "type": "author",
-                "id": "",
-                "url": "",
-                "host": "",
+                "id": f"{request.get_host()}api/users/{requester_username}/",
+                "url": f"{request.get_host()}api/users/{requester_username}/",
+                "host": request.get_host(),
                 "displayName": requester_username,
-                "github": "",
-                "profileImage": ""
+                "github": FRAcceptURL,
+                "profileImage": FRRejectURL,
             }
         }
-
-        response = requests.post(remoteInbox, json=None, headers=headers)
-        response.raise_for_status()
+        response = requests.post(remoteInbox, json=body, headers=headers)
+        try:
+            response.raise_for_status()
+            data = response.json()
+            print('Message created successfully:', data)
+            return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
+        except requests.exceptions.HTTPError as e:
+            error = response.json()
+            print('Failed to create message:', response.status_code, response.reason, error)
+            return Response({"error": "Failed to create message.", "details": error}, status=response.status_code)
 
     # Todo - Sent FR to spec-user's inbox at server `hero` (other server):
     else:
