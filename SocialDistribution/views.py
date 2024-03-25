@@ -1348,13 +1348,16 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
             "summary": f"Remote following request from {requester_username} at {remoteNodename}",
             "actor": {
                 "type": "author",
-                "id": f"{request.get_host()}/api/users/{user.uuid}/",
-                "url": f"{request.get_host()}/api/users/{user.uuid}/",
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}",
+                "url": f"https://{request.get_host()}/api/users/{user.uuid}",
                 "host": request.get_host(),
                 "displayName": requester_username,
                 "github": FRAcceptURL,
                 "profileImage": FRRejectURL
             },
+            "object": {
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}"
+            }
         }
 
         response = requests.post(

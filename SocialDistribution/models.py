@@ -23,7 +23,7 @@ class User(AbstractUser):
     #   and users can not fill in the introduction when registering
     bio = models.TextField(max_length=200, blank=True)
     username = models.CharField(max_length=50, unique=True)
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     email = models.EmailField()
     avatar = models.ImageField(upload_to='avatars/', default="avatars/default_avatar.png")
     github_username = models.CharField(max_length=50, blank=True)
