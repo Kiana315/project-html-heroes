@@ -102,8 +102,8 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
         const contentHTML = `
             <div class="content">
                 <div class="title">${post.title}</div>
-                <p class="post-content">${post.content}</p>
-                ${createImagesHTML(post.image_data)}
+                ${isImageData(post.content) ? createImagesHTML(post.content) : `<p class="post-content">${post.content}</p>`}
+                
             </div>
         `;
 
@@ -241,6 +241,11 @@ function createImagesHTML(imageDataString) {
         }
     }
     return imagesHTML;
+}
+
+function isImageData(content) {
+    // Check if the content starts with 'data:image'
+    return content.trim().startsWith('data:image');
 }
 
 function getCookie(name) {
