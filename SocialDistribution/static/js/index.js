@@ -102,17 +102,13 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
         const contentHTML = `
             <div class="content">
                 <div class="title">${post.title}</div>
-                ${isImageData(post.content) ? createImagesHTML(post.content) : `<p class="post-content">${post.content}</p>`}
+                ${isImageData(post.content) ? createImagesHTML(post.content) : `<p class="remote-post-content">${post.content}</p>`}
                 
             </div>
         `;
 
         const interactionHTML = `
             <div class="interact-container">
-                <!-- <button id="share-${post.id}" type="button" data-post-id="${post.id}">
-                    <ion-icon size="small" name="share-outline" style="margin-right: 8px;"></ion-icon>
-                    Share <span class="share-count">${post.share_count}</span>
-                </button> -->
                 <button id="comment-${post.id}" type="button" data-post-id="${post.id}">
                     <ion-icon size="small" name="chatbox-ellipses-outline" style="margin-right: 8px;">
                     </ion-icon>

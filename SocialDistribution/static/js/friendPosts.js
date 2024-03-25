@@ -100,7 +100,7 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
         const contentHTML = `
             <div class="content">
                 <div class="title">${post.title}</div>
-                ${isImageData(post.content) ? createImagesHTML(post.content) : `<p class="post-content">${post.content}</p>`}
+                ${isImageData(post.content) ? createImagesHTML(post.content) : `<p class="remote-post-content">${post.content}</p>`}
                 
             </div>
         `;
