@@ -110,8 +110,8 @@ class FriendSerializer(serializers.ModelSerializer):
 class MessageSuperSerializer(serializers.ModelSerializer):
     post_id = serializers.ReadOnlyField(source='post.id')
     owner_username = serializers.ReadOnlyField(source='owner.username')
-    content = serializers.CharField(max_length=50)
-    origin = serializers.CharField(max_length=10)
+    content = serializers.CharField(max_length=500)
+    origin = serializers.CharField(max_length=50)
     class Meta:
         model = MessageSuper
         fields = ['id', 'owner_username', 'date', 'message_type', 'content', 'origin', 'post_id']
