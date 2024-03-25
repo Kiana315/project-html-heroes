@@ -1423,6 +1423,31 @@ def rejectRemoteFollowRequest(request, remoteNodename, user_username, proj_usern
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@require_POST
+def remoteComment(request, post_id):
+    # 获取评论内容
+    comment_text = request.POST.get('comment_text')
+
+    # 这里需要添加逻辑来处理评论内容，例如保存评论到数据库等
+    # 这里的代码仅作为示例
+    if comment_text:
+        # 保存评论到数据库或其他操作
+        return JsonResponse({'success': True, 'message': 'Comment added successfully.'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Comment text is required.'}, status=400)
+
+@require_POST
+def remoteLike(request, post_id):
+    # 这里可以添加点赞逻辑，例如增加点赞数量等
+    # 这里的代码仅作为示例
+    # 假设你已经从请求中获取了点赞的用户信息等
+    user = request.user
+    if user.is_authenticated:
+        # 在这里执行点赞逻辑，例如将点赞记录保存到数据库
+        # 记得要检查用户是否已经点过赞
+        return JsonResponse({'success': True, 'message': 'Post liked successfully.'})
+    else:
+        return JsonResponse({'success': False, 'message': 'User must be logged in to like a post.'}, status=403)
 
 
 """ HELPER FUNC """

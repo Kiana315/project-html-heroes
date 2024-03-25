@@ -375,7 +375,6 @@ export function createRemotePostBlocks_1_200OK(remotePosts) {
     sortPostsByDate();
 
     submitCommentButton.addEventListener('click', () => {
-        const postId = submitCommentButton.getAttribute('data-post-id');
         const commentText = commentInput.value.trim();
         if (commentText === '') {
             alert('Please enter a comment.');

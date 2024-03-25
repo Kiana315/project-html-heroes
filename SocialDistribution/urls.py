@@ -108,6 +108,10 @@ urlpatterns = [
 
     path("api/users/", UsersAPIView.as_view({'get': 'list'}), name="API_ALL_USER"),
 
+    path("remote/posts/<str:post_id>/comments/", views.remoteComment, name='REMOTE_PComms'),
+    path("remote/posts/<str:post_id>/like/", views.remoteLike, name='REMOTE_PLikes'),
+
+    # API docs
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
