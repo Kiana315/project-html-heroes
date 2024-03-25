@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
             });
+            sortPostsByDate();
         })
         .catch(error => console.error('Error:', error));
 });
@@ -132,6 +133,7 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
             postElement.innerHTML += interactionHTML;
             postContainer.appendChild(postElement);
     });
+    sortPostsByDate();
 }
 
 
@@ -167,5 +169,24 @@ function createImagesHTML(imageDataString) {
     return imagesHTML;
 }
 
+function sortPostsByDate() {
+    const postContainer = document.getElementById('post-container');
+    const posts = postContainer.querySelectorAll('.post');
+
+    // 将帖子元素转换为数组，并根据日期排序
+    const sortedPosts = Array.from(posts).sort((a, b) => {
+        const dateA = new Date(a.querySelector('.post-time').innerText);
+        const dateB = new Date(b.querySelector('.post-time').innerText);
+        return dateB - dateA; // 降序排序
+    });
+
+    // 清空原有的帖子容器
+    postContainer.innerHTML = '';
+
+    // 将排序后的帖子重新追加到帖子容器中
+    sortedPosts.forEach(post => {
+        postContainer.appendChild(post);
+    });
+}
 
 
