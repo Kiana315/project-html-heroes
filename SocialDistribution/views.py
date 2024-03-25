@@ -1513,7 +1513,7 @@ def rejectRemoteFollowRequest(request, remoteNodename, user_username, proj_usern
 #TTT
 @require_POST
 def remoteComment(request, remoteNodename, proj_username, post_id):
-    requester_username = request.user
+    user = request.user
     proj_User = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
     comment_text = request.POST.get('comment_text')
 
@@ -1528,32 +1528,43 @@ def remoteComment(request, remoteNodename, proj_username, post_id):
             'Content-Type': 'application/json',
             'X-CSRFToken': get_token(request)
         }
-        print(f"CHECK-01: {request.get_host()}/api/users/{requester_username}")
+        print(f"CHECK-01: {request.get_host()}/api/users/{user.username}")
         print(f"CHECK-02: {request.get_host()}")
 
         body = {
-            "type": "Follow",
-            "summary": f"Remote following request from {requester_username} at {remoteNodename}",
-            "actor": {
-                "type": "author",
-                "id": f"https://{request.get_host()}/api/users/{user.uuid}",
-                "url": f"https://{request.get_host()}/api/users/{user.uuid}",
-                "host": request.get_host(),
-                "displayName": requester_username,
-                "github": FRAcceptURL,
-                "profileImage": FRRejectURL
-            },
-            "object": {
-                "id": f"https://{request.get_host()}/api/users/{user.uuid}"
-            }
+            "type": "comment",
+            "author": None,
+            "post": None,
+            "comment": f"Comments reminder from {user.username} at {remoteNodename}",
+            "contentType": "text/plain",
         }
+        response = requests.post(remoteInbox, json=body, headers=headers)
+        try:
+            if response.status_code == 200:
+                data = response.json()
+                print('Message created successfully:', data)
+                return Response({"message": "Comment Reminder created successfully.", "data": data}, status=status.HTTP_200_OK)
+            else:
+                try:
+                    error = response.json()
+                    print('Failed to create message:', response.status_code, response.reason, error)
+                    return Response({"error": "Failed to create comment reminder.", "details": error},
+                                    status=response.status_code)
+                except ValueError:
+                    print('Failed to create message:', response.status_code, response.reason, response.text)
+                    return Response({"error": "Failed to create comment reminder.", "details": response.text},
+                                    status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            print('Request failed:', e)
+            return Response({"error": "Request failed.", "details": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         pass
 
 
 @require_POST
 def remoteLike(request, remoteNodename, proj_username, post_id):
-    requester_username = request.user
+    user = request.user
     proj_User = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
     comment_text = request.POST.get('comment_text')
 
@@ -1568,25 +1579,41 @@ def remoteLike(request, remoteNodename, proj_username, post_id):
             'Content-Type': 'application/json',
             'X-CSRFToken': get_token(request)
         }
-        print(f"CHECK-01: {request.get_host()}/api/users/{requester_username}")
+        print(f"CHECK-01: {request.get_host()}/api/users/{user.username}")
         print(f"CHECK-02: {request.get_host()}")
 
         body = {
-            "type": "Follow",
-            "summary": f"Remote following request from {requester_username} at {remoteNodename}",
-            "actor": {
+            "type": "like",
+            "object": f"https://{request.get_host()}/api/users/{user.uuid}",
+            "author": {
                 "type": "author",
                 "id": f"https://{request.get_host()}/api/users/{user.uuid}",
-                "url": f"https://{request.get_host()}/api/users/{user.uuid}",
                 "host": request.get_host(),
-                "displayName": requester_username,
-                "github": FRAcceptURL,
-                "profileImage": FRRejectURL
+                "displayName": user.username,
+                "url": f"https://{request.get_host()}/api/users/{user.uuid}",
             },
-            "object": {
-                "id": f"https://{request.get_host()}/api/users/{user.uuid}"
-            }
         }
+        response = requests.post(remoteInbox, json=body, headers=headers)
+        try:
+            if response.status_code == 200:
+                data = response.json()
+                print('Message created successfully:', data)
+                return Response({"message": "Like Reminder created successfully.", "data": data},
+                                status=status.HTTP_200_OK)
+            else:
+                try:
+                    error = response.json()
+                    print('Failed to create message:', response.status_code, response.reason, error)
+                    return Response({"error": "Failed to create like reminder.", "details": error},
+                                    status=response.status_code)
+                except ValueError:
+                    print('Failed to create message:', response.status_code, response.reason, response.text)
+                    return Response({"error": "Failed to create like reminder.", "details": response.text},
+                                    status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            print('Request failed:', e)
+            return Response({"error": "Request failed.", "details": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         pass
 
