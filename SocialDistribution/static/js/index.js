@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formattedDate = formatDate(datePosted)
 
                 checkLikeStatusAndUpdateIcon(post.id);
-                
+
                 const userInfoHTML = `
                     <div class="user-info">
                         <img src="${post.avatar}" alt="profile avatar" class="user-avatar">
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (commentButton) {
                     commentButton.addEventListener('click', function() {
                         event.preventDefault();
-                        
+
                         // display the input box
                         commentModal.style.display = 'block';
                         submitCommentButton.setAttribute('data-post-id', post.id);
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const likeButton = postElement.querySelector(`button[id="like-${post.id}"]`);
                 if (likeButton) {
                     likeButton.addEventListener('click', function(event) {
-                        event.preventDefault(); 
+                        event.preventDefault();
                         toggleLike(post.id); // like function
                     });
                 }
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error:', error));
 
     cancelCommentButton.addEventListener('click', () => {
-        
+
         commentInput.value = ''; // clear the input box
     });
 
@@ -118,22 +118,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({comment_text: commentText})
+            body: JSON.stringify({ comment_text: commentText })
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(() => {
-            document.getElementById('comment-modal').style.display = 'none';
-            document.getElementById('comment-text').value = ''; // clear the input box
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error posting comment.');
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(() => {
+                document.getElementById('comment-modal').style.display = 'none';
+                document.getElementById('comment-text').value = ''; // clear the input box
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error posting comment.');
+            });
         commentModal.style.display = 'none';
         commentInput.value = '';
     });
@@ -141,43 +141,44 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleLike(postId) {
         console.log('Like button clicked for post:', postId);
         fetch(`/api/posts/${postId}/likes/`, {
-            method: 'POST', 
+            method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'), // Get CSRF token
                 'Content-Type': 'application/json'
             },
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            checkLikeStatusAndUpdateIcon(postId);
-            fetchLikes(postId);
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                checkLikeStatusAndUpdateIcon(postId);
+                fetchLikes(postId);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
     }
-    
+
     function updateLikeIcon(postId, isLiked) {
         console.log("hongxin")
         const likeButton = document.getElementById(`like-${postId}`);
         const likeIcon = likeButton.querySelector('ion-icon');
-    
+
         if (isLiked) {
             likeIcon.setAttribute('name', 'heart');
             likeIcon.style.color = 'red'; // set to red
             console.log("liked")
-        } else {
+        }
+        else {
             likeIcon.setAttribute('name', 'heart-outline');
             likeIcon.style.color = '';
             console.log("didn't like")
         }
     }
-    
+
     function checkLikeStatusAndUpdateIcon(postId) {
         fetch(`/api/posts/${postId}/check-like/`, {
             method: 'GET',
@@ -186,13 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Content-Type': 'application/json'
             },
         })
-        .then(response => response.json())
-        .then(data => {
-            updateLikeIcon(postId, data.has_liked); // Update icon based on like status
-        })
-        .catch(error => console.error('Error checking like status:', error));
+            .then(response => response.json())
+            .then(data => {
+                updateLikeIcon(postId, data.has_liked); // Update icon based on like status
+            })
+            .catch(error => console.error('Error checking like status:', error));
     }
-    
+
 })
 
 function fetchLikes(postId) {
@@ -216,15 +217,15 @@ function updateLikesDisplay(likesCount, postId) {
     const likeCountElement = likeButton.querySelector('.like-count');
     if (likeCountElement) {
         // Update the display of like amounts
-        likeButton.innerHTML = `<ion-icon size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>` + 
-        (likesCount > 0 ? `<span class="like-count">${likesCount}</span>` : '');
-    } else {
+        likeButton.innerHTML = `<ion-icon size="small" name="heart-outline" style="margin-right: 8px;"></ion-icon>` +
+            (likesCount > 0 ? `<span class="like-count">${likesCount}</span>` : '');
+    }
+    else {
         console.error('Like count span not found inside button for post:', postId);
     }
 }
 
 // TODO: fitting design
-
 export function createRemotePostBlocks_0_enjoy(remotePosts) {
     console.log("@ remotePosts", remotePosts);
     const postContainer = document.getElementById('post-container');
@@ -277,10 +278,10 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
             </div>
         `;
 
-            postLink.innerHTML = userInfoHTML + contentHTML + interactionHTML;
-            postElement.appendChild(postLink);
-            // postElement.innerHTML += interactionHTML;
-            postContainer.appendChild(postElement);
+        postLink.innerHTML = userInfoHTML + contentHTML + interactionHTML;
+        postElement.appendChild(postLink);
+        // postElement.innerHTML += interactionHTML;
+        postContainer.appendChild(postElement);
     });
     sortPostsByDate();
 }
@@ -289,7 +290,7 @@ export function createRemotePostBlocks_0_enjoy(remotePosts) {
 export function createRemotePostBlocks_1_200OK(remotePosts) {
     console.log("@ remotePosts", remotePosts);
     const postContainer = document.getElementById('post-container');
-    
+
     remotePosts.forEach(post => {
         const postElement = document.createElement('div');
         postElement.className = 'post';
@@ -360,52 +361,51 @@ export function createRemotePostBlocks_1_200OK(remotePosts) {
         const commentInput = document.getElementById(`comment-text-${post.id}`);
         if (commentButton) {
             commentButton.addEventListener('click', function() {
-                
+
                 // display the input box
                 commentModal.style.display = commentModal.style.display === 'block' ? 'none' : 'block';
 
                 // submitCommentButton.setAttribute('data-post-id', post.id);
+                submitCommentButton.addEventListener('click', () => {
+                    const commentText = commentInput.value.trim();
+                    if (commentText === '') {
+                        alert('Please enter a comment.');
+                        return;
+                    }
+
+                    fetch(`/api/posts/200OK/${post.author.displayName}/${post.id}/comments/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ comment_text: commentText })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(() => {
+                            document.getElementById('comment-modal').style.display = 'none';
+                            document.getElementById('comment-text').value = ''; // clear the input box
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error posting comment.');
+                        });
+                    commentModal.style.display = 'none';
+                    commentInput.value = '';
+                });
             });
         }
         cancelCommentButton.addEventListener('click', () => {
             console.log("cancel button clicked");
             commentInput.value = ''; // clear the input box
-        });    
+        });
     });
     sortPostsByDate();
-
-    submitCommentButton.addEventListener('click', () => {
-        const commentText = commentInput.value.trim();
-        if (commentText === '') {
-            alert('Please enter a comment.');
-            return;
-        }
-
-        fetch(`/api/posts/${postId}/comments/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({comment_text: commentText})
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(() => {
-            document.getElementById('comment-modal').style.display = 'none';
-            document.getElementById('comment-text').value = ''; // clear the input box
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error posting comment.');
-        });
-        commentModal.style.display = 'none';
-        commentInput.value = '';
-    });
 }
 
 
@@ -449,7 +449,6 @@ export function createRemotePostBlocks_2_hero(remotePosts) {
 }
 
 
-
 window.addEventListener('pageshow', function(event) {
     if (sessionStorage.getItem('refreshOnBack') === 'true') {
         sessionStorage.removeItem('refreshOnBack');
@@ -460,13 +459,13 @@ window.addEventListener('pageshow', function(event) {
 function createImagesHTML(imageDataString) {
     if (!imageDataString) return '';
 
-    const imageDataArray = imageDataString.split(","); 
+    const imageDataArray = imageDataString.split(",");
     let imagesHTML = '';
 
     for (let i = 0; i < imageDataArray.length; i += 2) {
         let base64Type = imageDataArray[i]; // 文件类型
         let base64Data = imageDataArray[i + 1]; // 图片数据
-        
+
         if (base64Type && base64Data) {
             imagesHTML += `<img src="${base64Type},${base64Data}" class="post-image" style="width: 30%; max-height: 500px; margin: 0 10px">`;
         }

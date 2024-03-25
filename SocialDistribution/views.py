@@ -1321,16 +1321,58 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
     if remoteNodename == "enjoy":
         print(remoteNodename)
         print(remoteInbox)
-        response = requests.post(remoteInbox, json=None)
+        headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': get_token(request)
+        }
+        print(f"CHECK-01: {request.get_host()}/api/users/{requester_username}")
+        print(f"CHECK-02: {request.get_host()}")
+
+        body = {
+            "type": "Follow",
+            "summary": f"Remote following request from {requester_username} at {remoteNodename}",
+            "actor": {
+                "type": "author",
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}",
+                "url": f"https://{request.get_host()}/api/users/{user.uuid}",
+                "host": request.get_host(),
+                "displayName": requester_username,
+                "github": FRAcceptURL,
+                "profileImage": FRRejectURL
+            },
+            "object": {
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}"
+            }
+        }
+
+        response = requests.post(
+            remoteInbox,
+            json=body,
+            headers=headers
+        )
+
+        print('Response status code:', response.status_code)
+        print('Response text:', response.text)
+
         try:
-            response.raise_for_status()
-            data = response.json()
-            print('Message created successfully:', data)
-            return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
-        except requests.exceptions.HTTPError as e:
-            error = response.json()
-            print('Failed to create message:', response.status_code, response.reason, error)
-            return Response({"error": "Failed to create message.", "details": error}, status=response.status_code)
+            if response.status_code == 200:
+                data = response.json()
+                print('Message created successfully:', data)
+                return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
+            else:
+                try:
+                    error = response.json()
+                    print('Failed to create message:', response.status_code, response.reason, error)
+                    return Response({"error": "Failed to create message.", "details": error},
+                                    status=response.status_code)
+                except ValueError:
+                    print('Failed to create message:', response.status_code, response.reason, response.text)
+                    return Response({"error": "Failed to create message.", "details": response.text},
+                                    status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            print('Request failed:', e)
+            return Response({"error": "Request failed.", "details": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # Todo - Sent FR to spec-user's inbox at server `200OK`:
     elif remoteNodename == "200OK":
@@ -1468,9 +1510,15 @@ def rejectRemoteFollowRequest(request, remoteNodename, user_username, proj_usern
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+#TTT
 @require_POST
-def remoteComment(request, post_id):
+def remoteComment(request, remoteNodename, proj_username, post_id):
+    requester_username = request.user
+    proj_User = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
     comment_text = request.POST.get('comment_text')
+
+    remoteInbox = proj_User.remoteInbox
+
     if remoteNodename == "enjoy":
         pass
     elif remoteNodename == "200OK":
@@ -1488,60 +1536,60 @@ def remoteComment(request, post_id):
             "summary": f"Remote following request from {requester_username} at {remoteNodename}",
             "actor": {
                 "type": "author",
-                "id": f"{request.get_host()}/api/users/{requester_username}",
-                "url": f"{request.get_host()}/api/users/{requester_username}",
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}",
+                "url": f"https://{request.get_host()}/api/users/{user.uuid}",
                 "host": request.get_host(),
                 "displayName": requester_username,
                 "github": FRAcceptURL,
                 "profileImage": FRRejectURL
+            },
+            "object": {
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}"
             }
         }
-
-        response = requests.post(
-            remoteInbox,
-            json=body,
-            headers=headers,
-            auth=HTTPBasicAuth(host.username, host.password)
-        )
-
-        print('Response status code:', response.status_code)
-        print('Response text:', response.text)
-
-        try:
-            if response.status_code == 200:
-                data = response.json()
-                print('Message created successfully:', data)
-                return Response({"message": "Message created successfully.", "data": data}, status=status.HTTP_200_OK)
-            else:
-                try:
-                    error = response.json()
-                    print('Failed to create message:', response.status_code, response.reason, error)
-                    return Response({"error": "Failed to create message.", "details": error},
-                                    status=response.status_code)
-                except ValueError:
-                    print('Failed to create message:', response.status_code, response.reason, response.text)
-                    return Response({"error": "Failed to create message.", "details": response.text},
-                                    status=response.status_code)
-        except requests.exceptions.RequestException as e:
-            print('Request failed:', e)
-            return Response({"error": "Request failed.", "details": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         pass
 
 
 @require_POST
-def remoteLike(request, post_id):
-    # 这里可以添加点赞逻辑，例如增加点赞数量等
-    # 这里的代码仅作为示例
-    # 假设你已经从请求中获取了点赞的用户信息等
-    user = request.user
-    if user.is_authenticated:
-        # 在这里执行点赞逻辑，例如将点赞记录保存到数据库
-        # 记得要检查用户是否已经点过赞
-        return JsonResponse({'success': True, 'message': 'Post liked successfully.'})
+def remoteLike(request, remoteNodename, proj_username, post_id):
+    requester_username = request.user
+    proj_User = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
+    comment_text = request.POST.get('comment_text')
+
+    remoteInbox = proj_User.remoteInbox
+
+    if remoteNodename == "enjoy":
+        pass
+    elif remoteNodename == "200OK":
+        print(remoteNodename)
+        print(remoteInbox)
+        headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': get_token(request)
+        }
+        print(f"CHECK-01: {request.get_host()}/api/users/{requester_username}")
+        print(f"CHECK-02: {request.get_host()}")
+
+        body = {
+            "type": "Follow",
+            "summary": f"Remote following request from {requester_username} at {remoteNodename}",
+            "actor": {
+                "type": "author",
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}",
+                "url": f"https://{request.get_host()}/api/users/{user.uuid}",
+                "host": request.get_host(),
+                "displayName": requester_username,
+                "github": FRAcceptURL,
+                "profileImage": FRRejectURL
+            },
+            "object": {
+                "id": f"https://{request.get_host()}/api/users/{user.uuid}"
+            }
+        }
     else:
-        return JsonResponse({'success': False, 'message': 'User must be logged in to like a post.'}, status=403)
+        pass
+
 
 
 """ HELPER FUNC """
