@@ -1293,6 +1293,7 @@ class CheckFollowerView(APIView):
 @api_view(['GET'])
 def followRequesting(request, remoteNodename, requester_username, proj_username):
     host = get_object_or_404(Host, name=remoteNodename)
+    user = get_object_or_404(User, username=requester_username)
     proj_user = get_object_or_404(ProjUser, username=proj_username, hostname=remoteNodename)
     proj_user.add_requester(requester_username)
     remoteInbox = proj_user.remoteInbox
@@ -1314,6 +1315,21 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
         print(remoteNodename)
         print(remoteInbox)
         headers = {'username': host.username, 'password': host.password}
+
+        body = {
+            "type": "Follow",
+            "summary": f"Remote following request from {requester_username} at {remoteNodename}",
+            "actor": {
+                "type": "author",
+                "id": "",
+                "url": "",
+                "host": "",
+                "displayName": requester_username,
+                "github": "",
+                "profileImage": ""
+            }
+        }
+
         response = requests.post(remoteInbox, json=None, headers=headers)
         response.raise_for_status()
 
@@ -1332,6 +1348,7 @@ def followRequesting(request, remoteNodename, requester_username, proj_username)
             "origin": f"{requester_username} from Server `HTML HEROES`",
             "content": f"{requester_username} from Server `HTML HEROES` wants to follow you remotely, you may accept it by clicking {requestContent_accept}, or reject it by clicking {requestContent_reject}.",
         }
+
         response = requests.post(remoteInbox, json=body, headers=headers)
         try:
             response.raise_for_status()
